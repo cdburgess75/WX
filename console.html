@@ -4,14 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>SQUALL — Station Weather</title>
+<title>WX Console — Station Weather</title>
 <meta name="description" content="Single-file offline-first weather console. Open-Meteo forecast data, NWS active alerts.">
 <!--
-  SQUALL v2026.08.16.002 — single-file weather console
+  WX Console v2026.08.16.003 — single-file weather console
   Versioning: vYYYY.MM.DD.NNN — NNN increments per shipped change that day
   (same scheme as SetList69).
   v2026.08.16.001  initial build (alerts, hero, 48h scope, 7-day, sun/moon)
   v2026.08.16.002  radar (canvas slippy map, RainViewer + CARTO, nowcast loop)
+  v2026.08.16.003  renamed SQUALL -> WX Console; storage keys sq.* -> wxc.*
+                   (kept distinct from WX's wx.* — both apps share an origin
+                   on GitHub Pages and would otherwise overwrite each other)
   ------------------------------------------------------------------
   Data sources (no API keys, CORS-enabled, works from file:// or Pages):
     Forecast   https://api.open-meteo.com/v1/forecast        (CC BY 4.0)
@@ -241,7 +244,7 @@ footer a{color:var(--dim)}
   .dayrow{grid-template-columns:56px 28px 1fr 104px;gap:9px;padding:12px}
   .dayrow .pop{display:none}
   .bar{gap:8px;padding:9px 12px}
-  .mark{font-size:15px;letter-spacing:.16em}
+  .mark{font-size:14px;letter-spacing:.10em}
   .metrics{grid-template-columns:repeat(2,1fr)}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -251,7 +254,7 @@ footer a{color:var(--dim)}
 
 <header>
   <div class="bar">
-    <div class="mark">SQ<span>/</span>ALL</div>
+    <div class="mark">WX<span>/</span>CONSOLE</div>
     <div class="place">
       <b id="pname">Locating…</b>
       <small id="pmeta">—</small>
@@ -354,7 +357,7 @@ footer a{color:var(--dim)}
 
   <footer>
     <div id="statusWrap"><span class="status" id="status"><i></i><span id="statusText">IDLE</span></span></div>
-    SQUALL v2026.08.16.002 · Forecast data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>, CC BY 4.0. Watches and warnings from the US National Weather Service (api.weather.gov).<br>
+    WX Console v2026.08.16.003 · Forecast data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>, CC BY 4.0. Watches and warnings from the US National Weather Service (api.weather.gov).<br>
     Radar by <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>. Basemap &copy; OpenStreetMap contributors, &copy; CARTO.<br>
     Not for use in life-threatening weather. Always confirm with NWS or your local emergency management.
   </footer>
@@ -364,7 +367,7 @@ footer a{color:var(--dim)}
 
 <script>
 "use strict";
-const VERSION="v2026.08.16.002";
+const VERSION="v2026.08.16.003";
 /* ========== storage (localStorage with in-memory fallback) ========== */
 const store=(()=>{let ok=true,mem={};try{localStorage.setItem("_t","1");localStorage.removeItem("_t")}catch(e){ok=false}
  return{get(k){try{return ok?localStorage.getItem(k):(k in mem?mem[k]:null)}catch(e){return k in mem?mem[k]:null}},
@@ -373,7 +376,7 @@ const J={get(k,d){const v=store.get(k);if(!v)return d;try{return JSON.parse(v)}c
 
 /* ========== state ========== */
 const DEFAULT={name:"Loranger",admin:"Louisiana",country:"US",lat:30.6013,lon:-90.3573};
-let S={loc:J.get("sq.loc",DEFAULT),imperial:J.get("sq.imp",true),data:null,alerts:[],cursor:null};
+let S={loc:J.get("wxc.loc",DEFAULT),imperial:J.get("wxc.imp",true),data:null,alerts:[],cursor:null};
 
 /* ========== units ========== */
 const U={
@@ -485,11 +488,11 @@ async function refresh(silent){
   try{
     const [fc,al]=await Promise.all([loadForecast(loc),loadAlerts(loc)]);
     S.data=fc;S.alerts=al;S.cursor=null;
-    J.set("sq.cache",{at:Date.now(),loc,fc,al});
+    J.set("wxc.cache",{at:Date.now(),loc,fc,al});
     render();
     setStatus("","UPDATED "+new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}));
   }catch(e){
-    const c=J.get("sq.cache",null);
+    const c=J.get("wxc.cache",null);
     if(c&&c.loc&&c.loc.lat===loc.lat&&c.loc.lon===loc.lon){
       S.data=c.fc;S.alerts=c.al||[];render();
       const mins=Math.round((Date.now()-c.at)/60000);
@@ -902,14 +905,14 @@ qIn.addEventListener("input",()=>{
   },320);
 });
 function pick(loc){
-  S.loc=loc;J.set("sq.loc",loc);
-  const saved=J.get("sq.saved",[]);
-  if(!saved.some(s=>s.lat===loc.lat&&s.lon===loc.lon)){saved.unshift(loc);J.set("sq.saved",saved.slice(0,8))}
+  S.loc=loc;J.set("wxc.loc",loc);
+  const saved=J.get("wxc.saved",[]);
+  if(!saved.some(s=>s.lat===loc.lat&&s.lon===loc.lon)){saved.unshift(loc);J.set("wxc.saved",saved.slice(0,8))}
   searchBox.classList.remove("open");qIn.value="";resUl.innerHTML="";
   refresh();
 }
 function renderSaved(){
-  const box=document.getElementById("saved"),saved=J.get("sq.saved",[]);
+  const box=document.getElementById("saved"),saved=J.get("wxc.saved",[]);
   box.innerHTML="";
   const here=document.createElement("button");
   here.className="chip";here.innerHTML="Use my location";
@@ -918,7 +921,7 @@ function renderSaved(){
     const b=document.createElement("button");b.className="chip";
     b.innerHTML=`<span>${esc(s.name)}</span><span class="x">×</span>`;
     b.addEventListener("click",ev=>{
-      if(ev.target.classList.contains("x")){const a=J.get("sq.saved",[]);a.splice(i,1);J.set("sq.saved",a);renderSaved();return}
+      if(ev.target.classList.contains("x")){const a=J.get("wxc.saved",[]);a.splice(i,1);J.set("wxc.saved",a);renderSaved();return}
       pick(s);
     });
     box.appendChild(b);
@@ -942,19 +945,19 @@ function useGeo(){
 /* ========== controls ========== */
 const btnU=document.getElementById("btnUnits");
 function syncUnits(){btnU.textContent=S.imperial?"°F":"°C";btnU.classList.toggle("on",!S.imperial)}
-btnU.addEventListener("click",()=>{S.imperial=!S.imperial;J.set("sq.imp",S.imperial);syncUnits();if(S.data)render()});
+btnU.addEventListener("click",()=>{S.imperial=!S.imperial;J.set("wxc.imp",S.imperial);syncUnits();if(S.data)render()});
 document.getElementById("btnRefresh").addEventListener("click",()=>refresh());
 let rzT;
 window.addEventListener("resize",()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(S.data)renderScope();sizeRadar();drawRadar()},150)});
 document.addEventListener("visibilitychange",()=>{if(document.hidden){clearTimeout(RAD.timer);RAD.timer=null}else if(RAD.playing&&RAD.frames.length&&!RAD.timer)startLoop();
-  if(!document.hidden&&S.data&&Date.now()-(J.get("sq.cache",{at:0}).at||0)>600000)refresh(true)});
+  if(!document.hidden&&S.data&&Date.now()-(J.get("wxc.cache",{at:0}).at||0)>600000)refresh(true)});
 setInterval(()=>{if(!document.hidden&&S.data)refresh(true)},900000);
 
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 
 /* ========== boot ========== */
 syncUnits();drawScale();setPlayIcon();
-const cached=J.get("sq.cache",null);
+const cached=J.get("wxc.cache",null);
 if(cached&&cached.loc&&cached.loc.lat===S.loc.lat&&cached.loc.lon===S.loc.lon){S.data=cached.fc;S.alerts=cached.al||[];render();setStatus("stale","CACHED")}
 refresh();
 </script>

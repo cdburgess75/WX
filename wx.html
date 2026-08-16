@@ -7,7 +7,7 @@
 <title>WX</title>
 <meta name="description" content="One screen. One answer. Weather without the dashboard.">
 <!--
-  WX v2026.08.16.003 — the whole app is one screen and one answer.
+  WX v2026.08.16.004 — the whole app is one screen and one answer.
   No tabs, no cards, no scrolling. A rules engine picks the single most
   important thing about the next 12 hours and says it in one word.
   Data: Open-Meteo (CC BY 4.0) + NWS active alerts. No keys.
@@ -18,6 +18,9 @@
   v2026.08.16.001  initial build (verdict engine, 12h bars, search, cache)
   v2026.08.16.002  sample-data fallback for blocked-network previews
   v2026.08.16.003  renamed STONE -> WX
+  v2026.08.16.004  freeze verdict now scans the 12h ahead instead of today's
+                   daily min (which by evening is this morning's low); sample
+                   mode carries the real UTC offset so the NOW bar lines up
 -->
 <style>
 :root{
@@ -140,7 +143,7 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
   </div>
 
   <div class="foot">
-    <b id="stamp">—</b><br>WX v2026.08.16.003 · Open-Meteo · NWS alerts
+    <b id="stamp">—</b><br>WX v2026.08.16.004 · Open-Meteo · NWS alerts
   </div>
 </div>
 
@@ -152,7 +155,7 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
 
 <script>
 "use strict";
-const VERSION="v2026.08.16.003";
+const VERSION="v2026.08.16.004";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -205,12 +208,15 @@ const SNOW=new Set([71,73,75,77,85,86]);
 const STORM=new Set([95,96,99]);
 
 function verdict(){
-  const c=D.current,h=D.hourly,d=D.daily,i=hourNow();
+  const c=D.current,h=D.hourly,i=hourNow();
   const nxt=k=>{const out=[];for(let j=i;j<Math.min(i+13,h.time.length);j++)out.push(h[k][j]);return out};
   const t=h.time.slice(i,i+13);
   const codes=nxt("weather_code"),pops=nxt("precipitation_probability"),gusts=nxt("wind_gusts_10m");
   const feels=f(c.apparent_temperature),temp=f(c.temperature_2m);
-  const lowTonight=f(d.temperature_2m_min[0]);
+  // The low that matters is the one still ahead of us. daily.temperature_2m_min[0]
+  // is *today's* min, so by evening it reports this morning's low — already spent.
+  // Scanning the same 12-hour window as everything else is self-correcting.
+  const lowAhead=f(Math.min(...nxt("temperature_2m")));
   const firstWet=codes.findIndex((x,k)=>(WET.has(x)||STORM.has(x)||SNOW.has(x))&&pops[k]>=45);
   const stormIn=codes.findIndex((x,k)=>STORM.has(x)&&pops[k]>=40);
   const maxGust=mph(Math.max(...gusts));
@@ -230,7 +236,7 @@ function verdict(){
   if(feels>=(F?103:39))return{mark:"hot",cls:"bad",word:"Dangerous heat",say:`Feels like ${R(feels)}°. Shade and water, no yard work.`};
   if(feels>=(F?95:35))return{mark:"hot",cls:"bad",word:"Hot",say:`Feels like ${R(feels)}°. Drink more than you think you need.`};
   if(feels<=(F?20:-7))return{mark:"cold",cls:"wet",word:"Bitter cold",say:`Feels like ${R(feels)}°. Cover skin, cover pipes.`};
-  if(lowTonight<=(F?32:0))return{mark:"cold",cls:"wet",word:"Freeze tonight",say:`Down to ${R(lowTonight)}° tonight. Pipes, plants, pets.`};
+  if(lowAhead<=(F?32:0))return{mark:"cold",cls:"wet",word:"Freeze tonight",say:`Down to ${R(lowAhead)}° tonight. Pipes, plants, pets.`};
   // 4. coming at you
   if(stormIn>=0)return{mark:"storm",cls:"bad",word:"Storms coming",say:`Thunderstorms around ${clock(t[stormIn])}.`};
   if(firstWet>=0)return{mark:"rain",cls:"wet",
@@ -244,7 +250,10 @@ function verdict(){
     word:feels>=(F?80:27)?"Warm":"Good",
     say:`${R(temp)}° and no rain coming. Go outside.`};
 }
-function shortEvent(e){return String(e).replace(/ (Warning|Watch|Advisory|Statement)$/,m=>m).slice(0,28)}
+// Keep the full event name. Dropping the trailing Warning/Watch/Advisory would fit
+// the one-word slot better, but it would also render "Tornado Watch" and "Tornado
+// Warning" identically, and that distinction is the whole point of the alert.
+function shortEvent(e){return String(e).slice(0,28)}
 function rainEnds(codes,pops,t){
   for(let k=1;k<codes.length;k++)if(!(WET.has(codes[k])||STORM.has(codes[k]))||pops[k]<40)return`Should ease up by ${clock(t[k])}.`;
   return"Set in for a while.";
@@ -383,7 +392,9 @@ function demoData(){
     P.push(stormy?55:h>=13&&h<21?30:10);
     C.push(stormy&&i>2&&i<9?95:base>30?2:1);
   }
-  return {utc_offset_seconds:0,
+  // The rows above are built from the local clock, so the offset has to match or
+  // hourNow() lands the NOW bar several hours off on any machine that isn't on UTC.
+  return {utc_offset_seconds:-new Date().getTimezoneOffset()*60,
     current:{temperature_2m:T[0],apparent_temperature:A[0],
       is_day:(start.getHours()>=6&&start.getHours()<20)?1:0,
       weather_code:C[0],wind_gusts_10m:24},

@@ -6,7 +6,7 @@ Two single-file, offline-first weather apps in the SKYWAVE style. No build step,
 
 | App | File | Size | Philosophy |
 |-----|------|------|------------|
-| SQUALL | squall.html | ~50 KB | Full console — everything on one page |
+| WX Console | console.html | ~50 KB | Full console — everything on one page |
 | WX | wx.html | ~21 KB | One answer — decides what matters and says it plainly |
 
 ---
@@ -18,8 +18,8 @@ All free, no keys, CORS-enabled, work from `file://` or GitHub Pages:
 - **Forecast:** `https://api.open-meteo.com/v1/forecast` — CC BY 4.0, attribution required (both apps carry it in the footer). Free non-commercial up to 10,000 calls/day.
 - **Geocoding:** `https://geocoding-api.open-meteo.com/v1/search` — city/ZIP search.
 - **US alerts:** `https://api.weather.gov/alerts/active?point=lat,lon` — NWS watches/warnings.
-- **Radar (SQUALL only):** `https://api.rainviewer.com/public/weather-maps.json` — past frames + ~30 min nowcast. Third-party composite, not raw NEXRAD; fine for "is that cell coming at me," not authoritative for storm-mode work.
-- **Basemap (SQUALL only):** CARTO dark tiles (`basemaps.cartocdn.com/dark_all`) — attribution: © OpenStreetMap contributors, © CARTO.
+- **Radar (WX Console only):** `https://api.rainviewer.com/public/weather-maps.json` — past frames + ~30 min nowcast. Third-party composite, not raw NEXRAD; fine for "is that cell coming at me," not authoritative for storm-mode work.
+- **Basemap (WX Console only):** CARTO dark tiles (`basemaps.cartocdn.com/dark_all`) — attribution: © OpenStreetMap contributors, © CARTO.
 - **Reverse geocode (WX only):** `api.bigdatacloud.net/data/reverse-geocode-client` — names the town after "use my location."
 
 ## Shared architecture decisions
@@ -27,12 +27,13 @@ All free, no keys, CORS-enabled, work from `file://` or GitHub Pages:
 - **Metric in, convert client-side.** Everything is fetched in metric; the °F/°C toggle is pure math, so it never refetches and works offline.
 - **Cache-first offline.** Last good payload saved to localStorage. On fetch failure, render from cache and flag staleness ("OFFLINE · 20 MIN OLD"). localStorage is wrapped in a try/catch shim with in-memory fallback so sandboxed previews don't crash it.
 - **Default location:** Loranger, LA (30.6013, -90.3573).
+- **Separate storage namespaces.** WX uses `wx.*`, WX Console uses `wxc.*`. Both apps are served from the same GitHub Pages origin and therefore share one localStorage, so the prefixes must never converge — collapsing them onto a single `wx.*` prefix would make each app overwrite the other's saved location and unit preference.
 - **Refresh:** every 15 min while visible, plus on tab-return if data >10 min old.
 - **Time handling:** Open-Meteo returns local ISO strings; all comparisons are done in a shared "as-if-UTC" frame using `utc_offset_seconds`.
 
 ---
 
-## SQUALL — the console
+## WX Console — the console
 
 Dark/amber panadapter aesthetic (FeedPoint family). Sections top to bottom:
 
@@ -55,7 +56,7 @@ Cave-wall aesthetic: stone/bone/ochre palette, SVG-noise grain, hand-scratched p
 
 1. Active NWS alert (severity ≥ moderate) → event name + "Get somewhere safe."
 2. Happening now: storm / snow / rain (rain includes "eases up by X PM" scan).
-3. Dangerous air: feels ≥103°F "Dangerous heat" · ≥95°F "Hot" · ≤20°F "Bitter cold" · tonight's low ≤32°F "Freeze tonight — pipes, plants, pets."
+3. Dangerous air: feels ≥103°F "Dangerous heat" · ≥95°F "Hot" · ≤20°F "Bitter cold" · lowest hourly temp in the next 12 h ≤32°F "Freeze tonight — pipes, plants, pets."
 4. Incoming (next 12 h): storms ≥40% pop → time; rain ≥45% pop → "Rain soon/later" + time; max gust ≥30 mph → "Windy."
 5. Nothing wrong: "Cold" (≤45°F) / "Warm" (≥80°F) / "Good — go outside."
 
@@ -76,35 +77,41 @@ The Claude chat preview and iOS Files Quick Look block outbound fetches. The app
 gh repo create weather --public --clone
 cd weather
 cp ~/Downloads/wx.html index.html         # WX at the root URL
-cp ~/Downloads/squall.html squall.html    # console at /squall.html
-git add . && git commit -m "SQUALL + WX v2026.08.16"
+cp ~/Downloads/console.html console.html  # console at /console.html
+git add . && git commit -m "WX + WX Console v2026.08.16"
 git push -u origin main
 gh api repos/{owner}/weather/pages -X POST -f 'source[branch]=main' -f 'source[path]=/'
 ```
 
-URLs: `https://<user>.github.io/weather/` (WX) and `.../squall.html` (SQUALL). Add both to the phone home screen via Safari Share → Add to Home Screen.
+URLs: `https://<user>.github.io/weather/` (WX) and `.../console.html` (WX Console). Add both to the phone home screen via Safari Share → Add to Home Screen.
 
 ## Testing done
 
-- JS syntax-checked; all `getElementById` targets verified present.
-- jsdom smoke tests: boot with network cut → SQUALL degrades to OFFLINE badge, STONE to sample mode; no exceptions.
+- JS syntax-checked (`node --check` on the extracted script); HTML parses clean; all `getElementById` targets verified present in the markup — 13 in WX, 36 in WX Console.
+- Stub-DOM smoke tests: boot with network cut → WX Console degrades to the OFFLINE badge, WX to sample mode; no exceptions. WX Console additionally re-rendered end to end in both unit modes, with and without an active alert.
 - WX verdict engine run against 10 synthetic scenarios (heat 106, storms in 4 h, rain in 2 h, raining now, tornado warning, hard freeze, 38 mph gusts, nice day, clear night, cold-dry) — all verdicts and phrasing correct.
+- Freeze regression (added in v2026.08.16.004, both directions):
+  - 9 PM, this morning was 45°F, tonight drops to 25°F → was "Cold", now "Freeze tonight."
+  - 6 PM, dawn hit 28°F but the night stays 49°F → was "Freeze tonight", now "Good."
+  - 6 AM with a 38°F low and no freeze coming → correctly stays quiet in both versions.
 
 ## Changelog
 
-**SQUALL**
+**WX Console**
 
-- v2026.08.16.001 — initial build: alerts, hero, 48h scope, 7-day, sun/moon
+- v2026.08.16.001 — initial build: alerts, hero, 48h scope, 7-day, sun/moon (as SQUALL)
 - v2026.08.16.002 — radar: canvas slippy map, RainViewer + CARTO, nowcast loop
+- v2026.08.16.003 — renamed SQUALL → WX Console; storage keys `sq.*` → `wxc.*`
 
 **WX**
 
 - v2026.08.16.001 — initial build: verdict engine, 12h bars, search, cache (as STONE)
 - v2026.08.16.002 — sample-data fallback for blocked-network previews
 - v2026.08.16.003 — renamed STONE → WX
+- v2026.08.16.004 — freeze verdict scans the 12 h ahead instead of today's daily min; sample mode carries the real UTC offset
 
 ## Backlog / ideas
 
-- SQUALL: hourly precip accumulation as second trace; NWS RIDGE radar toggle (authoritative vs RainViewer); propagation/solar panel (shares data needs with SKYWAVE's planned Propagation tab).
+- WX Console: hourly precip accumulation as second trace; NWS RIDGE radar toggle (authoritative vs RainViewer); propagation/solar panel (shares data needs with SKYWAVE's planned Propagation tab).
 - WX: threshold tuning for Louisiana summers; maybe a "tomorrow" second line.
 - Both: PWA manifest + service worker for true installable offline (adds a second file or inline hack — breaks the pure single-file rule; decide if worth it).

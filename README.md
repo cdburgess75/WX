@@ -4,10 +4,10 @@ Two single-file, offline-first weather apps. No build step, no API keys, no libr
 
 | App | File | Size | Philosophy |
 |-----|------|------|------------|
-| SQUALL | `squall.html` | ~50 KB | Full console — everything on one page |
+| WX Console | `console.html` | ~50 KB | Full console — everything on one page |
 | WX | `wx.html` | ~21 KB | One answer — decides what matters and says it plainly |
 
-Both pull from Open-Meteo (forecast + geocoding) and api.weather.gov (US alerts); SQUALL adds RainViewer radar over CARTO dark tiles. Everything is fetched in metric and converted client-side, and the last good payload is cached in localStorage so the apps still render — flagged stale — with the network down.
+Both pull from Open-Meteo (forecast + geocoding) and api.weather.gov (US alerts); WX Console adds RainViewer radar over CARTO dark tiles. Everything is fetched in metric and converted client-side, and the last good payload is cached in localStorage so the apps still render — flagged stale — with the network down.
 
 See **[NOTES.md](NOTES.md)** for the full design record: data sources, architecture decisions, the WX verdict engine and its tunable thresholds, deployment steps, testing, changelog, and backlog.
 

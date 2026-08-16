@@ -18,7 +18,8 @@ All free, no keys, CORS-enabled, work from `file://` or GitHub Pages:
 - **Forecast:** `https://api.open-meteo.com/v1/forecast` — CC BY 4.0, attribution required (both apps carry it in the footer). Free non-commercial up to 10,000 calls/day.
 - **Geocoding:** `https://geocoding-api.open-meteo.com/v1/search` — city/ZIP search.
 - **US alerts:** `https://api.weather.gov/alerts/active?point=lat,lon` — NWS watches/warnings.
-- **Radar (WX Console only):** `https://api.rainviewer.com/public/weather-maps.json` — past frames + ~30 min nowcast. Third-party composite, not raw NEXRAD; fine for "is that cell coming at me," not authoritative for storm-mode work.
+- **Radar (WX Console only):** `https://api.rainviewer.com/public/weather-maps.json` — past frames + ~30 min nowcast (default). Third-party composite, not raw NEXRAD.
+- **NEXRAD (WX Console only):** raw N0Q reflectivity tiles from the Iowa Environmental Mesonet (`mesonet.agron.iastate.edu/cache/tile.py`) — the RV/NX button on the radar bar switches sources; NEXRAD is observed-only (no nowcast), ~50 min of history in 5-minute steps.
 - **Basemap (WX Console only):** CARTO dark tiles (`basemaps.cartocdn.com/dark_all`) — attribution: © OpenStreetMap contributors, © CARTO.
 - **Reverse geocode (WX only):** `api.bigdatacloud.net/data/reverse-geocode-client` — names the town after "use my location."
 - **Air quality (WX only):** `https://air-quality-api.open-meteo.com/v1/air-quality` — current US AQI, same free/no-key terms as the forecast API.
@@ -136,6 +137,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.004 — sun-shower app icon (shared with WX for now)
 - v2026.08.16.005 — opens full-screen from the home screen (web-app metas); offline shell via the shared service worker
 - v2026.08.16.006 — new shared app icon (in-house sun/storm/rain variant)
+- v2026.08.16.007 — RV/NX radar source toggle (RainViewer composite vs raw NEXRAD via Iowa Mesonet); GPS-first location ported from WX, with the same parish-skipping reverse geocode
 
 **WX**
 
@@ -155,7 +157,7 @@ on plain HTTP in every current browser.
 
 ## Backlog / ideas
 
-- WX Console: hourly precip accumulation as second trace; NWS RIDGE radar toggle (authoritative vs RainViewer); propagation/solar panel (shares data needs with SKYWAVE's planned Propagation tab).
+- WX Console: hourly precip accumulation as second trace; propagation/solar panel (shares data needs with SKYWAVE's planned Propagation tab). ~~NWS RIDGE radar toggle~~ — done in v2026.08.16.007 as the RV/NX switch (raw NEXRAD via Iowa Mesonet rather than RIDGE's ArcGIS service; same authoritative reflectivity, far simpler tiles).
 - WX: threshold tuning for Louisiana summers; maybe a "tomorrow" second line.
 - ~~Icon candidate~~ — done in v2026.08.16.013: drew the in-house variant (sun/storm/rain, our own artwork) and tuned the app palette to it.
 - ~~Both: PWA manifest + service worker~~ — done in WX v2026.08.16.007. Decided: the icon PNGs had already broken single-file purity, so the shell may as well work offline. `manifest.webmanifest` + `sw.js` at the root; the worker caches pages per-URL (console too) and never touches API calls.

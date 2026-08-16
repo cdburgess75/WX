@@ -54,7 +54,7 @@ Sun-shower aesthetic (matches the app icon): pastel sky gradient, slate ink, sun
 
 **Screen:** pictograph → temperature → ONE WORD verdict → one plain sentence → 12 hourly bars (taller = warmer, blue = rain likely) → status stamp.
 
-**Five taps total:** temperature = °F/°C · place name = change location · pictograph = refresh · the verdict when an alert is up = full NWS text in plain language · any hour bar = that hour's numbers in the sentence slot for a few seconds.
+**The taps:** temperature = °F/°C · place name = change location · pictograph or the UPDATED stamp = refresh · the verdict when an alert is up = full NWS text in plain language · any hour bar = that hour's numbers for a few seconds · sun/moon (top right) = light/dark override (the clock decides until you pick) · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A gold pill appears when a newer version is deployed; tapping it reloads.
 
 **Verdict engine** (priority order — first match wins):
 
@@ -142,6 +142,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.005 — sun-shower app icon
 - v2026.08.16.006 — sun-shower skin: pastel palette matching the icon; amber for moderate alerts, red only for severe/extreme; long alert names sized to fit
 - v2026.08.16.007 — 15-minute rain nowcast; tappable alert verdict (full NWS text); tappable hour bars; day/dusk/night skins; AQI verdict; UV sunscreen line; tropical alert wording; per-day phrase variety; verdict favicon; PWA manifest + service worker
+- v2026.08.16.008 — share + sun/moon theme buttons top right; tap the UPDATED stamp to refresh; version number links to this changelog; update pill when a newer version is deployed
 
 ## Backlog / ideas
 

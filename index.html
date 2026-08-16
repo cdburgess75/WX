@@ -15,7 +15,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cdefs%3E%3ClinearGradient id=%22bg%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23BFE3FA%22/%3E%3Cstop offset=%221%22 stop-color=%22%23E8F5FE%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22100%22 height=%22100%22 fill=%22url%28%23bg%29%22/%3E%3Ccircle cx=%2266%22 cy=%2232%22 r=%2215%22 fill=%22%23FFC94F%22/%3E%3Cline x1=%2266.0%22 y1=%2211.5%22 x2=%2266.0%22 y2=%224.5%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2279.2%22 y1=%2216.3%22 x2=%2283.7%22 y2=%2210.9%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2286.2%22 y1=%2228.4%22 x2=%2293.1%22 y2=%2227.2%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2283.8%22 y1=%2242.2%22 x2=%2289.8%22 y2=%2245.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2273.0%22 y1=%2251.3%22 x2=%2275.4%22 y2=%2257.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2259.0%22 y1=%2251.3%22 x2=%2256.6%22 y2=%2257.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2248.2%22 y1=%2242.2%22 x2=%2242.2%22 y2=%2245.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2245.8%22 y1=%2228.4%22 x2=%2238.9%22 y2=%2227.2%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2252.8%22 y1=%2216.3%22 x2=%2248.3%22 y2=%2210.9%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cpath transform=%22translate%2824,56%29 scale%281.0%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2838,72%29 scale%280.85%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2820,84%29 scale%280.8%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2846,90%29 scale%280.7%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!--
-  WX v2026.08.16.007 — the whole app is one screen and one answer.
+  WX v2026.08.16.008 — the whole app is one screen and one answer.
   No tabs, no cards, no scrolling. A rules engine picks the single most
   important thing about the next 12 hours and says it in one word.
   Data: Open-Meteo (CC BY 4.0) + NWS active alerts. No keys.
@@ -43,6 +43,10 @@
                    day; favicon mirrors the current verdict; installable PWA
                    (manifest + service worker — the icon PNGs already broke
                    single-file purity, so the shell may as well work offline)
+  v2026.08.16.008  share + sun/moon theme buttons top right (theme still
+                   follows the clock until you pick); tap the UPDATED time
+                   to refresh; version number links to the changelog; an
+                   update pill appears when a newer version is deployed
 -->
 <style>
 :root{
@@ -79,6 +83,14 @@ body::after{
 .place:active{color:var(--water)}
 .place svg{opacity:.65}
 
+/* ---- corner buttons: theme + share ---- */
+.corner{position:absolute;top:2px;right:0;display:flex;gap:2px;z-index:2}
+.corner button{
+  background:none;border:0;color:var(--ash);cursor:pointer;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;padding:0;border-radius:12px;
+}
+.corner button:active{color:var(--bone)}
+
 /* ---- the answer ---- */
 .answer{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(4px,1.4vh,14px);min-height:0;width:100%}
 .mark{width:clamp(96px,26vh,168px);height:clamp(96px,26vh,168px);flex:none;cursor:pointer}
@@ -109,7 +121,14 @@ body::after{
 
 /* ---- footer ---- */
 .foot{flex:none;font:500 11px/1.6 var(--sans);letter-spacing:.1em;color:#93A9BB;text-align:center;padding-top:10px}
-.foot b{color:var(--ash);font-weight:600}
+.foot b{color:var(--ash);font-weight:600;cursor:pointer}
+.foot a{color:inherit;text-decoration:underline dotted;text-underline-offset:2px}
+.upd{
+  display:block;margin:0 auto 8px;background:var(--ochre);color:#FFF;border:0;border-radius:99px;
+  padding:10px 16px;font:700 12px/1 var(--sans);letter-spacing:.12em;cursor:pointer;
+}
+.upd[hidden]{display:none}
+body.night .foot{color:#7E89B5}
 
 /* ---- change place ---- */
 .sheet{
@@ -161,6 +180,12 @@ body.night .bars i.wet{background:#8FC1F2}
 <body>
 
 <div class="app">
+  <div class="corner">
+    <button id="themeBtn" aria-label="Switch between light and dark"></button>
+    <button id="shareBtn" aria-label="Share WX">
+      <svg width="19" height="22" viewBox="0 0 24 27" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 9H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V11a2 2 0 0 0-2-2h-2"/><path d="M12 17V3"/><path d="M8 7l4-4 4 4"/></svg>
+    </button>
+  </div>
   <button class="place" id="place" aria-label="Change location">
     <svg width="13" height="17" viewBox="0 0 13 17" fill="currentColor" aria-hidden="true"><path d="M6.5 0C2.9 0 0 2.8 0 6.3 0 11 6.5 17 6.5 17S13 11 13 6.3C13 2.8 10.1 0 6.5 0zm0 8.9a2.6 2.6 0 1 1 0-5.2 2.6 2.6 0 0 1 0 5.2z"/></svg>
     <span id="placeName">FINDING YOU</span>
@@ -179,7 +204,9 @@ body.night .bars i.wet{background:#8FC1F2}
   </div>
 
   <div class="foot">
-    <b id="stamp">—</b><br>WX v2026.08.16.007 · Open-Meteo · NWS alerts
+    <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
+    <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.16.008</a> · Open-Meteo · NWS alerts
   </div>
 </div>
 
@@ -196,7 +223,7 @@ body.night .bars i.wet{background:#8FC1F2}
 
 <script>
 "use strict";
-const VERSION="v2026.08.16.007";
+const VERSION="v2026.08.16.008";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -376,14 +403,23 @@ function paint(){
 }
 
 /* ---------- the sky follows the clock ---------- */
+const SUN_ICO='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9L19 19M19 5l-2.1 2.1M7.1 16.9L5 19"/></svg>';
+const MOON_ICO='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.5 3a8.5 8.5 0 1 0 6.5 14 9.5 9.5 0 0 1-6.5-14z"/></svg>';
 function setSkin(){
+  // The clock decides until the person does; a picked theme sticks.
+  const pref=box.g("wx.theme","auto");
   let skin="";
-  try{
-    const d=D.daily,n=now(),up=ms(d.sunrise[0]),dn=ms(d.sunset[0]);
-    if(n<up-30*60000||n>dn+30*60000)skin="night";
-    else if(n>dn-70*60000||n<up+40*60000)skin="dusk";
-  }catch(e){skin=D&&D.current&&D.current.is_day===0?"night":""}
+  if(pref==="dark")skin="night";
+  else if(pref!=="light"){
+    try{
+      const d=D.daily,n=now(),up=ms(d.sunrise[0]),dn=ms(d.sunset[0]);
+      if(n<up-30*60000||n>dn+30*60000)skin="night";
+      else if(n>dn-70*60000||n<up+40*60000)skin="dusk";
+    }catch(e){skin=D&&D.current&&D.current.is_day===0?"night":""}
+  }
   document.body.className=skin;
+  const tb=document.getElementById("themeBtn");
+  if(tb)tb.innerHTML=skin==="night"?SUN_ICO:MOON_ICO;
   const tc=document.querySelector('meta[name="theme-color"]');
   if(tc)tc.setAttribute("content",skin==="night"?"#46538F":skin==="dusk"?"#FBCE8A":"#BFE3FA");
 }
@@ -415,6 +451,7 @@ async function load(){
     ]);
     D=fc;ALERTS=al;AQI=aq;box.s("wx.cache",{at:Date.now(),loc,fc,al,aqi:aq});
     paint();stamp("UPDATED "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}));
+    checkUpdate();
   }catch(e){
     const c=box.g("wx.cache",null);
     if(c&&c.loc.lat===loc.lat&&c.loc.lon===loc.lon){
@@ -429,9 +466,40 @@ async function load(){
 }
 const stamp=t=>document.getElementById("stamp").textContent=t;
 
-/* ---------- three taps, that's the whole interface ---------- */
+/* ---------- taps ---------- */
 document.getElementById("deg").addEventListener("click",()=>{F=!F;box.s("wx.f",F);if(D)paint()});
 document.getElementById("mark").addEventListener("click",()=>{stamp("CHECKING…");load()});
+
+/* theme: sun/moon toggle, top right */
+document.getElementById("themeBtn").addEventListener("click",()=>{
+  box.s("wx.theme",document.body.className==="night"?"light":"dark");
+  if(D)paint();else setSkin();
+});
+
+/* share, the arrow-out-of-a-box everyone knows */
+document.getElementById("shareBtn").addEventListener("click",async()=>{
+  try{
+    if(navigator.share)await navigator.share({title:"WX",text:"One screen. One answer.",url:location.href});
+    else if(navigator.clipboard){await navigator.clipboard.writeText(location.href);stamp("LINK COPIED")}
+  }catch(e){}
+});
+
+/* the timestamp refreshes when tapped */
+const stampEl=document.getElementById("stamp");
+stampEl.addEventListener("click",()=>{stamp("CHECKING…");load();checkUpdate()});
+stampEl.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();stamp("CHECKING…");load();checkUpdate()}});
+
+/* a new deploy shows a pill; tapping it pulls the fresh page */
+let UPDV=null;
+async function checkUpdate(){
+  try{
+    const r=await fetch("./?upd="+Date.now().toString(36),{cache:"no-store"});
+    if(!r.ok)return;
+    const m=(await r.text()).match(/const VERSION="([^"]+)"/);
+    if(m&&m[1]!==VERSION){UPDV=m[1];document.getElementById("updBtn").hidden=false}
+  }catch(e){}
+}
+document.getElementById("updBtn").addEventListener("click",()=>location.reload());
 
 const sheet=document.getElementById("sheet"),q=document.getElementById("q"),hits=document.getElementById("hits");
 document.getElementById("place").addEventListener("click",()=>{sheet.classList.add("open");showRecent();setTimeout(()=>q.focus(),60)});

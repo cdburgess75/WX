@@ -38,7 +38,7 @@ All free, no keys, CORS-enabled, work from `file://` or GitHub Pages:
 
 ## WX Console — the console
 
-Dark/amber panadapter aesthetic (FeedPoint family). Sections top to bottom:
+Same theme family as WX since v2026.08.16.008: WX's deep blue-black dark palette and pale-sky light palette, following the sun by default with a sun/moon override, share button in the header, and theme-aware canvases — the radar basemap flips between CARTO dark and light tiles with the theme. (Was the dark/amber FeedPoint panadapter through v007.) Sections top to bottom:
 
 1. **NWS alerts** — expandable, severity-colored, above the fold on purpose (Gulf Coast).
 2. **Current conditions** — big temp, feels-like, wind w/ gusts, 9-cell metrics grid (humidity, dewpoint, pressure, UV, visibility, cloud, rain today, rain chance).
@@ -138,6 +138,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.005 — opens full-screen from the home screen (web-app metas); offline shell via the shared service worker
 - v2026.08.16.006 — new shared app icon (in-house sun/storm/rain variant)
 - v2026.08.16.007 — RV/NX radar source toggle (RainViewer composite vs raw NEXRAD via Iowa Mesonet); GPS-first location ported from WX, with the same parish-skipping reverse geocode
+- v2026.08.16.008 — the WX theme throughout: light/dark palettes, sun/moon toggle + share in the header, theme-aware canvases and basemap; duplicate alerts deduped; place line ellipsizes
 
 **WX**
 

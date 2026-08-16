@@ -6,8 +6,10 @@
 <meta name="color-scheme" content="dark">
 <title>WX</title>
 <meta name="description" content="One screen. One answer. Weather without the dashboard.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cdefs%3E%3ClinearGradient id=%22bg%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23BFE3FA%22/%3E%3Cstop offset=%221%22 stop-color=%22%23E8F5FE%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22100%22 height=%22100%22 fill=%22url%28%23bg%29%22/%3E%3Ccircle cx=%2266%22 cy=%2232%22 r=%2215%22 fill=%22%23FFC94F%22/%3E%3Cline x1=%2266.0%22 y1=%2211.5%22 x2=%2266.0%22 y2=%224.5%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2279.2%22 y1=%2216.3%22 x2=%2283.7%22 y2=%2210.9%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2286.2%22 y1=%2228.4%22 x2=%2293.1%22 y2=%2227.2%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2283.8%22 y1=%2242.2%22 x2=%2289.8%22 y2=%2245.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2273.0%22 y1=%2251.3%22 x2=%2275.4%22 y2=%2257.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2259.0%22 y1=%2251.3%22 x2=%2256.6%22 y2=%2257.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2248.2%22 y1=%2242.2%22 x2=%2242.2%22 y2=%2245.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2245.8%22 y1=%2228.4%22 x2=%2238.9%22 y2=%2227.2%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2252.8%22 y1=%2216.3%22 x2=%2248.3%22 y2=%2210.9%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cpath transform=%22translate%2824,56%29 scale%281.0%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2838,72%29 scale%280.85%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2820,84%29 scale%280.8%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2846,90%29 scale%280.7%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!--
-  WX v2026.08.16.004 — the whole app is one screen and one answer.
+  WX v2026.08.16.005 — the whole app is one screen and one answer.
   No tabs, no cards, no scrolling. A rules engine picks the single most
   important thing about the next 12 hours and says it in one word.
   Data: Open-Meteo (CC BY 4.0) + NWS active alerts. No keys.
@@ -21,6 +23,8 @@
   v2026.08.16.004  freeze verdict now scans the 12h ahead instead of today's
                    daily min (which by evening is this morning's low); sample
                    mode carries the real UTC offset so the NOW bar lines up
+  v2026.08.16.005  sun-shower app icon: SVG favicon inline, apple-touch-icon
+                   + icon-512 PNGs alongside (iOS won't take a data URI there)
 -->
 <style>
 :root{
@@ -143,7 +147,7 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
   </div>
 
   <div class="foot">
-    <b id="stamp">—</b><br>WX v2026.08.16.004 · Open-Meteo · NWS alerts
+    <b id="stamp">—</b><br>WX v2026.08.16.005 · Open-Meteo · NWS alerts
   </div>
 </div>
 
@@ -155,7 +159,7 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
 
 <script>
 "use strict";
-const VERSION="v2026.08.16.004";
+const VERSION="v2026.08.16.005";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},

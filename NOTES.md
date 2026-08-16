@@ -21,6 +21,8 @@ All free, no keys, CORS-enabled, work from `file://` or GitHub Pages:
 - **Radar (WX Console only):** `https://api.rainviewer.com/public/weather-maps.json` — past frames + ~30 min nowcast. Third-party composite, not raw NEXRAD; fine for "is that cell coming at me," not authoritative for storm-mode work.
 - **Basemap (WX Console only):** CARTO dark tiles (`basemaps.cartocdn.com/dark_all`) — attribution: © OpenStreetMap contributors, © CARTO.
 - **Reverse geocode (WX only):** `api.bigdatacloud.net/data/reverse-geocode-client` — names the town after "use my location."
+- **Air quality (WX only):** `https://air-quality-api.open-meteo.com/v1/air-quality` — current US AQI, same free/no-key terms as the forecast API.
+- **15-minute nowcast (WX only):** the forecast call also requests `minutely_15=precipitation` — Dark-Sky-style "rain in about 20 minutes," free from the same endpoint.
 
 ## Shared architecture decisions
 
@@ -48,17 +50,21 @@ Dark/amber panadapter aesthetic (FeedPoint family). Sections top to bottom:
 
 Sun-shower aesthetic (matches the app icon): pastel sky gradient, slate ink, sun-gold and water-blue accents, rounded pictographs. Was cave-wall stone/ochre through v2026.08.16.005. One screen, no scrolling. Reading level ~5th grade.
 
+**The sky follows the clock:** three skins driven by daily sunrise/sunset — day (pastel), dusk (peach→lavender, ~70 min before sunset through ~40 min after sunrise), night (soft navy, light ink). The favicon re-renders to the current verdict's pictograph, so even the tab shows the weather.
+
 **Screen:** pictograph → temperature → ONE WORD verdict → one plain sentence → 12 hourly bars (taller = warmer, blue = rain likely) → status stamp.
 
-**Three taps total:** temperature = °F/°C · place name = change location · pictograph = refresh.
+**Five taps total:** temperature = °F/°C · place name = change location · pictograph = refresh · the verdict when an alert is up = full NWS text in plain language · any hour bar = that hour's numbers in the sentence slot for a few seconds.
 
 **Verdict engine** (priority order — first match wins):
 
-1. Active NWS alert (severity ≥ moderate) → event name; severe/extreme are coral + "Get somewhere safe.", moderate is amber + a calmer line. Long event names render at a smaller size so the verdict never swallows the screen.
-2. Happening now: storm / snow / rain (rain includes "eases up by X PM" scan).
-3. Dangerous air: feels ≥103°F "Dangerous heat" · ≥95°F "Hot" · ≤20°F "Bitter cold" · lowest hourly temp in the next 12 h ≤32°F "Freeze tonight — pipes, plants, pets."
-4. Incoming (next 12 h): storms ≥40% pop → time; rain ≥45% pop → "Rain soon/later" + time; max gust ≥30 mph → "Windy."
-5. Nothing wrong: "Cold" (≤45°F) / "Warm" (≥80°F) / "Good — go outside."
+1. Active NWS alert (severity ≥ moderate) → event name; severe/extreme are coral, moderate is amber; tropical events (hurricane/tropical/surge) get their own wording; the verdict is tappable and opens the full alert text. Long event names render at a smaller size.
+2. Happening now: storm / snow / rain — the rain "eases up around X:XX" line uses the 15-minute nowcast when available, hourly as fallback.
+3. Dangerous air: feels ≥103°F "Dangerous heat" · ≥95°F "Hot" · ≤20°F "Bitter cold" · lowest hourly temp in the next 12 h ≤32°F "Freeze tonight" · US AQI ≥151 "Bad air" (≥201 gets the stronger line).
+4. Incoming: the 15-minute nowcast first ("Rain in about N minutes," N ≤ 90); then hourly — storms ≥40% pop → time; rain ≥45% pop → "Rain soon/later"; max gust ≥30 mph → "Windy."
+5. Nothing wrong: "Cold" (≤45°F) / "Warm" (≥80°F) / "Good." On a clear day with UV ≥8 in the next 12 h, the closing line becomes "Strong sun — wear sunscreen."
+
+Most verdicts carry two or three phrasings, rotated by day of month — deterministic, so the app never disagrees with itself on refresh, but tomorrow reads a little differently than today.
 
 **Tunable constants** (top of the engine): heat thresholds 95/103°F, cold 20°F, freeze 32°F, gust 30 mph, rain pop 45%, storm pop 40%. WMO code sets: WET {51-67, 80-82}, SNOW {71-77, 85-86}, STORM {95, 96, 99}.
 
@@ -125,6 +131,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.002 — radar: canvas slippy map, RainViewer + CARTO, nowcast loop
 - v2026.08.16.003 — renamed SQUALL → WX Console; storage keys `sq.*` → `wxc.*`
 - v2026.08.16.004 — sun-shower app icon (shared with WX for now)
+- v2026.08.16.005 — opens full-screen from the home screen (web-app metas); offline shell via the shared service worker
 
 **WX**
 
@@ -134,9 +141,10 @@ on plain HTTP in every current browser.
 - v2026.08.16.004 — freeze verdict scans the 12 h ahead instead of today's daily min; sample mode carries the real UTC offset
 - v2026.08.16.005 — sun-shower app icon
 - v2026.08.16.006 — sun-shower skin: pastel palette matching the icon; amber for moderate alerts, red only for severe/extreme; long alert names sized to fit
+- v2026.08.16.007 — 15-minute rain nowcast; tappable alert verdict (full NWS text); tappable hour bars; day/dusk/night skins; AQI verdict; UV sunscreen line; tropical alert wording; per-day phrase variety; verdict favicon; PWA manifest + service worker
 
 ## Backlog / ideas
 
 - WX Console: hourly precip accumulation as second trace; NWS RIDGE radar toggle (authoritative vs RainViewer); propagation/solar panel (shares data needs with SKYWAVE's planned Propagation tab).
 - WX: threshold tuning for Louisiana summers; maybe a "tomorrow" second line.
-- Both: PWA manifest + service worker for true installable offline (adds a second file or inline hack — breaks the pure single-file rule; decide if worth it).
+- ~~Both: PWA manifest + service worker~~ — done in WX v2026.08.16.007. Decided: the icon PNGs had already broken single-file purity, so the shell may as well work offline. `manifest.webmanifest` + `sw.js` at the root; the worker caches pages per-URL (console too) and never touches API calls.

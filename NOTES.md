@@ -7,7 +7,7 @@ Two single-file, offline-first weather apps in the SKYWAVE style. No build step,
 | App | File | Size | Philosophy |
 |-----|------|------|------------|
 | WX Console | console.html | ~50 KB | Full console — everything on one page |
-| WX | wx.html | ~21 KB | One answer — decides what matters and says it plainly |
+| WX | index.html | ~21 KB | One answer — decides what matters and says it plainly |
 
 ---
 
@@ -72,18 +72,30 @@ The Claude chat preview and iOS Files Quick Look block outbound fetches. The app
 
 ## Deploying to GitHub Pages
 
+The repo *is* the deploy — Pages serves `main` from the root, so the files are
+already laid out the way they are served. No build step, no copy step.
+
+| Repo file | Served at |
+|-----------|-----------|
+| `index.html` | `/WX/` — WX at the root URL |
+| `console.html` | `/WX/console.html` |
+
+That is why the one-answer app is named `index.html` rather than `wx.html`:
+Pages serves `index.html` for the bare directory URL, so WX is what you get
+when you tap the bookmark, and the console is one level deeper on purpose.
+
+One-time enable (already done for `cdburgess75/WX`):
+
 ```bash
-# one-time
-gh repo create weather --public --clone
-cd weather
-cp ~/Downloads/wx.html index.html         # WX at the root URL
-cp ~/Downloads/console.html console.html  # console at /console.html
-git add . && git commit -m "WX + WX Console v2026.08.16"
-git push -u origin main
-gh api repos/{owner}/weather/pages -X POST -f 'source[branch]=main' -f 'source[path]=/'
+gh api repos/cdburgess75/WX/pages -X POST -f 'source[branch]=main' -f 'source[path]=/'
 ```
 
-URLs: `https://<user>.github.io/weather/` (WX) and `.../console.html` (WX Console). Add both to the phone home screen via Safari Share → Add to Home Screen.
+URLs: `https://cdburgess75.github.io/WX/` (WX) and `.../WX/console.html` (WX Console).
+Add both to the phone home screen via Safari Share → Add to Home Screen.
+
+Pages takes a minute or two to build on first enable, and serves over HTTPS —
+which matters, because `navigator.geolocation` ("use my location") is blocked
+on plain HTTP in every current browser.
 
 ## Testing done
 

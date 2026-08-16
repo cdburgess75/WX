@@ -5,12 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#BFE3FA">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="WX">
+<link rel="manifest" href="manifest.webmanifest">
 <title>WX</title>
 <meta name="description" content="One screen. One answer. Weather without the dashboard.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cdefs%3E%3ClinearGradient id=%22bg%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23BFE3FA%22/%3E%3Cstop offset=%221%22 stop-color=%22%23E8F5FE%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22100%22 height=%22100%22 fill=%22url%28%23bg%29%22/%3E%3Ccircle cx=%2266%22 cy=%2232%22 r=%2215%22 fill=%22%23FFC94F%22/%3E%3Cline x1=%2266.0%22 y1=%2211.5%22 x2=%2266.0%22 y2=%224.5%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2279.2%22 y1=%2216.3%22 x2=%2283.7%22 y2=%2210.9%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2286.2%22 y1=%2228.4%22 x2=%2293.1%22 y2=%2227.2%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2283.8%22 y1=%2242.2%22 x2=%2289.8%22 y2=%2245.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2273.0%22 y1=%2251.3%22 x2=%2275.4%22 y2=%2257.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2259.0%22 y1=%2251.3%22 x2=%2256.6%22 y2=%2257.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2248.2%22 y1=%2242.2%22 x2=%2242.2%22 y2=%2245.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2245.8%22 y1=%2228.4%22 x2=%2238.9%22 y2=%2227.2%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2252.8%22 y1=%2216.3%22 x2=%2248.3%22 y2=%2210.9%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cpath transform=%22translate%2824,56%29 scale%281.0%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2838,72%29 scale%280.85%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2820,84%29 scale%280.8%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2846,90%29 scale%280.7%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!--
-  WX v2026.08.16.006 — the whole app is one screen and one answer.
+  WX v2026.08.16.007 — the whole app is one screen and one answer.
   No tabs, no cards, no scrolling. A rules engine picks the single most
   important thing about the next 12 hours and says it in one word.
   Data: Open-Meteo (CC BY 4.0) + NWS active alerts. No keys.
@@ -30,6 +35,14 @@
                    (was cave-wall stone/ochre); moderate alerts show amber,
                    red reserved for severe/extreme; long alert names get a
                    smaller size so the verdict never swallows the screen
+  v2026.08.16.007  the big one: 15-minute rain nowcast ("Rain in about 20
+                   minutes"); tap an alert verdict to read the full NWS text;
+                   tap an hour bar for that hour; day/dusk/night skins; air
+                   quality verdict (Open-Meteo AQI); sunscreen line at UV 8+;
+                   tropical alerts get their own words; phrasing varies by
+                   day; favicon mirrors the current verdict; installable PWA
+                   (manifest + service worker — the icon PNGs already broke
+                   single-file purity, so the shell may as well work offline)
 -->
 <style>
 :root{
@@ -122,6 +135,23 @@ body::after{
   font:700 16px/1 var(--sans);letter-spacing:.14em;padding:17px;cursor:pointer;text-transform:uppercase;
 }
 button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(--ochre);outline-offset:3px}
+
+/* ---- the sky follows the day ---- */
+body.dusk{background:linear-gradient(180deg,#FBCE8A 0%,#F5AE8C 45%,#BBCDE9 100%)}
+body.dusk::after{background:radial-gradient(ellipse at 50% 30%,rgba(255,170,90,.32),transparent 60%)}
+body.night{background:linear-gradient(180deg,#46538F 0%,#252C55 100%);
+  --bone:#EDF2FA;--ash:#A6B2D6;--ochre:#FFC94F;--rust:#FF9078;--water:#8FC1F2}
+body.night::after{background:radial-gradient(ellipse at 50% 24%,rgba(255,233,176,.16),transparent 60%)}
+body.night .foot{color:#7E89B5}
+body.night .bars i{background:#FFC94F}
+body.night .bars i.wet{background:#8FC1F2}
+
+/* ---- the verdict opens the alert when there is one ---- */
+.word.tap{cursor:pointer}
+.alerttext{flex:1;overflow:auto;color:#33475C;font:500 17px/1.55 var(--sans);padding:6px 2px;white-space:pre-wrap}
+.alerttext h2{font:800 22px/1.2 var(--sans);margin:0 0 10px;color:#C8820A}
+.alerttext h2.bad{color:#D8553E}
+.alerttext b{display:block;margin:16px 0 4px;font:700 12px/1 var(--sans);letter-spacing:.12em;color:#7E93A6;text-transform:uppercase}
 @media (prefers-reduced-motion:no-preference){
   .answer{animation:rise .5s ease-out}
   @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -144,12 +174,12 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
   </div>
 
   <div class="hours">
-    <div class="bars" id="bars" aria-hidden="true"></div>
+    <div class="bars" id="bars"></div>
     <div class="ticks"><span>NOW</span><span id="tickMid">+6</span><span>+12 HRS</span></div>
   </div>
 
   <div class="foot">
-    <b id="stamp">—</b><br>WX v2026.08.16.006 · Open-Meteo · NWS alerts
+    <b id="stamp">—</b><br>WX v2026.08.16.007 · Open-Meteo · NWS alerts
   </div>
 </div>
 
@@ -159,16 +189,22 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
   <button class="shut" id="shut">Close</button>
 </div>
 
+<div class="sheet" id="alertSheet" role="dialog" aria-label="Alert details">
+  <div class="alerttext" id="alertText"></div>
+  <button class="shut" id="alertShut">Close</button>
+</div>
+
 <script>
 "use strict";
-const VERSION="v2026.08.16.006";
+const VERSION="v2026.08.16.007";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
  s(k,v){const j=JSON.stringify(v);try{if(ok)localStorage.setItem(k,j);else m[k]=j}catch(e){m[k]=j}}}})();
 
 const HOME={name:"Loranger",lat:30.6013,lon:-90.3573};
-let loc=box.g("wx.loc",HOME), F=box.g("wx.f",true), D=null, ALERTS=[];
+let loc=box.g("wx.loc",HOME), F=box.g("wx.f",true), D=null, ALERTS=[], AQI=null, CURRENT_ALERT=null;
+let sayT=null, sayOrig="";
 
 const f=c=>F?c*9/5+32:c;
 const mph=k=>k/1.609344;
@@ -176,6 +212,9 @@ const R=v=>Math.round(v);
 const ms=s=>Date.parse(s.length===16?s+":00Z":s+"Z");
 const now=()=>Date.now()+(D?D.utc_offset_seconds*1000:0);
 function clock(s){let h=+s.slice(11,13);const ap=h>=12?"PM":"AM";h=h%12||12;return h+" "+ap}
+function clockMin(s){let h=+s.slice(11,13);const mm=s.slice(14,16),ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+mm+" "+ap}
+// Same answer all day, a different sentence tomorrow — variety without randomness.
+const pick=a=>a[new Date().getDate()%a.length];
 
 /* ---------- pictographs: drawn like something scratched on a wall ---------- */
 const OCH="#F5A623",BONE="#FFFFFF",WAT="#5AA7E8",RST="#D8553E",ASH="#8FA5B8";
@@ -229,41 +268,78 @@ function verdict(){
   const stormIn=codes.findIndex((x,k)=>STORM.has(x)&&pops[k]>=40);
   const maxGust=mph(Math.max(...gusts));
   const night=c.is_day===0;
+  const uvMax=h.uv_index?Math.max(...nxt("uv_index")):0;
 
-  // 1. a real warning beats everything
+  // 1. a real warning beats everything — and the word is a door now, not a wall
   if(ALERTS.length){
     const a=ALERTS[0],sev=(a.severity||"").toLowerCase();
     const grave=sev==="extreme"||sev==="severe";
-    return{mark:grave?"warn":"warn2",cls:grave?"bad":"",word:shortEvent(a.event),
-      say:grave?"Take this one seriously. Get somewhere safe.":"There's an alert for this area. Worth a look."};
+    const trop=/hurricane|tropical|surge/i.test(a.event||"");
+    return{mark:grave?"warn":"warn2",cls:grave?"bad":"",word:shortEvent(a.event),alert:a,
+      say:trop?(grave?"The real thing. Finish getting ready — tap for details.":"The tropics are stirring. Tap the words to read it.")
+              :(grave?"Take this one seriously. Tap for details.":"There's an alert for this area. Tap it to read.")};
   }
   // 2. happening right now
-  if(STORM.has(c.weather_code))return{mark:"storm",cls:"bad",word:"Storms",say:"Thunderstorms overhead. Stay inside."};
+  if(STORM.has(c.weather_code))return{mark:"storm",cls:"bad",word:"Storms",
+    say:pick(["Thunderstorms overhead. Stay inside.","Lightning close by. Head in.","Storming right now. Wait it out inside."])};
   if(SNOW.has(c.weather_code))return{mark:"snow",cls:"wet",word:"Snow",say:"Snow falling now. Roads get slick."};
   if(WET.has(c.weather_code))return{mark:"rain",cls:"wet",word:"Raining",say:rainEnds(codes,pops,t)};
   // 3. dangerous air
-  if(feels>=(F?103:39))return{mark:"hot",cls:"bad",word:"Dangerous heat",say:`Feels like ${R(feels)}°. Shade and water, no yard work.`};
-  if(feels>=(F?95:35))return{mark:"hot",cls:"bad",word:"Hot",say:`Feels like ${R(feels)}°. Drink more than you think you need.`};
+  if(feels>=(F?103:39))return{mark:"hot",cls:"bad",word:"Dangerous heat",
+    say:`Feels like ${R(feels)}°. ${pick(["Shade and water, no yard work.","Stay in the AC this afternoon.","This heat hurts people. Take it easy."])}`};
+  if(feels>=(F?95:35))return{mark:"hot",cls:"bad",word:"Hot",
+    say:`Feels like ${R(feels)}°. ${pick(["Drink more than you think you need.","Water first, everything else second.","Find the shade and stay there."])}`};
   if(feels<=(F?20:-7))return{mark:"cold",cls:"wet",word:"Bitter cold",say:`Feels like ${R(feels)}°. Cover skin, cover pipes.`};
   if(lowAhead<=(F?32:0))return{mark:"cold",cls:"wet",word:"Freeze tonight",say:`Down to ${R(lowAhead)}° tonight. Pipes, plants, pets.`};
-  // 4. coming at you
+  if(AQI!=null&&AQI>=151)return{mark:"fog",cls:"bad",word:"Bad air",
+    say:AQI>=201?"Air is unhealthy today. Stay inside if you can.":"Air quality is poor. Take it easy outside."};
+  // 4. coming at you — the 15-minute nowcast gets first say
+  const soon=rainSoonMinutes();
+  if(soon!=null&&stormIn<0)return{mark:"rain",cls:"wet",word:"Rain soon",
+    say:soon<=5?"Rain any minute now. Grab a coat.":`Rain in about ${soon} minutes. ${pick(["Grab a coat.","Wrap it up outside.","Close the windows."])}`};
   if(stormIn>=0)return{mark:"storm",cls:"bad",word:"Storms coming",say:`Thunderstorms around ${clock(t[stormIn])}.`};
   if(firstWet>=0)return{mark:"rain",cls:"wet",
     word:firstWet<=2?"Rain soon":"Rain later",
     say:`Rain starts around ${clock(t[firstWet])}. ${firstWet<=2?"Grab a coat now.":"You have time."}`};
-  if(maxGust>=30)return{mark:"wind",cls:"bad",word:"Windy",say:`Gusts to ${R(maxGust)} mph. Tie things down.`};
+  if(maxGust>=30)return{mark:"wind",cls:"bad",word:"Windy",
+    say:`Gusts to ${R(maxGust)} mph. ${pick(["Tie things down.","Hold onto your hat.","Not a day for the umbrella."])}`};
   // 5. nothing wrong — say so and get out of the way
-  if(feels<=(F?45:7))return{mark:night?"moon":"cloud",cls:"",word:"Cold",say:`${R(temp)}° and dry. Wear a real coat.`};
+  if(feels<=(F?45:7))return{mark:night?"moon":"cloud",cls:"",word:"Cold",
+    say:`${R(temp)}° and dry. ${pick(["Wear a real coat.","Layer up before you go.","Gloves weather."])}`};
   const clear=c.weather_code<=1;
+  const tail=(!night&&uvMax>=8)?"Strong sun — wear sunscreen.":pick(["Go outside.","Get out there.","Enjoy it."]);
   return{mark:night?(clear?"moon":"partnight"):(clear?"sun":c.weather_code===2?"part":"cloud"),cls:"",
     word:feels>=(F?80:27)?"Warm":"Good",
-    say:`${R(temp)}° and no rain coming. Go outside.`};
+    say:`${R(temp)}° and no rain coming. ${tail}`};
+}
+/* The 15-minute nowcast: minutes until rain reaches this spot, or null.
+   Dark Sky's old trick — Open-Meteo serves the same data for free. */
+function rainSoonMinutes(){
+  const m=D.minutely_15;if(!m||!m.time||!m.precipitation)return null;
+  const n=now();let s=-1;
+  for(let k=0;k<m.time.length;k++){if(ms(m.time[k])<=n)s=k;else break}
+  if(s<0)return null;
+  for(let k=s;k<Math.min(s+9,m.time.length);k++){
+    if((m.precipitation[k]||0)>=0.1){
+      const mins=Math.max(0,Math.round((ms(m.time[k])-n)/60000));
+      if(mins<=90)return mins;
+    }
+  }
+  return null;
 }
 // Keep the full event name. Dropping the trailing Warning/Watch/Advisory would fit
 // the one-word slot better, but it would also render "Tornado Watch" and "Tornado
 // Warning" identically, and that distinction is the whole point of the alert.
 function shortEvent(e){return String(e).slice(0,28)}
 function rainEnds(codes,pops,t){
+  const m=D.minutely_15;
+  if(m&&m.time&&m.precipitation){
+    const n=now();let s=0;
+    for(let k=0;k<m.time.length;k++)if(ms(m.time[k])<=n)s=k;
+    for(let k=s+1;k<m.time.length-1;k++)
+      if((m.precipitation[k]||0)<0.1&&(m.precipitation[k+1]||0)<0.1)
+        return`Should ease up around ${clockMin(m.time[k])}.`;
+  }
   for(let k=1;k<codes.length;k++)if(!(WET.has(codes[k])||STORM.has(codes[k]))||pops[k]<40)return`Should ease up by ${clock(t[k])}.`;
   return"Set in for a while.";
 }
@@ -271,12 +347,17 @@ function hourNow(){const h=D.hourly.time,n=now();for(let i=h.length-1;i>=0;i--)i
 
 /* ---------- paint ---------- */
 function paint(){
+  setSkin();
   const v=verdict(),c=D.current,h=D.hourly,i=hourNow();
+  CURRENT_ALERT=v.alert||null;
+  if(sayT){clearTimeout(sayT);sayT=null}
   document.getElementById("mark").innerHTML=pict(v.mark);
   document.getElementById("deg").innerHTML=R(f(c.temperature_2m))+"<u>°</u>";
-  const w=document.getElementById("word");w.textContent=v.word;w.className="word "+v.cls+(v.word.length>14?" long":"");
+  const w=document.getElementById("word");w.textContent=v.word;
+  w.className="word "+v.cls+(v.word.length>14?" long":"")+(v.alert?" tap":"");
   document.getElementById("say").textContent=v.say;
   document.getElementById("placeName").textContent=loc.name.toUpperCase();
+  setFavicon(v.mark);
 
   const bars=document.getElementById("bars");bars.innerHTML="";
   const temps=[];for(let j=i;j<Math.min(i+12,h.time.length);j++)temps.push(f(h.temperature_2m[j]));
@@ -288,9 +369,30 @@ function paint(){
     if(pop>=45)b.className="wet";
     if(k===0)b.className+=" now";
     b.title=clock(h.time[j])+" · "+R(tp)+"° · "+pop+"%";
+    b.dataset.info=clock(h.time[j])+" — "+R(tp)+"°, "+pop+"% chance of rain";
     bars.appendChild(b);
   });
   document.getElementById("tickMid").textContent=temps.length>6?clock(h.time[i+6]):"+6";
+}
+
+/* ---------- the sky follows the clock ---------- */
+function setSkin(){
+  let skin="";
+  try{
+    const d=D.daily,n=now(),up=ms(d.sunrise[0]),dn=ms(d.sunset[0]);
+    if(n<up-30*60000||n>dn+30*60000)skin="night";
+    else if(n>dn-70*60000||n<up+40*60000)skin="dusk";
+  }catch(e){skin=D&&D.current&&D.current.is_day===0?"night":""}
+  document.body.className=skin;
+  const tc=document.querySelector('meta[name="theme-color"]');
+  if(tc)tc.setAttribute("content",skin==="night"?"#46538F":skin==="dusk"?"#FBCE8A":"#BFE3FA");
+}
+/* ---------- the tab shows the weather too ---------- */
+function setFavicon(mark){
+  const l=document.querySelector('link[rel="icon"]');if(!l)return;
+  const night=document.body.className==="night";
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="${night?"#39406B":"#BFE3FA"}"/>${pict(mark)}</svg>`;
+  l.setAttribute("href","data:image/svg+xml,"+encodeURIComponent(svg));
 }
 
 /* ---------- data ---------- */
@@ -298,25 +400,29 @@ async function load(){
   try{
     const u=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`+
       `&current=temperature_2m,apparent_temperature,is_day,weather_code,wind_gusts_10m`+
-      `&hourly=temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_gusts_10m`+
-      `&daily=temperature_2m_min,temperature_2m_max&timezone=auto&forecast_days=3`;
-    const [fc,al]=await Promise.all([
+      `&hourly=temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_gusts_10m,uv_index`+
+      `&minutely_15=precipitation&forecast_minutely_15=16`+
+      `&daily=temperature_2m_min,temperature_2m_max,sunrise,sunset&timezone=auto&forecast_days=3`;
+    const [fc,al,aq]=await Promise.all([
       fetch(u).then(r=>{if(!r.ok)throw new Error("forecast");return r.json()}),
       fetch(`https://api.weather.gov/alerts/active?point=${loc.lat.toFixed(4)},${loc.lon.toFixed(4)}`)
         .then(r=>r.ok?r.json():{features:[]}).then(j=>(j.features||[]).map(x=>x.properties)
         .filter(p=>p&&p.event&&["extreme","severe","moderate"].includes((p.severity||"").toLowerCase())))
-        .catch(()=>[])
+        .catch(()=>[]),
+      fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${loc.lat}&longitude=${loc.lon}&current=us_aqi`)
+        .then(r=>r.ok?r.json():null).then(j=>j&&j.current&&j.current.us_aqi!=null?Math.round(j.current.us_aqi):null)
+        .catch(()=>null)
     ]);
-    D=fc;ALERTS=al;box.s("wx.cache",{at:Date.now(),loc,fc,al});
+    D=fc;ALERTS=al;AQI=aq;box.s("wx.cache",{at:Date.now(),loc,fc,al,aqi:aq});
     paint();stamp("UPDATED "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}));
   }catch(e){
     const c=box.g("wx.cache",null);
     if(c&&c.loc.lat===loc.lat&&c.loc.lon===loc.lon){
-      D=c.fc;ALERTS=c.al||[];paint();
+      D=c.fc;ALERTS=c.al||[];AQI=c.aqi!=null?c.aqi:null;paint();
       const m=Math.round((Date.now()-c.at)/60000);
       stamp("OFFLINE · "+(m<60?m+" MIN OLD":Math.round(m/60)+" HR OLD"));
     }else{
-      D=demoData();ALERTS=[];paint();
+      D=demoData();ALERTS=[];AQI=null;paint();
       stamp("SAMPLE · OPEN IN A BROWSER FOR LIVE DATA");
     }
   }
@@ -331,7 +437,33 @@ const sheet=document.getElementById("sheet"),q=document.getElementById("q"),hits
 document.getElementById("place").addEventListener("click",()=>{sheet.classList.add("open");showRecent();setTimeout(()=>q.focus(),60)});
 document.getElementById("shut").addEventListener("click",close);
 function close(){sheet.classList.remove("open");q.value="";hits.innerHTML=""}
-document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){close();closeAlert()}});
+
+/* tap the verdict to read the actual alert */
+const alertSheet=document.getElementById("alertSheet");
+function closeAlert(){alertSheet.classList.remove("open")}
+document.getElementById("alertShut").addEventListener("click",closeAlert);
+document.getElementById("word").addEventListener("click",()=>{
+  const a=CURRENT_ALERT;if(!a)return;
+  const sev=(a.severity||"").toLowerCase(),bad=sev==="extreme"||sev==="severe";
+  document.getElementById("alertText").innerHTML=
+    `<h2 class="${bad?"bad":""}">${esc(a.event)}</h2>`+
+    (a.headline?`${esc(a.headline)}\n`:"")+
+    (a.instruction?`<b>What to do</b>${esc(String(a.instruction).trim())}`:"")+
+    (a.description?`<b>Details</b>${esc(String(a.description).trim())}`:"");
+  alertSheet.classList.add("open");
+});
+
+/* tap an hour bar to hear about that hour */
+const barsEl=document.getElementById("bars");
+barsEl.addEventListener("pointerdown",e=>{
+  const b=e.target&&e.target.dataset&&e.target.dataset.info?e.target:null;if(!b)return;
+  const sayEl=document.getElementById("say");
+  if(!sayT)sayOrig=sayEl.textContent;
+  else clearTimeout(sayT);
+  sayEl.textContent=b.dataset.info;
+  sayT=setTimeout(()=>{sayEl.textContent=sayOrig;sayT=null},4000);
+});
 
 function row(text,sub,fn,cls){
   const li=document.createElement("li");li.tabIndex=0;if(cls)li.className=cls;
@@ -408,15 +540,17 @@ function demoData(){
       is_day:(start.getHours()>=6&&start.getHours()<20)?1:0,
       weather_code:C[0],wind_gusts_10m:24},
     hourly:{time:t,temperature_2m:T,apparent_temperature:A,precipitation_probability:P,weather_code:C,wind_gusts_10m:T.map(()=>24)},
-    daily:{time:[t[0].slice(0,10)],temperature_2m_min:[24],temperature_2m_max:[34]}};
+    daily:{time:[t[0].slice(0,10)],temperature_2m_min:[24],temperature_2m_max:[34],
+      sunrise:[t[0].slice(0,10)+"T06:30"],sunset:[t[0].slice(0,10)+"T19:45"]}};
 }
 
 /* ---------- boot ---------- */
 const cached=box.g("wx.cache",null);
-if(cached&&cached.loc.lat===loc.lat&&cached.loc.lon===loc.lon){D=cached.fc;ALERTS=cached.al||[];paint();stamp("SAVED COPY")}
+if(cached&&cached.loc.lat===loc.lat&&cached.loc.lon===loc.lon){D=cached.fc;ALERTS=cached.al||[];AQI=cached.aqi!=null?cached.aqi:null;paint();stamp("SAVED COPY")}
 load();
 setInterval(()=>{if(!document.hidden)load()},900000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)load()});
+if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
 </html>

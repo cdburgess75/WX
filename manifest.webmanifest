@@ -1,0 +1,14 @@
+{
+  "name": "WX",
+  "short_name": "WX",
+  "description": "One screen. One answer. Weather without the dashboard.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#BFE3FA",
+  "theme_color": "#BFE3FA",
+  "icons": [
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

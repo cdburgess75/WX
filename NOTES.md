@@ -50,9 +50,9 @@ Dark/amber panadapter aesthetic (FeedPoint family). Sections top to bottom:
 
 Sun-shower aesthetic (matches the app icon): pastel sky gradient, slate ink, sun-gold and water-blue accents, rounded pictographs. Was cave-wall stone/ochre through v2026.08.16.005. One screen, no scrolling. Reading level ~5th grade.
 
-**The sky follows the clock:** three skins driven by daily sunrise/sunset — day (pastel), dusk (peach→lavender, ~70 min before sunset through ~40 min after sunrise), night (soft navy, light ink). The favicon re-renders to the current verdict's pictograph, so even the tab shows the weather.
+**The sky follows the clock:** three skins driven by daily sunrise/sunset — day (solid pastel sky), dusk (solid warm cream, ~70 min before sunset through ~40 min after sunrise), night (solid deep blue-black, light ink). Flat color on purpose — gradients read as murk on OLED phones. The favicon re-renders to the current verdict's pictograph, so even the tab shows the weather.
 
-**Screen:** pictograph → temperature → ONE WORD verdict → one plain sentence → 12 hourly bars (taller = warmer, blue = rain likely) → status stamp.
+**Screen:** pictograph → temperature → ONE WORD verdict → one plain sentence → TOMORROW hi/lo + first-rain line → 12 hourly bars (taller = warmer, blue = rain likely) → status stamp.
 
 **The taps:** temperature = °F/°C · place name = change location · pictograph or the UPDATED stamp = refresh · the verdict when an alert is up = full NWS text in plain language · any hour bar = that hour's numbers for a few seconds · sun/moon (top right) = light/dark override (the clock decides until you pick) · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A gold pill appears when a newer version is deployed; tapping it reloads.
 
@@ -144,6 +144,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.007 — 15-minute rain nowcast; tappable alert verdict (full NWS text); tappable hour bars; day/dusk/night skins; AQI verdict; UV sunscreen line; tropical alert wording; per-day phrase variety; verdict favicon; PWA manifest + service worker
 - v2026.08.16.008 — share + sun/moon theme buttons top right; tap the UPDATED stamp to refresh; version number links to this changelog; update pill when a newer version is deployed
 - v2026.08.16.009 — GPS-first location: automatic on launch, follows a GPS-chosen spot, never overrides a hand-picked town; local time and skins ride along
+- v2026.08.16.010 — solid calm backgrounds (gradients out; night is deep blue-black, not purple); refresh stamp is a bordered ↻ button; version link styled as a link; TOMORROW hi/lo + first-rain line under the sentence
 
 ## Backlog / ideas
 

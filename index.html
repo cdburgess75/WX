@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>WX</title>
+<meta name="description" content="One screen. One answer. Weather without the dashboard.">
+<!--
+  WX v2026.08.16.004 — the whole app is one screen and one answer.
+  No tabs, no cards, no scrolling. A rules engine picks the single most
+  important thing about the next 12 hours and says it in one word.
+  Data: Open-Meteo (CC BY 4.0) + NWS active alerts. No keys.
+  Taps: temperature = °F/°C.  place name = change location.  mark = refresh.
+
+  Versioning: vYYYY.MM.DD.NNN — NNN increments per shipped change that day
+  (same scheme as SetList69).
+  v2026.08.16.001  initial build (verdict engine, 12h bars, search, cache)
+  v2026.08.16.002  sample-data fallback for blocked-network previews
+  v2026.08.16.003  renamed STONE -> WX
+  v2026.08.16.004  freeze verdict now scans the 12h ahead instead of today's
+                   daily min (which by evening is this morning's low); sample
+                   mode carries the real UTC offset so the NOW bar lines up
+-->
+<style>
+:root{
+  --stone:#1A1512;      /* cave wall */
+  --stone2:#241C17;
+  --bone:#EFE6D4;       /* chalk */
+  --ochre:#D98E2B;      /* the good stuff */
+  --rust:#B4462F;       /* danger */
+  --water:#5B8CA8;      /* rain */
+  --ash:#8A7B6B;        /* quiet text */
+  --sans:system-ui,-apple-system,"Segoe UI Variable","Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--stone); color:var(--bone); font-family:var(--sans);
+  display:flex; flex-direction:column; align-items:center;
+  padding:calc(env(safe-area-inset-top) + 14px) 18px calc(env(safe-area-inset-bottom) + 12px);
+  -webkit-text-size-adjust:100%; position:relative;
+}
+/* cave-wall grain */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .2 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at 50% 38%,rgba(217,142,43,.09),transparent 62%);
+}
+.app{position:relative;z-index:1;width:100%;max-width:520px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;min-height:0}
+
+/* ---- place ---- */
+.place{
+  background:none;border:0;color:var(--ash);font:600 clamp(15px,4.2vw,18px)/1.2 var(--sans);
+  letter-spacing:.16em;text-transform:uppercase;cursor:pointer;padding:8px 12px;min-height:44px;
+  display:flex;align-items:center;gap:9px;flex:none;
+}
+.place:active{color:var(--bone)}
+.place svg{opacity:.65}
+
+/* ---- the answer ---- */
+.answer{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(4px,1.4vh,14px);min-height:0;width:100%}
+.mark{width:clamp(96px,26vh,168px);height:clamp(96px,26vh,168px);flex:none;cursor:pointer}
+.deg{
+  background:none;border:0;color:var(--bone);cursor:pointer;padding:0;
+  font:800 clamp(64px,17vh,132px)/.86 var(--sans);letter-spacing:-.045em;font-variant-numeric:tabular-nums;
+}
+.deg u{text-decoration:none;font-size:.33em;font-weight:600;color:var(--ash);vertical-align:.9em;margin-left:.06em;letter-spacing:0}
+.word{
+  font:800 clamp(34px,9.4vh,66px)/1 var(--sans);letter-spacing:-.02em;text-transform:uppercase;
+  color:var(--ochre);text-align:center;
+}
+.word.bad{color:var(--rust)}
+.word.wet{color:var(--water)}
+.say{
+  font:500 clamp(17px,2.6vh,22px)/1.35 var(--sans);color:var(--bone);opacity:.86;
+  text-align:center;max-width:20ch;text-wrap:balance;
+}
+
+/* ---- next 12 hours ---- */
+.hours{width:100%;flex:none;padding-top:6px}
+.bars{display:flex;align-items:flex-end;gap:clamp(3px,1.4vw,7px);height:clamp(48px,9vh,74px)}
+.bars i{flex:1;border-radius:3px;background:var(--ochre);opacity:.32;min-height:5px}
+.bars i.wet{background:var(--water);opacity:.95}
+.bars i.now{opacity:.85;box-shadow:inset 0 0 0 2px var(--bone)}
+.ticks{display:flex;justify-content:space-between;margin-top:9px;font:600 11.5px/1 var(--sans);letter-spacing:.18em;color:var(--ash)}
+
+/* ---- footer ---- */
+.foot{flex:none;font:500 11px/1.6 var(--sans);letter-spacing:.1em;color:#5F5449;text-align:center;padding-top:10px}
+.foot b{color:var(--ash);font-weight:600}
+
+/* ---- change place ---- */
+.sheet{
+  position:fixed;inset:0;z-index:5;background:rgba(16,12,10,.96);display:none;
+  flex-direction:column;padding:calc(env(safe-area-inset-top) + 18px) 18px 18px;
+}
+.sheet.open{display:flex}
+.sheet input{
+  width:100%;font:600 20px/1.2 var(--sans);color:var(--bone);background:var(--stone2);
+  border:2px solid #3A2E25;border-radius:12px;padding:16px;letter-spacing:.02em;
+}
+.sheet input:focus{outline:0;border-color:var(--ochre)}
+.hits{list-style:none;margin-top:12px;overflow:auto;flex:1}
+.hits li{
+  padding:17px 4px;border-bottom:1px solid #2C231C;cursor:pointer;
+  font:600 19px/1.25 var(--sans);display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+}
+.hits li span{color:var(--ash);font-weight:500;font-size:15px;text-align:right}
+.hits li:active{color:var(--ochre)}
+.hits li.here{color:var(--ochre)}
+.shut{
+  margin-top:14px;background:none;border:2px solid #3A2E25;border-radius:12px;color:var(--ash);
+  font:700 16px/1 var(--sans);letter-spacing:.14em;padding:17px;cursor:pointer;text-transform:uppercase;
+}
+button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(--ochre);outline-offset:3px}
+@media (prefers-reduced-motion:no-preference){
+  .answer{animation:rise .5s ease-out}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <button class="place" id="place" aria-label="Change location">
+    <svg width="13" height="17" viewBox="0 0 13 17" fill="currentColor" aria-hidden="true"><path d="M6.5 0C2.9 0 0 2.8 0 6.3 0 11 6.5 17 6.5 17S13 11 13 6.3C13 2.8 10.1 0 6.5 0zm0 8.9a2.6 2.6 0 1 1 0-5.2 2.6 2.6 0 0 1 0 5.2z"/></svg>
+    <span id="placeName">FINDING YOU</span>
+  </button>
+
+  <div class="answer">
+    <svg class="mark" id="mark" viewBox="0 0 100 100" aria-hidden="true"></svg>
+    <button class="deg" id="deg" aria-label="Switch between Fahrenheit and Celsius">--<u>°</u></button>
+    <div class="word" id="word">&nbsp;</div>
+    <p class="say" id="say">Reading the sky…</p>
+  </div>
+
+  <div class="hours">
+    <div class="bars" id="bars" aria-hidden="true"></div>
+    <div class="ticks"><span>NOW</span><span id="tickMid">+6</span><span>+12 HRS</span></div>
+  </div>
+
+  <div class="foot">
+    <b id="stamp">—</b><br>WX v2026.08.16.004 · Open-Meteo · NWS alerts
+  </div>
+</div>
+
+<div class="sheet" id="sheet">
+  <input id="q" type="search" placeholder="Town name or ZIP" autocomplete="off" enterkeyhint="search">
+  <ul class="hits" id="hits"></ul>
+  <button class="shut" id="shut">Close</button>
+</div>
+
+<script>
+"use strict";
+const VERSION="v2026.08.16.004";
+/* ---------- tiny store ---------- */
+const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
+ return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
+ s(k,v){const j=JSON.stringify(v);try{if(ok)localStorage.setItem(k,j);else m[k]=j}catch(e){m[k]=j}}}})();
+
+const HOME={name:"Loranger",lat:30.6013,lon:-90.3573};
+let loc=box.g("wx.loc",HOME), F=box.g("wx.f",true), D=null, ALERTS=[];
+
+const f=c=>F?c*9/5+32:c;
+const mph=k=>k/1.609344;
+const R=v=>Math.round(v);
+const ms=s=>Date.parse(s.length===16?s+":00Z":s+"Z");
+const now=()=>Date.now()+(D?D.utc_offset_seconds*1000:0);
+function clock(s){let h=+s.slice(11,13);const ap=h>=12?"PM":"AM";h=h%12||12;return h+" "+ap}
+
+/* ---------- pictographs: drawn like something scratched on a wall ---------- */
+const OCH="#D98E2B",BONE="#EFE6D4",WAT="#5B8CA8",RST="#B4462F",ASH="#8A7B6B";
+function pict(kind){
+  const s=(d,c,w)=>`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w||5}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const sun=`<circle cx="50" cy="44" r="17" fill="${OCH}"/>`+
+    [12,55,98,140,185,228,270,315].map((a,i)=>{const r=a*Math.PI/180,L=i%2?27:31;
+      return s(`M${(50+Math.cos(r)*21).toFixed(0)} ${(44+Math.sin(r)*21).toFixed(0)}L${(50+Math.cos(r)*L).toFixed(0)} ${(44+Math.sin(r)*L).toFixed(0)}`,OCH,5)}).join("");
+  const cloud=(c)=>s("M24 62c-9 0-13-6-12-12 1-6 7-9 12-8 1-11 11-17 20-15 7 1 12 6 14 13 8-2 15 3 16 10 1 7-4 12-11 12z",c||ASH,5);
+  const drops=(n,c)=>Array.from({length:n},(_,i)=>s(`M${28+i*15} 72L${23+i*15} 88`,c||WAT,5)).join("");
+  const bolt=`<path d="M53 62L36 84h13l-6 16 21-24H51l6-14z" fill="${OCH}" stroke="${OCH}" stroke-width="3" stroke-linejoin="round"/>`;
+  const moon=`<path d="M62 24a25 25 0 1 0 15 41 27 27 0 0 1-15-41z" fill="${OCH}"/>`;
+  const map={
+    sun, moon,
+    part:`<g transform="translate(6,-6) scale(.72)">${sun}</g>`+cloud(),
+    partnight:`<g transform="translate(2,-4) scale(.66)">${moon}</g>`+cloud(),
+    cloud:cloud(),
+    rain:cloud()+drops(3),
+    heavy:cloud()+drops(3)+s("M43 76L38 92",WAT,5),
+    storm:cloud("#6E6157")+bolt,
+    snow:cloud()+[0,1,2].map(i=>`<circle cx="${29+i*15}" cy="${80+(i%2)*7}" r="4.5" fill="${BONE}"/>`).join(""),
+    fog:cloud()+s("M22 76h56",ASH,5)+s("M30 88h40",ASH,5),
+    wind:s("M18 40h44a11 11 0 1 0-11-11",BONE,5)+s("M14 58h56a11 11 0 1 1-11 11",BONE,5)+s("M22 76h34",BONE,5),
+    hot:`<circle cx="50" cy="42" r="19" fill="${RST}"/>`+[20,90,160,230,300].map(a=>{const r=a*Math.PI/180;
+      return s(`M${(50+Math.cos(r)*24).toFixed(0)} ${(42+Math.sin(r)*24).toFixed(0)}L${(50+Math.cos(r)*33).toFixed(0)} ${(42+Math.sin(r)*33).toFixed(0)}`,RST,6)}).join(""),
+    cold:s("M50 18v64M24 34l52 32M76 34L24 66",WAT,6),
+    warn:`<path d="M50 14L92 86H8z" fill="none" stroke="${RST}" stroke-width="6" stroke-linejoin="round"/>`+
+      s("M50 40v22",RST,7)+`<circle cx="50" cy="73" r="4" fill="${RST}"/>`
+  };
+  return map[kind]||map.cloud;
+}
+
+/* ---------- the verdict engine: one answer, in priority order ---------- */
+const WET=new Set([51,53,55,56,57,61,63,65,66,67,80,81,82]);
+const SNOW=new Set([71,73,75,77,85,86]);
+const STORM=new Set([95,96,99]);
+
+function verdict(){
+  const c=D.current,h=D.hourly,i=hourNow();
+  const nxt=k=>{const out=[];for(let j=i;j<Math.min(i+13,h.time.length);j++)out.push(h[k][j]);return out};
+  const t=h.time.slice(i,i+13);
+  const codes=nxt("weather_code"),pops=nxt("precipitation_probability"),gusts=nxt("wind_gusts_10m");
+  const feels=f(c.apparent_temperature),temp=f(c.temperature_2m);
+  // The low that matters is the one still ahead of us. daily.temperature_2m_min[0]
+  // is *today's* min, so by evening it reports this morning's low — already spent.
+  // Scanning the same 12-hour window as everything else is self-correcting.
+  const lowAhead=f(Math.min(...nxt("temperature_2m")));
+  const firstWet=codes.findIndex((x,k)=>(WET.has(x)||STORM.has(x)||SNOW.has(x))&&pops[k]>=45);
+  const stormIn=codes.findIndex((x,k)=>STORM.has(x)&&pops[k]>=40);
+  const maxGust=mph(Math.max(...gusts));
+  const night=c.is_day===0;
+
+  // 1. a real warning beats everything
+  if(ALERTS.length){
+    const a=ALERTS[0],sev=(a.severity||"").toLowerCase();
+    return{mark:"warn",cls:"bad",word:shortEvent(a.event),
+      say:sev==="extreme"||sev==="severe"?"Take this one seriously. Get somewhere safe.":"Weather alert in effect for here."};
+  }
+  // 2. happening right now
+  if(STORM.has(c.weather_code))return{mark:"storm",cls:"bad",word:"Storms",say:"Thunderstorms overhead. Stay inside."};
+  if(SNOW.has(c.weather_code))return{mark:"snow",cls:"wet",word:"Snow",say:"Snow falling now. Roads get slick."};
+  if(WET.has(c.weather_code))return{mark:"rain",cls:"wet",word:"Raining",say:rainEnds(codes,pops,t)};
+  // 3. dangerous air
+  if(feels>=(F?103:39))return{mark:"hot",cls:"bad",word:"Dangerous heat",say:`Feels like ${R(feels)}°. Shade and water, no yard work.`};
+  if(feels>=(F?95:35))return{mark:"hot",cls:"bad",word:"Hot",say:`Feels like ${R(feels)}°. Drink more than you think you need.`};
+  if(feels<=(F?20:-7))return{mark:"cold",cls:"wet",word:"Bitter cold",say:`Feels like ${R(feels)}°. Cover skin, cover pipes.`};
+  if(lowAhead<=(F?32:0))return{mark:"cold",cls:"wet",word:"Freeze tonight",say:`Down to ${R(lowAhead)}° tonight. Pipes, plants, pets.`};
+  // 4. coming at you
+  if(stormIn>=0)return{mark:"storm",cls:"bad",word:"Storms coming",say:`Thunderstorms around ${clock(t[stormIn])}.`};
+  if(firstWet>=0)return{mark:"rain",cls:"wet",
+    word:firstWet<=2?"Rain soon":"Rain later",
+    say:`Rain starts around ${clock(t[firstWet])}. ${firstWet<=2?"Grab a coat now.":"You have time."}`};
+  if(maxGust>=30)return{mark:"wind",cls:"bad",word:"Windy",say:`Gusts to ${R(maxGust)} mph. Tie things down.`};
+  // 5. nothing wrong — say so and get out of the way
+  if(feels<=(F?45:7))return{mark:night?"moon":"cloud",cls:"",word:"Cold",say:`${R(temp)}° and dry. Wear a real coat.`};
+  const clear=c.weather_code<=1;
+  return{mark:night?(clear?"moon":"partnight"):(clear?"sun":c.weather_code===2?"part":"cloud"),cls:"",
+    word:feels>=(F?80:27)?"Warm":"Good",
+    say:`${R(temp)}° and no rain coming. Go outside.`};
+}
+// Keep the full event name. Dropping the trailing Warning/Watch/Advisory would fit
+// the one-word slot better, but it would also render "Tornado Watch" and "Tornado
+// Warning" identically, and that distinction is the whole point of the alert.
+function shortEvent(e){return String(e).slice(0,28)}
+function rainEnds(codes,pops,t){
+  for(let k=1;k<codes.length;k++)if(!(WET.has(codes[k])||STORM.has(codes[k]))||pops[k]<40)return`Should ease up by ${clock(t[k])}.`;
+  return"Set in for a while.";
+}
+function hourNow(){const h=D.hourly.time,n=now();for(let i=h.length-1;i>=0;i--)if(ms(h[i])<=n)return i;return 0}
+
+/* ---------- paint ---------- */
+function paint(){
+  const v=verdict(),c=D.current,h=D.hourly,i=hourNow();
+  document.getElementById("mark").innerHTML=pict(v.mark);
+  document.getElementById("deg").innerHTML=R(f(c.temperature_2m))+"<u>°</u>";
+  const w=document.getElementById("word");w.textContent=v.word;w.className="word "+v.cls;
+  document.getElementById("say").textContent=v.say;
+  document.getElementById("placeName").textContent=loc.name.toUpperCase();
+
+  const bars=document.getElementById("bars");bars.innerHTML="";
+  const temps=[];for(let j=i;j<Math.min(i+12,h.time.length);j++)temps.push(f(h.temperature_2m[j]));
+  const lo=Math.min(...temps),hi=Math.max(...temps),sp=Math.max(hi-lo,F?12:7);
+  temps.forEach((tp,k)=>{
+    const j=i+k,pop=h.precipitation_probability[j]||0;
+    const b=document.createElement("i");
+    b.style.height=(22+((tp-lo)/sp)*74).toFixed(0)+"%";
+    if(pop>=45)b.className="wet";
+    if(k===0)b.className+=" now";
+    b.title=clock(h.time[j])+" · "+R(tp)+"° · "+pop+"%";
+    bars.appendChild(b);
+  });
+  document.getElementById("tickMid").textContent=temps.length>6?clock(h.time[i+6]):"+6";
+}
+
+/* ---------- data ---------- */
+async function load(){
+  try{
+    const u=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`+
+      `&current=temperature_2m,apparent_temperature,is_day,weather_code,wind_gusts_10m`+
+      `&hourly=temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_gusts_10m`+
+      `&daily=temperature_2m_min,temperature_2m_max&timezone=auto&forecast_days=3`;
+    const [fc,al]=await Promise.all([
+      fetch(u).then(r=>{if(!r.ok)throw new Error("forecast");return r.json()}),
+      fetch(`https://api.weather.gov/alerts/active?point=${loc.lat.toFixed(4)},${loc.lon.toFixed(4)}`)
+        .then(r=>r.ok?r.json():{features:[]}).then(j=>(j.features||[]).map(x=>x.properties)
+        .filter(p=>p&&p.event&&["extreme","severe","moderate"].includes((p.severity||"").toLowerCase())))
+        .catch(()=>[])
+    ]);
+    D=fc;ALERTS=al;box.s("wx.cache",{at:Date.now(),loc,fc,al});
+    paint();stamp("UPDATED "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}));
+  }catch(e){
+    const c=box.g("wx.cache",null);
+    if(c&&c.loc.lat===loc.lat&&c.loc.lon===loc.lon){
+      D=c.fc;ALERTS=c.al||[];paint();
+      const m=Math.round((Date.now()-c.at)/60000);
+      stamp("OFFLINE · "+(m<60?m+" MIN OLD":Math.round(m/60)+" HR OLD"));
+    }else{
+      D=demoData();ALERTS=[];paint();
+      stamp("SAMPLE · OPEN IN A BROWSER FOR LIVE DATA");
+    }
+  }
+}
+const stamp=t=>document.getElementById("stamp").textContent=t;
+
+/* ---------- three taps, that's the whole interface ---------- */
+document.getElementById("deg").addEventListener("click",()=>{F=!F;box.s("wx.f",F);if(D)paint()});
+document.getElementById("mark").addEventListener("click",()=>{stamp("CHECKING…");load()});
+
+const sheet=document.getElementById("sheet"),q=document.getElementById("q"),hits=document.getElementById("hits");
+document.getElementById("place").addEventListener("click",()=>{sheet.classList.add("open");showRecent();setTimeout(()=>q.focus(),60)});
+document.getElementById("shut").addEventListener("click",close);
+function close(){sheet.classList.remove("open");q.value="";hits.innerHTML=""}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
+
+function row(text,sub,fn,cls){
+  const li=document.createElement("li");li.tabIndex=0;if(cls)li.className=cls;
+  li.innerHTML=`<b>${esc(text)}</b>`+(sub?`<span>${esc(sub)}</span>`:"");
+  if(typeof fn==="function"){
+    li.addEventListener("click",fn);
+    li.addEventListener("keydown",e=>{if(e.key==="Enter")fn()});
+  }
+  hits.appendChild(li);
+}
+function showRecent(){
+  hits.innerHTML="";
+  row("Use where I am","",here,"here");
+  box.g("wx.recent",[HOME]).forEach(p=>row(p.name,"",()=>go(p)));
+}
+let typing;
+q.addEventListener("input",()=>{
+  clearTimeout(typing);const v=q.value.trim();
+  if(v.length<2){showRecent();return}
+  typing=setTimeout(async()=>{
+    try{
+      const r=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(v)}&count=8&language=en&format=json`);
+      const list=(await r.json()).results||[];
+      hits.innerHTML="";
+      if(!list.length){row("Nothing by that name");return}
+      list.forEach(x=>row(x.name,[x.admin1,x.country_code].filter(Boolean).join(", "),
+        ()=>go({name:x.name,lat:x.latitude,lon:x.longitude})));
+    }catch(e){hits.innerHTML="";row("Search is down","try again")}
+  },330);
+});
+function go(p){
+  loc=p;box.s("wx.loc",p);
+  const rec=box.g("wx.recent",[HOME]).filter(x=>x.name!==p.name);
+  rec.unshift(p);box.s("wx.recent",rec.slice(0,5));
+  close();stamp("CHECKING…");load();
+}
+function here(){
+  if(!navigator.geolocation)return;
+  stamp("FINDING YOU…");
+  navigator.geolocation.getCurrentPosition(async p=>{
+    const lat=+p.coords.latitude.toFixed(4),lon=+p.coords.longitude.toFixed(4);
+    let name="Here";
+    try{
+      const r=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+      const j=await r.json();name=j.city||j.locality||j.principalSubdivision||"Here";
+    }catch(e){}
+    go({name,lat,lon});
+  },()=>stamp("LOCATION BLOCKED"),{timeout:9000,maximumAge:300000});
+}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
+
+/* ---------- baked-in sample so the app is never a blank wall ----------
+   Used only when the network is blocked (chat preview, Quick Look) AND
+   there's no cached real forecast. Live data replaces it on first fetch. */
+function demoData(){
+  const t=[],T=[],A=[],P=[],C=[];
+  const start=new Date();start.setMinutes(0,0,0);
+  const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+"T"+String(d.getHours()).padStart(2,"0")+":00";
+  for(let i=0;i<72;i++){
+    const d=new Date(start.getTime()+i*3600000),h=d.getHours();
+    t.push(iso(d));
+    const base=27+7*Math.sin((h-9)/24*2*Math.PI);       // 27–34 °C swing
+    T.push(+base.toFixed(1));
+    A.push(+(base+ (base>30?5:1)).toFixed(1));           // muggy feels-like
+    const stormy=h>=15&&h<=19;                           // afternoon pop-ups
+    P.push(stormy?55:h>=13&&h<21?30:10);
+    C.push(stormy&&i>2&&i<9?95:base>30?2:1);
+  }
+  // The rows above are built from the local clock, so the offset has to match or
+  // hourNow() lands the NOW bar several hours off on any machine that isn't on UTC.
+  return {utc_offset_seconds:-new Date().getTimezoneOffset()*60,
+    current:{temperature_2m:T[0],apparent_temperature:A[0],
+      is_day:(start.getHours()>=6&&start.getHours()<20)?1:0,
+      weather_code:C[0],wind_gusts_10m:24},
+    hourly:{time:t,temperature_2m:T,apparent_temperature:A,precipitation_probability:P,weather_code:C,wind_gusts_10m:T.map(()=>24)},
+    daily:{time:[t[0].slice(0,10)],temperature_2m_min:[24],temperature_2m_max:[34]}};
+}
+
+/* ---------- boot ---------- */
+const cached=box.g("wx.cache",null);
+if(cached&&cached.loc.lat===loc.lat&&cached.loc.lon===loc.lon){D=cached.fc;ALERTS=cached.al||[];paint();stamp("SAVED COPY")}
+load();
+setInterval(()=>{if(!document.hidden)load()},900000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)load()});
+</script>
+</body>
+</html>

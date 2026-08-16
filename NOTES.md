@@ -74,9 +74,12 @@ Most verdicts carry two or three phrasings, rotated by day of month — determin
 
 ## App icon
 
-"Sun shower" — gold sun upper-right, four water-blue drops falling lower-left on a
-pastel sky gradient (picked over five other drafted directions; friendly was the
-brief). Source of truth is `icon.svg`; `apple-touch-icon.png` (180) and
+"Sun, storm, rain" — in-house variant of a Flaticon reference the project liked
+(drawn from scratch, so no license strings): orange sun peeking top-left, blue
+storm cloud with a gold and a white bolt behind, white rain cloud with five
+drops in front, on a near-white sky. Replaced the original "sun shower" mark at
+WX v2026.08.16.013; the app palette is tuned to the same colors. Source of
+truth is `icon.svg`; `apple-touch-icon.png` (180) and
 `icon-512.png` are renders of it. The favicon is the same SVG inlined as a data
 URI in each app's `<head>`, so the pages themselves stay single-file — the PNGs
 exist only because iOS ignores data URIs for `apple-touch-icon`. Both apps share
@@ -132,6 +135,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.003 — renamed SQUALL → WX Console; storage keys `sq.*` → `wxc.*`
 - v2026.08.16.004 — sun-shower app icon (shared with WX for now)
 - v2026.08.16.005 — opens full-screen from the home screen (web-app metas); offline shell via the shared service worker
+- v2026.08.16.006 — new shared app icon (in-house sun/storm/rain variant)
 
 **WX**
 
@@ -147,10 +151,11 @@ on plain HTTP in every current browser.
 - v2026.08.16.010 — solid calm backgrounds (gradients out; night is deep blue-black, not purple); refresh stamp is a bordered ↻ button; version link styled as a link; TOMORROW hi/lo + first-rain line under the sentence
 - v2026.08.16.011 — reverse geocode digs past the parish: mines BigDataCloud's localityInfo for the nearest named town (Loranger, not Tangipahoa Parish)
 - v2026.08.16.012 — saved GPS locations still named after a parish/county re-resolve on next open, so the v011 fix reaches existing installs
+- v2026.08.16.013 — in-house sun/storm/rain icon replaces the sun-shower mark; palette re-tuned to it (richer orange and blue); long place names ellipsize instead of running under the corner buttons
 
 ## Backlog / ideas
 
 - WX Console: hourly precip accumulation as second trace; NWS RIDGE radar toggle (authoritative vs RainViewer); propagation/solar panel (shares data needs with SKYWAVE's planned Propagation tab).
 - WX: threshold tuning for Louisiana summers; maybe a "tomorrow" second line.
-- **Icon candidate (saved for later):** a Flaticon piece by "Paul J. Flat" (flaticon.com) — flat friendly style: orange sun upper-left with rounded rays, blue storm cloud behind it carrying two bolts (one gold, one white), white puffy rain cloud in front with five blue teardrops in two rows. Busier than our sun-shower mark but the same language. **License note:** Flaticon's free tier requires attribution and limits redistribution — if we adopt it, either credit properly or (better) draw our own variant in-house with the icon pipeline, same composition, our palette.
+- ~~Icon candidate~~ — done in v2026.08.16.013: drew the in-house variant (sun/storm/rain, our own artwork) and tuned the app palette to it.
 - ~~Both: PWA manifest + service worker~~ — done in WX v2026.08.16.007. Decided: the icon PNGs had already broken single-file purity, so the shell may as well work offline. `manifest.webmanifest` + `sw.js` at the root; the worker caches pages per-URL (console too) and never touches API calls.

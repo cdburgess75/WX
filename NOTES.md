@@ -2,12 +2,17 @@
 
 **Versioning (house standard):** `vYYYY.MM.DD.NNN` — date of the shipped change, NNN increments per shipped change within that day. Same scheme as SetList69; every release gets a changelog line in the file's header comment and the version shows in the app footer.
 
-Two single-file, offline-first weather apps in the SKYWAVE style. No build step, no API keys, no libraries. Each is one HTML file you can open locally or drop on GitHub Pages.
+A single-file, offline-first weather app in the SKYWAVE style. (Was two apps — WX and WX Console — through v2026.08.16.013.) No build step, no API keys, no libraries. Each is one HTML file you can open locally or drop on GitHub Pages.
 
 | App | File | Size | Philosophy |
 |-----|------|------|------------|
-| WX Console | console.html | ~50 KB | Full console — everything on one page |
-| WX | index.html | ~21 KB | One answer — decides what matters and says it plainly |
+| WX | index.html | ~76 KB | One answer first; the full console below the fold |
+
+One page since v2026.08.16.014. The answer fills the first screen exactly as
+before — pictograph, temperature, one word, one sentence, tomorrow, the bars —
+and scrolling (or the CONSOLE ⌄ tab) reveals the details grid, radar (RV/NX),
+the 48-hour scope, the 7-day outlook, and sun & moon. `console.html` survives
+only as a redirect stub for old bookmarks, forwarding to `/#console`.
 
 ---
 
@@ -30,7 +35,7 @@ All free, no keys, CORS-enabled, work from `file://` or GitHub Pages:
 - **Metric in, convert client-side.** Everything is fetched in metric; the °F/°C toggle is pure math, so it never refetches and works offline.
 - **Cache-first offline.** Last good payload saved to localStorage. On fetch failure, render from cache and flag staleness ("OFFLINE · 20 MIN OLD"). localStorage is wrapped in a try/catch shim with in-memory fallback so sandboxed previews don't crash it.
 - **Location is GPS-first (WX):** on launch WX quietly asks where you are; a GPS-chosen spot follows you on later opens (re-checked each launch, updated only if you've moved ~2 km). A town picked by hand always wins until you tap "Use where I am" again. Loranger, LA (30.6013, -90.3573) is the fallback while waiting and when permission is denied — and remains WX Console's default.
-- **Separate storage namespaces.** WX uses `wx.*`, WX Console uses `wxc.*`. Both apps are served from the same GitHub Pages origin and therefore share one localStorage, so the prefixes must never converge — collapsing them onto a single `wx.*` prefix would make each app overwrite the other's saved location and unit preference.
+- **One settings namespace.** Everything lives under `wx.*` (location, units, theme, radar source). The old console's `wxc.*` keys are read once as migration fallbacks (location, radar source) and otherwise retired.
 - **Refresh:** every 15 min while visible, plus on tab-return if data >10 min old.
 - **Time handling:** Open-Meteo returns local ISO strings; all comparisons are done in a shared "as-if-UTC" frame using `utc_offset_seconds`.
 
@@ -139,6 +144,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.006 — new shared app icon (in-house sun/storm/rain variant)
 - v2026.08.16.007 — RV/NX radar source toggle (RainViewer composite vs raw NEXRAD via Iowa Mesonet); GPS-first location ported from WX, with the same parish-skipping reverse geocode
 - v2026.08.16.008 — the WX theme throughout: light/dark palettes, sun/moon toggle + share in the header, theme-aware canvases and basemap; duplicate alerts deduped; place line ellipsizes
+- v2026.08.16.009 — merged into WX; console.html is now a redirect stub to /#console
 
 **WX**
 
@@ -155,6 +161,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.011 — reverse geocode digs past the parish: mines BigDataCloud's localityInfo for the nearest named town (Loranger, not Tangipahoa Parish)
 - v2026.08.16.012 — saved GPS locations still named after a parish/county re-resolve on next open, so the v011 fix reaches existing installs
 - v2026.08.16.013 — in-house sun/storm/rain icon replaces the sun-shower mark; palette re-tuned to it (richer orange and blue); long place names ellipsize instead of running under the corner buttons
+- v2026.08.16.014 — the merge: console lives below the fold of the one page; one fetch carries every field for both halves (7 days); one settings set with wxc.* migration; console.html becomes a redirect stub
 
 ## Backlog / ideas
 

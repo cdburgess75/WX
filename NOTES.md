@@ -145,6 +145,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.008 — share + sun/moon theme buttons top right; tap the UPDATED stamp to refresh; version number links to this changelog; update pill when a newer version is deployed
 - v2026.08.16.009 — GPS-first location: automatic on launch, follows a GPS-chosen spot, never overrides a hand-picked town; local time and skins ride along
 - v2026.08.16.010 — solid calm backgrounds (gradients out; night is deep blue-black, not purple); refresh stamp is a bordered ↻ button; version link styled as a link; TOMORROW hi/lo + first-rain line under the sentence
+- v2026.08.16.011 — reverse geocode digs past the parish: mines BigDataCloud's localityInfo for the nearest named town (Loranger, not Tangipahoa Parish)
 
 ## Backlog / ideas
 

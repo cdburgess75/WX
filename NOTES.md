@@ -66,6 +66,16 @@ Cave-wall aesthetic: stone/bone/ochre palette, SVG-noise grain, hand-scratched p
 
 ---
 
+## App icon
+
+"Sun shower" — gold sun upper-right, four water-blue drops falling lower-left on a
+pastel sky gradient (picked over five other drafted directions; friendly was the
+brief). Source of truth is `icon.svg`; `apple-touch-icon.png` (180) and
+`icon-512.png` are renders of it. The favicon is the same SVG inlined as a data
+URI in each app's `<head>`, so the pages themselves stay single-file — the PNGs
+exist only because iOS ignores data URIs for `apple-touch-icon`. Both apps share
+the icon for now; a console-specific variant is in the backlog.
+
 ## Why "No signal" in previews
 
 The Claude chat preview and iOS Files Quick Look block outbound fetches. The app is fine; the network is sandboxed. Real browsers and GitHub Pages work. Other suspects if it fails when hosted: ad blocker / Pi-hole eating `api.open-meteo.com`.
@@ -114,6 +124,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.001 — initial build: alerts, hero, 48h scope, 7-day, sun/moon (as SQUALL)
 - v2026.08.16.002 — radar: canvas slippy map, RainViewer + CARTO, nowcast loop
 - v2026.08.16.003 — renamed SQUALL → WX Console; storage keys `sq.*` → `wxc.*`
+- v2026.08.16.004 — sun-shower app icon (shared with WX for now)
 
 **WX**
 
@@ -121,6 +132,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.002 — sample-data fallback for blocked-network previews
 - v2026.08.16.003 — renamed STONE → WX
 - v2026.08.16.004 — freeze verdict scans the 12 h ahead instead of today's daily min; sample mode carries the real UTC offset
+- v2026.08.16.005 — sun-shower app icon
 
 ## Backlog / ideas
 

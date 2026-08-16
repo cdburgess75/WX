@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#BFE3FA">
 <title>WX</title>
 <meta name="description" content="One screen. One answer. Weather without the dashboard.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cdefs%3E%3ClinearGradient id=%22bg%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23BFE3FA%22/%3E%3Cstop offset=%221%22 stop-color=%22%23E8F5FE%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22100%22 height=%22100%22 fill=%22url%28%23bg%29%22/%3E%3Ccircle cx=%2266%22 cy=%2232%22 r=%2215%22 fill=%22%23FFC94F%22/%3E%3Cline x1=%2266.0%22 y1=%2211.5%22 x2=%2266.0%22 y2=%224.5%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2279.2%22 y1=%2216.3%22 x2=%2283.7%22 y2=%2210.9%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2286.2%22 y1=%2228.4%22 x2=%2293.1%22 y2=%2227.2%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2283.8%22 y1=%2242.2%22 x2=%2289.8%22 y2=%2245.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2273.0%22 y1=%2251.3%22 x2=%2275.4%22 y2=%2257.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2259.0%22 y1=%2251.3%22 x2=%2256.6%22 y2=%2257.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2248.2%22 y1=%2242.2%22 x2=%2242.2%22 y2=%2245.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2245.8%22 y1=%2228.4%22 x2=%2238.9%22 y2=%2227.2%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2252.8%22 y1=%2216.3%22 x2=%2248.3%22 y2=%2210.9%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cpath transform=%22translate%2824,56%29 scale%281.0%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2838,72%29 scale%280.85%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2820,84%29 scale%280.8%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2846,90%29 scale%280.7%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!--
-  WX v2026.08.16.005 — the whole app is one screen and one answer.
+  WX v2026.08.16.006 — the whole app is one screen and one answer.
   No tabs, no cards, no scrolling. A rules engine picks the single most
   important thing about the next 12 hours and says it in one word.
   Data: Open-Meteo (CC BY 4.0) + NWS active alerts. No keys.
@@ -25,34 +26,34 @@
                    mode carries the real UTC offset so the NOW bar lines up
   v2026.08.16.005  sun-shower app icon: SVG favicon inline, apple-touch-icon
                    + icon-512 PNGs alongside (iOS won't take a data URI there)
+  v2026.08.16.006  sun-shower skin: pastel sky palette matching the icon
+                   (was cave-wall stone/ochre); moderate alerts show amber,
+                   red reserved for severe/extreme; long alert names get a
+                   smaller size so the verdict never swallows the screen
 -->
 <style>
 :root{
-  --stone:#1A1512;      /* cave wall */
-  --stone2:#241C17;
-  --bone:#EFE6D4;       /* chalk */
-  --ochre:#D98E2B;      /* the good stuff */
-  --rust:#B4462F;       /* danger */
-  --water:#5B8CA8;      /* rain */
-  --ash:#8A7B6B;        /* quiet text */
+  --stone:#D8ECFB;      /* pastel sky (kept the old var names) */
+  --stone2:#FFFFFF;
+  --bone:#33475C;       /* ink: deep slate */
+  --ochre:#C8820A;      /* sun gold, dark enough to read */
+  --rust:#D8553E;       /* danger: warm coral */
+  --water:#2F6FC1;      /* rain text */
+  --ash:#7E93A6;        /* quiet text */
   --sans:system-ui,-apple-system,"Segoe UI Variable","Segoe UI",Roboto,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
 body{
-  background:var(--stone); color:var(--bone); font-family:var(--sans);
+  background:linear-gradient(180deg,#BFE3FA 0%,#E8F5FE 100%); color:var(--bone); font-family:var(--sans);
   display:flex; flex-direction:column; align-items:center;
   padding:calc(env(safe-area-inset-top) + 14px) 18px calc(env(safe-area-inset-bottom) + 12px);
   -webkit-text-size-adjust:100%; position:relative;
 }
-/* cave-wall grain */
-body::before{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .2 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+/* soft sunlight, no more cave grain */
 body::after{
   content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:radial-gradient(ellipse at 50% 38%,rgba(217,142,43,.09),transparent 62%);
+  background:radial-gradient(ellipse at 50% 26%,rgba(255,201,79,.30),transparent 60%);
 }
 .app{position:relative;z-index:1;width:100%;max-width:520px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;min-height:0}
 
@@ -62,7 +63,7 @@ body::after{
   letter-spacing:.16em;text-transform:uppercase;cursor:pointer;padding:8px 12px;min-height:44px;
   display:flex;align-items:center;gap:9px;flex:none;
 }
-.place:active{color:var(--bone)}
+.place:active{color:var(--water)}
 .place svg{opacity:.65}
 
 /* ---- the answer ---- */
@@ -79,6 +80,7 @@ body::after{
 }
 .word.bad{color:var(--rust)}
 .word.wet{color:var(--water)}
+.word.long{font-size:clamp(24px,5.8vh,42px);line-height:1.06}
 .say{
   font:500 clamp(17px,2.6vh,22px)/1.35 var(--sans);color:var(--bone);opacity:.86;
   text-align:center;max-width:20ch;text-wrap:balance;
@@ -87,36 +89,36 @@ body::after{
 /* ---- next 12 hours ---- */
 .hours{width:100%;flex:none;padding-top:6px}
 .bars{display:flex;align-items:flex-end;gap:clamp(3px,1.4vw,7px);height:clamp(48px,9vh,74px)}
-.bars i{flex:1;border-radius:3px;background:var(--ochre);opacity:.32;min-height:5px}
-.bars i.wet{background:var(--water);opacity:.95}
-.bars i.now{opacity:.85;box-shadow:inset 0 0 0 2px var(--bone)}
+.bars i{flex:1;border-radius:3px;background:#FFC94F;opacity:.6;min-height:5px}
+.bars i.wet{background:#5AA7E8;opacity:.95}
+.bars i.now{opacity:1;box-shadow:inset 0 0 0 2px var(--bone)}
 .ticks{display:flex;justify-content:space-between;margin-top:9px;font:600 11.5px/1 var(--sans);letter-spacing:.18em;color:var(--ash)}
 
 /* ---- footer ---- */
-.foot{flex:none;font:500 11px/1.6 var(--sans);letter-spacing:.1em;color:#5F5449;text-align:center;padding-top:10px}
+.foot{flex:none;font:500 11px/1.6 var(--sans);letter-spacing:.1em;color:#93A9BB;text-align:center;padding-top:10px}
 .foot b{color:var(--ash);font-weight:600}
 
 /* ---- change place ---- */
 .sheet{
-  position:fixed;inset:0;z-index:5;background:rgba(16,12,10,.96);display:none;
+  position:fixed;inset:0;z-index:5;background:rgba(235,247,254,.97);display:none;
   flex-direction:column;padding:calc(env(safe-area-inset-top) + 18px) 18px 18px;
 }
 .sheet.open{display:flex}
 .sheet input{
   width:100%;font:600 20px/1.2 var(--sans);color:var(--bone);background:var(--stone2);
-  border:2px solid #3A2E25;border-radius:12px;padding:16px;letter-spacing:.02em;
+  border:2px solid #BCD9EE;border-radius:12px;padding:16px;letter-spacing:.02em;
 }
 .sheet input:focus{outline:0;border-color:var(--ochre)}
 .hits{list-style:none;margin-top:12px;overflow:auto;flex:1}
 .hits li{
-  padding:17px 4px;border-bottom:1px solid #2C231C;cursor:pointer;
+  padding:17px 4px;border-bottom:1px solid #D6E8F5;cursor:pointer;
   font:600 19px/1.25 var(--sans);display:flex;justify-content:space-between;gap:12px;align-items:baseline;
 }
 .hits li span{color:var(--ash);font-weight:500;font-size:15px;text-align:right}
 .hits li:active{color:var(--ochre)}
 .hits li.here{color:var(--ochre)}
 .shut{
-  margin-top:14px;background:none;border:2px solid #3A2E25;border-radius:12px;color:var(--ash);
+  margin-top:14px;background:none;border:2px solid #BCD9EE;border-radius:12px;color:var(--ash);
   font:700 16px/1 var(--sans);letter-spacing:.14em;padding:17px;cursor:pointer;text-transform:uppercase;
 }
 button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(--ochre);outline-offset:3px}
@@ -147,7 +149,7 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
   </div>
 
   <div class="foot">
-    <b id="stamp">—</b><br>WX v2026.08.16.005 · Open-Meteo · NWS alerts
+    <b id="stamp">—</b><br>WX v2026.08.16.006 · Open-Meteo · NWS alerts
   </div>
 </div>
 
@@ -159,7 +161,7 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
 
 <script>
 "use strict";
-const VERSION="v2026.08.16.005";
+const VERSION="v2026.08.16.006";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -176,7 +178,7 @@ const now=()=>Date.now()+(D?D.utc_offset_seconds*1000:0);
 function clock(s){let h=+s.slice(11,13);const ap=h>=12?"PM":"AM";h=h%12||12;return h+" "+ap}
 
 /* ---------- pictographs: drawn like something scratched on a wall ---------- */
-const OCH="#D98E2B",BONE="#EFE6D4",WAT="#5B8CA8",RST="#B4462F",ASH="#8A7B6B";
+const OCH="#F5A623",BONE="#FFFFFF",WAT="#5AA7E8",RST="#D8553E",ASH="#8FA5B8";
 function pict(kind){
   const s=(d,c,w)=>`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w||5}" stroke-linecap="round" stroke-linejoin="round"/>`;
   const sun=`<circle cx="50" cy="44" r="17" fill="${OCH}"/>`+
@@ -193,7 +195,7 @@ function pict(kind){
     cloud:cloud(),
     rain:cloud()+drops(3),
     heavy:cloud()+drops(3)+s("M43 76L38 92",WAT,5),
-    storm:cloud("#6E6157")+bolt,
+    storm:cloud("#7B8FA0")+bolt,
     snow:cloud()+[0,1,2].map(i=>`<circle cx="${29+i*15}" cy="${80+(i%2)*7}" r="4.5" fill="${BONE}"/>`).join(""),
     fog:cloud()+s("M22 76h56",ASH,5)+s("M30 88h40",ASH,5),
     wind:s("M18 40h44a11 11 0 1 0-11-11",BONE,5)+s("M14 58h56a11 11 0 1 1-11 11",BONE,5)+s("M22 76h34",BONE,5),
@@ -201,7 +203,9 @@ function pict(kind){
       return s(`M${(50+Math.cos(r)*24).toFixed(0)} ${(42+Math.sin(r)*24).toFixed(0)}L${(50+Math.cos(r)*33).toFixed(0)} ${(42+Math.sin(r)*33).toFixed(0)}`,RST,6)}).join(""),
     cold:s("M50 18v64M24 34l52 32M76 34L24 66",WAT,6),
     warn:`<path d="M50 14L92 86H8z" fill="none" stroke="${RST}" stroke-width="6" stroke-linejoin="round"/>`+
-      s("M50 40v22",RST,7)+`<circle cx="50" cy="73" r="4" fill="${RST}"/>`
+      s("M50 40v22",RST,7)+`<circle cx="50" cy="73" r="4" fill="${RST}"/>`,
+    warn2:`<path d="M50 14L92 86H8z" fill="none" stroke="${OCH}" stroke-width="6" stroke-linejoin="round"/>`+
+      s("M50 40v22",OCH,7)+`<circle cx="50" cy="73" r="4" fill="${OCH}"/>`
   };
   return map[kind]||map.cloud;
 }
@@ -229,8 +233,9 @@ function verdict(){
   // 1. a real warning beats everything
   if(ALERTS.length){
     const a=ALERTS[0],sev=(a.severity||"").toLowerCase();
-    return{mark:"warn",cls:"bad",word:shortEvent(a.event),
-      say:sev==="extreme"||sev==="severe"?"Take this one seriously. Get somewhere safe.":"Weather alert in effect for here."};
+    const grave=sev==="extreme"||sev==="severe";
+    return{mark:grave?"warn":"warn2",cls:grave?"bad":"",word:shortEvent(a.event),
+      say:grave?"Take this one seriously. Get somewhere safe.":"There's an alert for this area. Worth a look."};
   }
   // 2. happening right now
   if(STORM.has(c.weather_code))return{mark:"storm",cls:"bad",word:"Storms",say:"Thunderstorms overhead. Stay inside."};
@@ -269,7 +274,7 @@ function paint(){
   const v=verdict(),c=D.current,h=D.hourly,i=hourNow();
   document.getElementById("mark").innerHTML=pict(v.mark);
   document.getElementById("deg").innerHTML=R(f(c.temperature_2m))+"<u>°</u>";
-  const w=document.getElementById("word");w.textContent=v.word;w.className="word "+v.cls;
+  const w=document.getElementById("word");w.textContent=v.word;w.className="word "+v.cls+(v.word.length>14?" long":"");
   document.getElementById("say").textContent=v.say;
   document.getElementById("placeName").textContent=loc.name.toUpperCase();
 

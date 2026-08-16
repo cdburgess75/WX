@@ -46,7 +46,7 @@ Dark/amber panadapter aesthetic (FeedPoint family). Sections top to bottom:
 
 ## WX — the one answer
 
-Cave-wall aesthetic: stone/bone/ochre palette, SVG-noise grain, hand-scratched pictographs. One screen, no scrolling. Reading level ~5th grade.
+Sun-shower aesthetic (matches the app icon): pastel sky gradient, slate ink, sun-gold and water-blue accents, rounded pictographs. Was cave-wall stone/ochre through v2026.08.16.005. One screen, no scrolling. Reading level ~5th grade.
 
 **Screen:** pictograph → temperature → ONE WORD verdict → one plain sentence → 12 hourly bars (taller = warmer, blue = rain likely) → status stamp.
 
@@ -54,7 +54,7 @@ Cave-wall aesthetic: stone/bone/ochre palette, SVG-noise grain, hand-scratched p
 
 **Verdict engine** (priority order — first match wins):
 
-1. Active NWS alert (severity ≥ moderate) → event name + "Get somewhere safe."
+1. Active NWS alert (severity ≥ moderate) → event name; severe/extreme are coral + "Get somewhere safe.", moderate is amber + a calmer line. Long event names render at a smaller size so the verdict never swallows the screen.
 2. Happening now: storm / snow / rain (rain includes "eases up by X PM" scan).
 3. Dangerous air: feels ≥103°F "Dangerous heat" · ≥95°F "Hot" · ≤20°F "Bitter cold" · lowest hourly temp in the next 12 h ≤32°F "Freeze tonight — pipes, plants, pets."
 4. Incoming (next 12 h): storms ≥40% pop → time; rain ≥45% pop → "Rain soon/later" + time; max gust ≥30 mph → "Windy."
@@ -133,6 +133,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.003 — renamed STONE → WX
 - v2026.08.16.004 — freeze verdict scans the 12 h ahead instead of today's daily min; sample mode carries the real UTC offset
 - v2026.08.16.005 — sun-shower app icon
+- v2026.08.16.006 — sun-shower skin: pastel palette matching the icon; amber for moderate alerts, red only for severe/extreme; long alert names sized to fit
 
 ## Backlog / ideas
 

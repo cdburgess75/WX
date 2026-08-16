@@ -15,7 +15,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cdefs%3E%3ClinearGradient id=%22bg%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23BFE3FA%22/%3E%3Cstop offset=%221%22 stop-color=%22%23E8F5FE%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22100%22 height=%22100%22 fill=%22url%28%23bg%29%22/%3E%3Ccircle cx=%2266%22 cy=%2232%22 r=%2215%22 fill=%22%23FFC94F%22/%3E%3Cline x1=%2266.0%22 y1=%2211.5%22 x2=%2266.0%22 y2=%224.5%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2279.2%22 y1=%2216.3%22 x2=%2283.7%22 y2=%2210.9%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2286.2%22 y1=%2228.4%22 x2=%2293.1%22 y2=%2227.2%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2283.8%22 y1=%2242.2%22 x2=%2289.8%22 y2=%2245.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2273.0%22 y1=%2251.3%22 x2=%2275.4%22 y2=%2257.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2259.0%22 y1=%2251.3%22 x2=%2256.6%22 y2=%2257.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2248.2%22 y1=%2242.2%22 x2=%2242.2%22 y2=%2245.8%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2245.8%22 y1=%2228.4%22 x2=%2238.9%22 y2=%2227.2%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2252.8%22 y1=%2216.3%22 x2=%2248.3%22 y2=%2210.9%22 stroke=%22%23FFC94F%22 stroke-width=%225.2%22 stroke-linecap=%22round%22/%3E%3Cpath transform=%22translate%2824,56%29 scale%281.0%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2838,72%29 scale%280.85%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2820,84%29 scale%280.8%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3Cpath transform=%22translate%2846,90%29 scale%280.7%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235AA7E8%22/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!--
-  WX v2026.08.16.009 — the whole app is one screen and one answer.
+  WX v2026.08.16.010 — the whole app is one screen and one answer.
   No tabs, no cards, no scrolling. A rules engine picks the single most
   important thing about the next 12 hours and says it in one word.
   Data: Open-Meteo (CC BY 4.0) + NWS active alerts. No keys.
@@ -51,6 +51,11 @@
                    is only the fallback), and a GPS-chosen spot follows you
                    on later opens; a town you picked by hand always wins.
                    Local time, skins, and sunrise/sunset ride along for free
+  v2026.08.16.010  solid calm backgrounds (gradients out; night is deep
+                   blue-black, not purple); the refresh stamp is a real
+                   button with a ↻; the version link looks like a link;
+                   TOMORROW line under the sentence (owed from the
+                   improvement round — it was promised and missed)
 -->
 <style>
 :root{
@@ -66,16 +71,12 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
 body{
-  background:linear-gradient(180deg,#BFE3FA 0%,#E8F5FE 100%); color:var(--bone); font-family:var(--sans);
+  background:#D9EDFB; color:var(--bone); font-family:var(--sans);
   display:flex; flex-direction:column; align-items:center;
   padding:calc(env(safe-area-inset-top) + 14px) 18px calc(env(safe-area-inset-bottom) + 12px);
   -webkit-text-size-adjust:100%; position:relative;
 }
-/* soft sunlight, no more cave grain */
-body::after{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:radial-gradient(ellipse at 50% 26%,rgba(255,201,79,.30),transparent 60%);
-}
+/* solid, calm skies — no gradients, no glow blobs */
 .app{position:relative;z-index:1;width:100%;max-width:520px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;min-height:0}
 
 /* ---- place ---- */
@@ -114,6 +115,7 @@ body::after{
   font:500 clamp(17px,2.6vh,22px)/1.35 var(--sans);color:var(--bone);opacity:.86;
   text-align:center;max-width:20ch;text-wrap:balance;
 }
+.tmrw{font:700 11.5px/1 var(--sans);letter-spacing:.18em;color:var(--ash);text-align:center}
 
 /* ---- next 12 hours ---- */
 .hours{width:100%;flex:none;padding-top:6px}
@@ -125,8 +127,14 @@ body::after{
 
 /* ---- footer ---- */
 .foot{flex:none;font:500 11px/1.6 var(--sans);letter-spacing:.1em;color:#93A9BB;text-align:center;padding-top:10px}
-.foot b{color:var(--ash);font-weight:600;cursor:pointer}
-.foot a{color:inherit;text-decoration:underline dotted;text-underline-offset:2px}
+.foot b{
+  display:inline-flex;align-items:center;gap:7px;color:var(--ash);font-weight:700;cursor:pointer;
+  border:1.5px solid currentColor;border-radius:99px;padding:9px 15px;margin-bottom:7px;
+}
+.foot b::before{content:"↻";font-size:14px;line-height:1}
+.foot b:active{color:var(--bone)}
+.foot a{color:var(--water);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.foot a::after{content:" ↗"}
 .upd{
   display:block;margin:0 auto 8px;background:var(--ochre);color:#FFF;border:0;border-radius:99px;
   padding:10px 16px;font:700 12px/1 var(--sans);letter-spacing:.12em;cursor:pointer;
@@ -160,14 +168,12 @@ body.night .foot{color:#7E89B5}
 button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(--ochre);outline-offset:3px}
 
 /* ---- the sky follows the day ---- */
-body.dusk{background:linear-gradient(180deg,#FBCE8A 0%,#F5AE8C 45%,#BBCDE9 100%)}
-body.dusk::after{background:radial-gradient(ellipse at 50% 30%,rgba(255,170,90,.32),transparent 60%)}
-body.night{background:linear-gradient(180deg,#46538F 0%,#252C55 100%);
-  --bone:#EDF2FA;--ash:#A6B2D6;--ochre:#FFC94F;--rust:#FF9078;--water:#8FC1F2}
-body.night::after{background:radial-gradient(ellipse at 50% 24%,rgba(255,233,176,.16),transparent 60%)}
-body.night .foot{color:#7E89B5}
+body.dusk{background:#F7DDB8}
+body.night{background:#141C26;
+  --bone:#E9EFF5;--ash:#93A6B8;--ochre:#FFC94F;--rust:#FF8A70;--water:#7FB8E6}
+body.night .foot{color:#5F7183}
 body.night .bars i{background:#FFC94F}
-body.night .bars i.wet{background:#8FC1F2}
+body.night .bars i.wet{background:#7FB8E6}
 
 /* ---- the verdict opens the alert when there is one ---- */
 .word.tap{cursor:pointer}
@@ -200,6 +206,7 @@ body.night .bars i.wet{background:#8FC1F2}
     <button class="deg" id="deg" aria-label="Switch between Fahrenheit and Celsius">--<u>°</u></button>
     <div class="word" id="word">&nbsp;</div>
     <p class="say" id="say">Reading the sky…</p>
+    <p class="tmrw" id="tmrw" hidden></p>
   </div>
 
   <div class="hours">
@@ -210,7 +217,7 @@ body.night .bars i.wet{background:#8FC1F2}
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.16.009</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.16.010</a> · Open-Meteo · NWS alerts
   </div>
 </div>
 
@@ -227,7 +234,7 @@ body.night .bars i.wet{background:#8FC1F2}
 
 <script>
 "use strict";
-const VERSION="v2026.08.16.009";
+const VERSION="v2026.08.16.010";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -389,6 +396,22 @@ function paint(){
   document.getElementById("say").textContent=v.say;
   document.getElementById("placeName").textContent=loc.name.toUpperCase();
   setFavicon(v.mark);
+  // Tomorrow in one small line: hi/lo and the first thing that falls
+  const tEl=document.getElementById("tmrw"),dd=D.daily;
+  if(v.alert||!dd||!dd.time||!dd.time[1]){tEl.hidden=true}
+  else{
+    const day2=dd.time[1];let ev="NO RAIN";
+    for(let j=0;j<h.time.length;j++){
+      if(h.time[j].slice(0,10)!==day2)continue;
+      if(STORM.has(h.weather_code[j])&&(h.precipitation_probability[j]||0)>=40){ev="STORMS AROUND "+clock(h.time[j]);break}
+    }
+    if(ev==="NO RAIN")for(let j=0;j<h.time.length;j++){
+      if(h.time[j].slice(0,10)!==day2)continue;
+      if(WET.has(h.weather_code[j])&&(h.precipitation_probability[j]||0)>=45){ev="RAIN AROUND "+clock(h.time[j]);break}
+    }
+    tEl.hidden=false;
+    tEl.textContent=`TOMORROW ${R(f(dd.temperature_2m_max[1]))}°/${R(f(dd.temperature_2m_min[1]))}° · ${ev}`;
+  }
 
   const bars=document.getElementById("bars");bars.innerHTML="";
   const temps=[];for(let j=i;j<Math.min(i+12,h.time.length);j++)temps.push(f(h.temperature_2m[j]));
@@ -425,13 +448,13 @@ function setSkin(){
   const tb=document.getElementById("themeBtn");
   if(tb)tb.innerHTML=skin==="night"?SUN_ICO:MOON_ICO;
   const tc=document.querySelector('meta[name="theme-color"]');
-  if(tc)tc.setAttribute("content",skin==="night"?"#46538F":skin==="dusk"?"#FBCE8A":"#BFE3FA");
+  if(tc)tc.setAttribute("content",skin==="night"?"#141C26":skin==="dusk"?"#F7DDB8":"#D9EDFB");
 }
 /* ---------- the tab shows the weather too ---------- */
 function setFavicon(mark){
   const l=document.querySelector('link[rel="icon"]');if(!l)return;
   const night=document.body.className==="night";
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="${night?"#39406B":"#BFE3FA"}"/>${pict(mark)}</svg>`;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="${night?"#1B2634":"#D9EDFB"}"/>${pict(mark)}</svg>`;
   l.setAttribute("href","data:image/svg+xml,"+encodeURIComponent(svg));
 }
 
@@ -612,7 +635,8 @@ function demoData(){
       is_day:(start.getHours()>=6&&start.getHours()<20)?1:0,
       weather_code:C[0],wind_gusts_10m:24},
     hourly:{time:t,temperature_2m:T,apparent_temperature:A,precipitation_probability:P,weather_code:C,wind_gusts_10m:T.map(()=>24)},
-    daily:{time:[t[0].slice(0,10)],temperature_2m_min:[24],temperature_2m_max:[34],
+    daily:{time:[t[0].slice(0,10),t[24].slice(0,10),t[48].slice(0,10)],
+      temperature_2m_min:[24,24.5,24],temperature_2m_max:[34,35,34],
       sunrise:[t[0].slice(0,10)+"T06:30"],sunset:[t[0].slice(0,10)+"T19:45"]}};
 }
 

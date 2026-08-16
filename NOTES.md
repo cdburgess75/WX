@@ -28,7 +28,7 @@ All free, no keys, CORS-enabled, work from `file://` or GitHub Pages:
 
 - **Metric in, convert client-side.** Everything is fetched in metric; the °F/°C toggle is pure math, so it never refetches and works offline.
 - **Cache-first offline.** Last good payload saved to localStorage. On fetch failure, render from cache and flag staleness ("OFFLINE · 20 MIN OLD"). localStorage is wrapped in a try/catch shim with in-memory fallback so sandboxed previews don't crash it.
-- **Default location:** Loranger, LA (30.6013, -90.3573).
+- **Location is GPS-first (WX):** on launch WX quietly asks where you are; a GPS-chosen spot follows you on later opens (re-checked each launch, updated only if you've moved ~2 km). A town picked by hand always wins until you tap "Use where I am" again. Loranger, LA (30.6013, -90.3573) is the fallback while waiting and when permission is denied — and remains WX Console's default.
 - **Separate storage namespaces.** WX uses `wx.*`, WX Console uses `wxc.*`. Both apps are served from the same GitHub Pages origin and therefore share one localStorage, so the prefixes must never converge — collapsing them onto a single `wx.*` prefix would make each app overwrite the other's saved location and unit preference.
 - **Refresh:** every 15 min while visible, plus on tab-return if data >10 min old.
 - **Time handling:** Open-Meteo returns local ISO strings; all comparisons are done in a shared "as-if-UTC" frame using `utc_offset_seconds`.
@@ -143,6 +143,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.006 — sun-shower skin: pastel palette matching the icon; amber for moderate alerts, red only for severe/extreme; long alert names sized to fit
 - v2026.08.16.007 — 15-minute rain nowcast; tappable alert verdict (full NWS text); tappable hour bars; day/dusk/night skins; AQI verdict; UV sunscreen line; tropical alert wording; per-day phrase variety; verdict favicon; PWA manifest + service worker
 - v2026.08.16.008 — share + sun/moon theme buttons top right; tap the UPDATED stamp to refresh; version number links to this changelog; update pill when a newer version is deployed
+- v2026.08.16.009 — GPS-first location: automatic on launch, follows a GPS-chosen spot, never overrides a hand-picked town; local time and skins ride along
 
 ## Backlog / ideas
 

@@ -84,11 +84,11 @@ That is why the one-answer app is named `index.html` rather than `wx.html`:
 Pages serves `index.html` for the bare directory URL, so WX is what you get
 when you tap the bookmark, and the console is one level deeper on purpose.
 
-One-time enable (already done for `cdburgess75/WX`):
-
-```bash
-gh api repos/cdburgess75/WX/pages -X POST -f 'source[branch]=main' -f 'source[path]=/'
-```
+Deployment runs through `.github/workflows/pages.yml`, which publishes the repo
+root on every push to `main`. The apps themselves still have no build step —
+the workflow exists only because the branch-based Pages deploy never fired for
+this repo; `configure-pages` with `enablement: true` sets the Pages source
+itself, so there is nothing to configure in the repo settings.
 
 URLs: `https://cdburgess75.github.io/WX/` (WX) and `.../WX/console.html` (WX Console).
 Add both to the phone home screen via Safari Share → Add to Home Screen.

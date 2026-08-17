@@ -8,11 +8,14 @@ A single-file, offline-first weather app in the SKYWAVE style. (Was two apps —
 |-----|------|------|------------|
 | WX | index.html | ~76 KB | One answer first; the full console below the fold |
 
-One page since v2026.08.16.014. The answer fills the first screen exactly as
-before — pictograph, temperature, one word, one sentence, tomorrow, the bars —
-and scrolling (or the CONSOLE ⌄ tab) reveals the details grid, radar (RV/NX),
-the 48-hour scope, the 7-day outlook, and sun & moon. `console.html` survives
-only as a redirect stub for old bookmarks, forwarding to `/#console`.
+One page since v2026.08.16.014; screen one went dense in v2026.08.16.015.
+The first screen now carries a compact hero row (pictograph · temperature ·
+verdict word side by side), the sentence, the TOMORROW line, four snapshot
+chips (feels · wind · humidity · UV), the 12 hourly bars, and the 7-day
+outlook folded to three rows — ALL 7 DAYS unfolds it in place, and tapping a
+row opens that day's details. Scrolling (or the CONSOLE ⌄ tab) reveals the
+details grid, radar (RV/NX), the 48-hour scope, and sun & moon. `console.html`
+survives only as a redirect stub for old bookmarks, forwarding to `/#console`.
 
 ---
 
@@ -58,7 +61,7 @@ Sun-shower aesthetic (matches the app icon): pastel sky gradient, slate ink, sun
 
 **The sky follows the clock:** three skins driven by daily sunrise/sunset — day (solid pastel sky), dusk (solid warm cream, ~70 min before sunset through ~40 min after sunrise), night (solid deep blue-black, light ink). Flat color on purpose — gradients read as murk on OLED phones. The favicon re-renders to the current verdict's pictograph, so even the tab shows the weather.
 
-**Screen:** pictograph → temperature → ONE WORD verdict → one plain sentence → TOMORROW hi/lo + first-rain line → 12 hourly bars (taller = warmer, blue = rain likely) → status stamp.
+**Screen:** hero row (pictograph · temperature · ONE WORD verdict) → one plain sentence → TOMORROW hi/lo + first-rain line → four snapshot chips → 12 hourly bars (taller = warmer, blue = rain likely) → folded 7-day outlook → status stamp. Long alert names wrap to their own line under the hero row.
 
 **The taps:** temperature = °F/°C · place name = change location · pictograph or the UPDATED stamp = refresh · the verdict when an alert is up = full NWS text in plain language · any hour bar = that hour's numbers for a few seconds · sun/moon (top right) = light/dark override (the clock decides until you pick) · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A gold pill appears when a newer version is deployed; tapping it reloads.
 
@@ -162,6 +165,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.012 — saved GPS locations still named after a parish/county re-resolve on next open, so the v011 fix reaches existing installs
 - v2026.08.16.013 — in-house sun/storm/rain icon replaces the sun-shower mark; palette re-tuned to it (richer orange and blue); long place names ellipsize instead of running under the corner buttons
 - v2026.08.16.014 — the merge: console lives below the fold of the one page; one fetch carries every field for both halves (7 days); one settings set with wxc.* migration; console.html becomes a redirect stub
+- v2026.08.16.015 — dense screen one (layouts C+B): compact hero row, snapshot chips, and the 7-day outlook folded to three rows on the first screen with ALL 7 DAYS / FEWER DAYS toggle and tap-for-detail rows; console keeps radar, scope, details, sun & moon
 
 ## Backlog / ideas
 

@@ -1,7 +1,7 @@
 /* WX service worker — offline shell only. The apps do their own data caching
    in localStorage; this just keeps the pages and icons loadable with no
    network. Weather API calls pass through untouched. */
-const CACHE = "wx-v2026.08.20.001";
+const CACHE = "wx-v2026.08.20.002";
 const ASSETS = ["./", "apple-touch-icon.png", "icon-512.png", "manifest.webmanifest"];
 
 self.addEventListener("install", e => {

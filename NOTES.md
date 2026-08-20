@@ -70,7 +70,7 @@ Big Sky aesthetic since v2026.08.20.001: the whole background is one saturated c
 
 Flat color on purpose — gradients read as murk on OLED phones. The console panels are translucent white (or ink, on ice) over the same sky, and the canvases (scope, radar basemap, sun arc, moon) carry white-on-color palettes with a dark-on-ice variant. The favicon re-renders to the current verdict's pictograph, so even the tab shows the weather.
 
-**Screen:** place → big thin temperature → ONE WORD verdict under it → one plain sentence → TOMORROW hi/lo + first-rain line → one line of vitals (feels · wind · humidity · UV) → 12 hourly bars (taller = warmer, solid white = rain likely) → 7-day outlook as white hairline rows, folded to three → status stamp. Long alert names drop to a smaller size so they never swallow the screen. The hero pictograph retired with the repaint — the color and the word carry it now (the pictographs live on in the week rows and the favicon).
+**Screen:** place → big thin temperature → ONE WORD verdict under it → one plain sentence → TOMORROW hi/lo + first-rain line → one line of vitals (feels · wind · humidity · UV) with sunrise · sunset under it → 12 hourly bars (taller = warmer, solid white = rain likely) → 7-day outlook as white hairline rows, folded to three → status stamp. Long alert names drop to a smaller size so they never swallow the screen. The hero pictograph retired with the repaint — the color and the word carry it now (the pictographs live on in the week rows and the favicon).
 
 **The taps:** temperature = °F/°C · place name = change location · the UPDATED stamp = refresh · the verdict when an alert is up = full NWS text in plain language · any hour bar = that hour's numbers for a few seconds · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A white pill appears when a newer version is deployed; tapping it reloads.
 
@@ -176,6 +176,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.014 — the merge: console lives below the fold of the one page; one fetch carries every field for both halves (7 days); one settings set with wxc.* migration; console.html becomes a redirect stub
 - v2026.08.16.015 — dense screen one (layouts C+B): compact hero row, snapshot chips, and the 7-day outlook folded to three rows on the first screen with ALL 7 DAYS / FEWER DAYS toggle and tap-for-detail rows; console keeps radar, scope, details, sun & moon
 - v2026.08.20.001 — Big Sky: the background is one saturated color chosen by the verdict (blue FINE, amber heat/moderate alerts, slate storms/wind/bad air, teal rain/snow, navy night, red severe warnings only, ice for dangerous cold with dark ink); white type, no cards on screen one, vitals as one line, week as hairline rows; console panels translucent over the sky, canvases on white-on-color palettes; sun/moon theme toggle retired — night is just another sky
+- v2026.08.20.002 — first-day-on-a-real-phone fixes: week rows said "undefined NaN" on iPhones (Safari refuses date-only strings with a Z suffix; daily dates now parse as explicit midnight UTC); sunrise & sunset added to screen one under the vitals line; census-designated places (Loranger is one) now count as towns in the reverse-geocode mining so the parish shouldn't win
 
 ## Backlog / ideas
 

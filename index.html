@@ -102,6 +102,11 @@
                    not a black void) with a real red pin and light
                    controls; the console panels and labels get more
                    contrast so Details reads in full sun
+  v2026.08.20.004  the radar was papered with "Not Supported" tiles:
+                   RainViewer's free tier stops at zoom 7 and the map
+                   starts at 8. Radar layers now overzoom — fetch the
+                   deepest supported tile and scale the right quadrant —
+                   so every zoom level shows weather, from either source
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -449,7 +454,7 @@ body.sky-ice{
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.20.003</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.20.004</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -538,7 +543,7 @@ body.sky-ice{
 
 <script>
 "use strict";
-const VERSION="v2026.08.20.003";
+const VERSION="v2026.08.20.004";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -1102,11 +1107,22 @@ function drawRadar(){
       const base=tileImg(`https://basemaps.cartocdn.com/${C.carto}/${z}/${tx}/${y}.png`);
       if(base._ok)g.drawImage(base,px,py,TS,TS);
       if(frame){
+        // RainViewer's free tiles stop at zoom 7 — above that the server
+        // sends "Not Supported" text tiles. Overzoom instead: fetch the
+        // deepest supported tile and scale up the right quadrant. Radar
+        // is blobby; the upscale is invisible in practice.
+        const rmax=frame.nx!==undefined?11:7;
+        const zr=Math.min(z,rmax),fo=1<<(z-zr);
         const ru=frame.nx!==undefined
-          ?`https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913${frame.nx}/${z}/${tx}/${y}.png`
-          :`${RAD.host}${frame.path}/256/${z}/${tx}/${y}/6/1_1.png`;
+          ?`https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913${frame.nx}/${zr}/${Math.floor(tx/fo)}/${Math.floor(y/fo)}.png`
+          :`${RAD.host}${frame.path}/256/${zr}/${Math.floor(tx/fo)}/${Math.floor(y/fo)}/6/1_1.png`;
         const rt=tileImg(ru);
-        if(rt._ok){g.globalAlpha=frame.fut?.68:.85;g.drawImage(rt,px,py,TS,TS);g.globalAlpha=1}
+        if(rt._ok){
+          g.globalAlpha=frame.fut?.68:.85;
+          const sq=TS/fo;
+          g.drawImage(rt,(tx%fo)*sq,(y%fo)*sq,sq,sq,px,py,TS,TS);
+          g.globalAlpha=1;
+        }
       }
     }
   }

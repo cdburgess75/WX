@@ -178,6 +178,7 @@ on plain HTTP in every current browser.
 - v2026.08.20.001 — Big Sky: the background is one saturated color chosen by the verdict (blue FINE, amber heat/moderate alerts, slate storms/wind/bad air, teal rain/snow, navy night, red severe warnings only, ice for dangerous cold with dark ink); white type, no cards on screen one, vitals as one line, week as hairline rows; console panels translucent over the sky, canvases on white-on-color palettes; sun/moon theme toggle retired — night is just another sky
 - v2026.08.20.002 — first-day-on-a-real-phone fixes: week rows said "undefined NaN" on iPhones (Safari refuses date-only strings with a Z suffix; daily dates now parse as explicit midnight UTC); sunrise & sunset added to screen one under the vitals line; census-designated places (Loranger is one) now count as towns in the reverse-geocode mining so the parish shouldn't win
 - v2026.08.20.003 — sunrise/sunset labels go sun-yellow with sun-orange times; NWS gridpoint lookup names the nearest real town when the geocoder answers with a parish; radar basemap swaps to CARTO Voyager (roads, water, names) with a red location pin and light controls; console panels/labels get more contrast
+- v2026.08.20.004 — radar showed "Not Supported" tiles: RainViewer's free tier stops at zoom 7 and the map starts at 8; radar layers now overzoom (fetch the deepest supported tile, scale the right quadrant) so every zoom shows weather
 
 ## Backlog / ideas
 

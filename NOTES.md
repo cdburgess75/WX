@@ -177,6 +177,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.015 — dense screen one (layouts C+B): compact hero row, snapshot chips, and the 7-day outlook folded to three rows on the first screen with ALL 7 DAYS / FEWER DAYS toggle and tap-for-detail rows; console keeps radar, scope, details, sun & moon
 - v2026.08.20.001 — Big Sky: the background is one saturated color chosen by the verdict (blue FINE, amber heat/moderate alerts, slate storms/wind/bad air, teal rain/snow, navy night, red severe warnings only, ice for dangerous cold with dark ink); white type, no cards on screen one, vitals as one line, week as hairline rows; console panels translucent over the sky, canvases on white-on-color palettes; sun/moon theme toggle retired — night is just another sky
 - v2026.08.20.002 — first-day-on-a-real-phone fixes: week rows said "undefined NaN" on iPhones (Safari refuses date-only strings with a Z suffix; daily dates now parse as explicit midnight UTC); sunrise & sunset added to screen one under the vitals line; census-designated places (Loranger is one) now count as towns in the reverse-geocode mining so the parish shouldn't win
+- v2026.08.20.003 — sunrise/sunset labels go sun-yellow with sun-orange times; NWS gridpoint lookup names the nearest real town when the geocoder answers with a parish; radar basemap swaps to CARTO Voyager (roads, water, names) with a red location pin and light controls; console panels/labels get more contrast
 
 ## Backlog / ideas
 

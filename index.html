@@ -117,6 +117,13 @@
                    postcode, Zippopotam turns 70446 into Loranger, the
                    postal name locals actually use. Saved GPS spots
                    carry a resolver version so old names re-resolve
+  v2026.08.20.007  rain never goes unsaid: a water-blue RAIN/STORMS
+                   AROUND line appears under the sentence whenever rain
+                   is inside the 12 hours but something louder (heat,
+                   an advisory) owns the big word; rain-likely hour bars
+                   are water-blue again instead of white-on-white; the
+                   alert window gets an X up top and both sheets pad
+                   for the iPhone home bar
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -129,6 +136,7 @@
   --water:var(--fg);
   --sunlbl:#FFE066;   /* sunrise/sunset labels: sun-yellow */
   --suntime:#FFAF54;  /* their times: sun-orange */
+  --rainink:#A8D8FF;  /* rain callouts: pale water-blue */
   --sans:system-ui,-apple-system,"Segoe UI Variable","Segoe UI",Roboto,sans-serif;
 }
 body.sky-hot{--bg:#E8862B;--sunlbl:#FFF2A8;--suntime:#FFDCA8}  /* heat, and moderate alerts */
@@ -136,7 +144,7 @@ body.sky-storm{--bg:#414E63}   /* thunder, wind, bad air */
 body.sky-rain{--bg:#1F7A8C}    /* rain and snow */
 body.sky-night{--bg:#182236}   /* after sunset, when nothing's wrong */
 body.sky-warn{--bg:#B23A31}    /* severe/extreme warnings only */
-body.sky-ice{--bg:#C9D9E6;--fg:#17313F;--sunlbl:#A87400;--suntime:#C7651A}  /* dangerous cold: the one dark-text sky */
+body.sky-ice{--bg:#C9D9E6;--fg:#17313F;--sunlbl:#A87400;--suntime:#C7651A;--rainink:#2563A8}  /* dangerous cold: the one dark-text sky */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{
@@ -187,6 +195,7 @@ body{
   text-align:center;max-width:32ch;text-wrap:balance;margin-top:clamp(2px,.6vh,6px);
 }
 .tmrw{font:700 11.5px/1 var(--sans);letter-spacing:.18em;color:var(--ash);text-align:center}
+.soon{font:700 11.5px/1.3 var(--sans);letter-spacing:.18em;color:var(--rainink);text-align:center}
 
 /* ---- one line of vitals ---- */
 .chips{
@@ -207,7 +216,7 @@ body{
 .hours{width:100%;flex:none;padding-top:6px}
 .bars{display:flex;align-items:flex-end;gap:clamp(3px,1.4vw,7px);height:clamp(34px,6vh,52px)}
 .bars i{flex:1;border-radius:3px;background:color-mix(in srgb,var(--fg) 55%,transparent);min-height:5px}
-.bars i.wet{background:var(--fg)}
+.bars i.wet{background:#A8D8FF}
 .bars i.now{background:var(--fg);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--bg) 75%,#000)}
 .ticks{display:flex;justify-content:space-between;margin-top:9px;font:600 11.5px/1 var(--sans);letter-spacing:.18em;color:var(--ash)}
 
@@ -251,9 +260,14 @@ body{
 /* ---- change place (sheets stay deep navy on every sky) ---- */
 .sheet{
   position:fixed;inset:0;z-index:5;background:rgba(15,22,35,.97);color:#EAF2FA;display:none;
-  flex-direction:column;padding:calc(env(safe-area-inset-top) + 18px) 18px 18px;
+  flex-direction:column;padding:calc(env(safe-area-inset-top) + 18px) 18px calc(env(safe-area-inset-bottom) + 18px);
 }
 .sheet.open{display:flex}
+.sheet .x{
+  position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:12px;width:44px;height:44px;
+  background:rgba(255,255,255,.12);border:0;border-radius:99px;color:#FFF;
+  font-size:18px;line-height:1;cursor:pointer;z-index:2;
+}
 .sheet input{
   width:100%;font:600 20px/1.2 var(--sans);color:#FFF;background:rgba(255,255,255,.08);
   border:2px solid rgba(255,255,255,.25);border-radius:12px;padding:16px;letter-spacing:.02em;
@@ -276,7 +290,7 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
 
 /* ---- the verdict opens the alert when there is one ---- */
 .word.tap{cursor:pointer}
-.alerttext{flex:1;overflow:auto;color:#EAF2FA;font:500 17px/1.55 var(--sans);padding:6px 2px;white-space:pre-wrap}
+.alerttext{flex:1;overflow:auto;color:#EAF2FA;font:500 17px/1.55 var(--sans);padding:6px 56px 6px 2px;white-space:pre-wrap}
 .alerttext h2{font:800 22px/1.2 var(--sans);margin:0 0 10px;color:#FFD469}
 .alerttext h2.bad{color:#FF9B85}
 .alerttext b{display:block;margin:16px 0 4px;font:700 12px/1 var(--sans);letter-spacing:.12em;color:rgba(255,255,255,.6);text-transform:uppercase}
@@ -445,6 +459,7 @@ body.sky-ice{
       <div class="word" id="word">&nbsp;</div>
     </div>
     <p class="say" id="say">Reading the sky…</p>
+    <p class="soon" id="soon" hidden></p>
     <p class="tmrw" id="tmrw" hidden></p>
   </div>
 
@@ -464,7 +479,7 @@ body.sky-ice{
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.20.006</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.20.007</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -547,13 +562,14 @@ body.sky-ice{
 </div>
 
 <div class="sheet" id="alertSheet" role="dialog" aria-label="Alert details">
+  <button class="x" id="alertX" aria-label="Close">✕</button>
   <div class="alerttext" id="alertText"></div>
   <button class="shut" id="alertShut">Close</button>
 </div>
 
 <script>
 "use strict";
-const VERSION="v2026.08.20.006";
+const VERSION="v2026.08.20.007";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -704,6 +720,20 @@ function rainEnds(codes,pops,t){
   return"Set in for a while.";
 }
 function hourNow(){const h=D.hourly.time,n=now();for(let i=h.length-1;i>=0;i--)if(ms(h[i])<=n)return i;return 0}
+/* The next rain in the 12-hour window, said plainly — shown when something
+   louder (heat, an advisory) owns the big word, so rain never goes unsaid. */
+function rainAhead(){
+  const h=D.hourly,i=hourNow();
+  const nxt=k=>{const out=[];for(let j=i;j<Math.min(i+13,h.time.length);j++)out.push(h[k][j]);return out};
+  const t=h.time.slice(i,i+13),codes=nxt("weather_code"),pops=nxt("precipitation_probability");
+  const soon=rainSoonMinutes();
+  const stormIn=codes.findIndex((x,k)=>STORM.has(x)&&pops[k]>=40);
+  if(stormIn>=0)return"STORMS AROUND "+clock(t[stormIn]);
+  if(soon!=null)return soon<=5?"RAIN ANY MINUTE":"RAIN IN ABOUT "+soon+" MIN";
+  const firstWet=codes.findIndex((x,k)=>(WET.has(x)||SNOW.has(x))&&pops[k]>=45);
+  if(firstWet>=0)return"RAIN AROUND "+clock(t[firstWet])+" · "+(pops[firstWet]||0)+"%";
+  return null;
+}
 
 /* ---------- paint ---------- */
 function paint(){
@@ -715,6 +745,11 @@ function paint(){
   const w=document.getElementById("word");w.textContent=v.word;
   w.className="word "+v.cls+(v.word.length>14?" long":"")+(v.alert?" tap":"");
   document.getElementById("say").textContent=v.say;
+  const sEl=document.getElementById("soon");
+  const saidAlready=/rain|storm|snow/i.test(v.word)||
+    (v.alert&&/storm|tornado|rain|flood|hurricane|tropical|squall/i.test(v.alert.event||""));
+  const note=saidAlready?null:rainAhead();
+  if(note){sEl.hidden=false;sEl.textContent=note}else sEl.hidden=true;
   document.getElementById("placeName").textContent=loc.name.toUpperCase();
   setFavicon(v.mark);
   // Tomorrow in one small line: hi/lo and the first thing that falls
@@ -857,6 +892,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){close();closeAlert(
 const alertSheet=document.getElementById("alertSheet");
 function closeAlert(){alertSheet.classList.remove("open")}
 document.getElementById("alertShut").addEventListener("click",closeAlert);
+document.getElementById("alertX").addEventListener("click",closeAlert);
 document.getElementById("word").addEventListener("click",()=>{
   const a=CURRENT_ALERT;if(!a)return;
   const sev=(a.severity||"").toLowerCase(),bad=sev==="extreme"||sev==="severe";

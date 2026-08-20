@@ -70,7 +70,7 @@ Big Sky aesthetic since v2026.08.20.001: the whole background is one saturated c
 
 Flat color on purpose — gradients read as murk on OLED phones. The console panels are translucent white (or ink, on ice) over the same sky, and the canvases (scope, radar basemap, sun arc, moon) carry white-on-color palettes with a dark-on-ice variant. The favicon re-renders to the current verdict's pictograph, so even the tab shows the weather.
 
-**Screen:** place → big thin temperature → ONE WORD verdict under it → one plain sentence → TOMORROW hi/lo + first-rain line → one line of vitals (feels · wind · humidity · UV) with sunrise · sunset under it → 12 hourly bars (taller = warmer, solid white = rain likely) → 7-day outlook as white hairline rows, folded to three → status stamp. Long alert names drop to a smaller size so they never swallow the screen. The hero pictograph retired with the repaint — the color and the word carry it now (the pictographs live on in the week rows and the favicon).
+**Screen:** place → big thin temperature → ONE WORD verdict under it → one plain sentence → TOMORROW hi/lo + first-rain line → one line of vitals (feels · wind · humidity · UV) with sunrise · sunset under it → 12 hourly bars (taller = warmer, water-blue = rain likely) → 7-day outlook as white hairline rows, folded to three → status stamp. Long alert names drop to a smaller size so they never swallow the screen. The hero pictograph retired with the repaint — the color and the word carry it now (the pictographs live on in the week rows and the favicon).
 
 **The taps:** temperature = °F/°C · place name = change location · the UPDATED stamp = refresh · the verdict when an alert is up = full NWS text in plain language · any hour bar = that hour's numbers for a few seconds · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A white pill appears when a newer version is deployed; tapping it reloads.
 
@@ -181,6 +181,7 @@ on plain HTTP in every current browser.
 - v2026.08.20.004 — radar showed "Not Supported" tiles: RainViewer's free tier stops at zoom 7 and the map starts at 8; radar layers now overzoom (fetch the deepest supported tile, scale the right quadrant) so every zoom shows weather
 - v2026.08.20.005 — radar moves to the top of the console (alerts still first); console panels switch from a white wash to smoked glass (a dark tint over the sky) so Details reads clean; radar gets pinch-to-zoom
 - v2026.08.20.006 — place naming round three: ZIP decides. Nearest-town gazetteers skip unincorporated places (answered Folsom); now the reverse geocode's postcode goes through Zippopotam and the postal name (70446 → Loranger) wins; GPS locations carry a resolver version so saved names re-resolve after upgrades
+- v2026.08.20.007 — rain never goes unsaid: water-blue RAIN/STORMS AROUND line under the sentence when rain is inside the 12 hours but heat or an advisory owns the big word; rain-likely hour bars water-blue again; alert window gets a top-right ✕ and sheets pad for the iPhone home bar
 
 ## Backlog / ideas
 

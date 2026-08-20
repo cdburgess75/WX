@@ -95,6 +95,13 @@
                    under the vitals line; census-designated places like
                    Loranger count as towns in the reverse-geocode mining,
                    so the parish shouldn't win anymore
+  v2026.08.20.003  sunrise/sunset go sun-yellow and sun-orange; when the
+                   geocoder still answers with a parish, the NWS gridpoint
+                   lookup names the nearest real town instead; the radar
+                   basemap swaps to CARTO Voyager (roads, water, names —
+                   not a black void) with a real red pin and light
+                   controls; the console panels and labels get more
+                   contrast so Details reads in full sun
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -105,14 +112,16 @@
   --bone:var(--fg);
   --ash:color-mix(in srgb,var(--fg) 72%,transparent);
   --water:var(--fg);
+  --sunlbl:#FFE066;   /* sunrise/sunset labels: sun-yellow */
+  --suntime:#FFAF54;  /* their times: sun-orange */
   --sans:system-ui,-apple-system,"Segoe UI Variable","Segoe UI",Roboto,sans-serif;
 }
-body.sky-hot{--bg:#E8862B}     /* heat, and moderate alerts */
+body.sky-hot{--bg:#E8862B;--sunlbl:#FFF2A8;--suntime:#FFDCA8}  /* heat, and moderate alerts */
 body.sky-storm{--bg:#414E63}   /* thunder, wind, bad air */
 body.sky-rain{--bg:#1F7A8C}    /* rain and snow */
 body.sky-night{--bg:#182236}   /* after sunset, when nothing's wrong */
 body.sky-warn{--bg:#B23A31}    /* severe/extreme warnings only */
-body.sky-ice{--bg:#C9D9E6;--fg:#17313F}  /* dangerous cold: the one dark-text sky */
+body.sky-ice{--bg:#C9D9E6;--fg:#17313F;--sunlbl:#A87400;--suntime:#C7651A}  /* dangerous cold: the one dark-text sky */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{
@@ -176,6 +185,8 @@ body{
   font:600 clamp(10.5px,1.5vh,12px)/1.4 var(--sans);letter-spacing:.14em;
   color:var(--ash);font-variant-numeric:tabular-nums;
 }
+.suns u{text-decoration:none;color:var(--sunlbl);font-weight:800}
+.suns b{color:var(--suntime);font-weight:700}
 
 /* ---- next 12 hours ---- */
 .hours{width:100%;flex:none;padding-top:6px}
@@ -262,22 +273,21 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
 /* ================= the console, below the fold ================= */
 :root{
   --mono:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
-  --panel:color-mix(in srgb,var(--fg) 9%,transparent);
-  --panel2:color-mix(in srgb,var(--fg) 17%,transparent);
-  --line:color-mix(in srgb,var(--fg) 24%,transparent);
-  --dim:color-mix(in srgb,var(--fg) 78%,transparent);
-  --dimmer:color-mix(in srgb,var(--fg) 55%,transparent);
+  --panel:color-mix(in srgb,var(--fg) 13%,transparent);
+  --panel2:color-mix(in srgb,var(--fg) 22%,transparent);
+  --line:color-mix(in srgb,var(--fg) 30%,transparent);
+  --dim:color-mix(in srgb,var(--fg) 85%,transparent);
+  --dimmer:color-mix(in srgb,var(--fg) 70%,transparent);
   --ok:#8FE0A4;--warn:#FFE3B0;--rust:#FFD3C9;--ochre:#FFD469;
   --alert1:color-mix(in srgb,var(--fg) 8%,transparent);
   --alert2:color-mix(in srgb,var(--fg) 8%,transparent);
   --bodytext:color-mix(in srgb,var(--fg) 92%,transparent);
   --trackpast:color-mix(in srgb,var(--fg) 40%,transparent);
   --trackfut:color-mix(in srgb,var(--fg) 22%,transparent);
-  --radarbg:#1A222E;--scrim:rgba(16,23,32,.78);
+  --radarbg:#D7E8EC;--scrim:rgba(255,255,255,.9);
 }
 body.sky-ice{
   --ok:#3F8F57;--warn:#B36B00;--rust:#C0392B;--ochre:#C87F16;
-  --radarbg:#DCE9F5;--scrim:rgba(255,255,255,.85);
 }
 .more{
   background:none;border:0;color:var(--ash);cursor:pointer;
@@ -315,8 +325,8 @@ body.sky-ice{
 .radarwrap canvas:active{cursor:grabbing}
 .zoom{position:absolute;top:12px;right:12px;display:grid;gap:6px}
 .zoom button{
-  width:40px;height:40px;border-radius:8px;background:var(--scrim);border:1px solid var(--line);
-  color:var(--bone);font:600 20px/1 var(--mono);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  width:40px;height:40px;border-radius:8px;background:var(--scrim);border:1px solid rgba(0,0,0,.18);
+  color:#26303E;font:600 20px/1 var(--mono);cursor:pointer;display:flex;align-items:center;justify-content:center;
 }
 .rbar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--line)}
 .rbar .play{
@@ -337,10 +347,10 @@ body.sky-ice{
 .rtime s.fut{color:var(--water)}
 .scale{
   position:absolute;left:12px;bottom:12px;display:flex;align-items:center;
-  background:var(--scrim);border:1px solid var(--line);border-radius:6px;padding:6px 8px;
+  background:var(--scrim);border:1px solid rgba(0,0,0,.18);border-radius:6px;padding:6px 8px;
 }
 .scale i{width:15px;height:9px;display:block}
-.scale span{font-family:var(--mono);font-size:9.5px;color:var(--dim);letter-spacing:.1em;margin:0 5px}
+.scale span{font-family:var(--mono);font-size:9.5px;color:#52646F;letter-spacing:.1em;margin:0 5px}
 /* scope */
 .readout{
   display:flex;gap:18px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);
@@ -439,7 +449,7 @@ body.sky-ice{
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.20.002</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.20.003</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -528,7 +538,7 @@ body.sky-ice{
 
 <script>
 "use strict";
-const VERSION="v2026.08.20.002";
+const VERSION="v2026.08.20.003";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -894,13 +904,29 @@ function here(){
   stamp("FINDING YOU…");
   navigator.geolocation.getCurrentPosition(async p=>{
     const lat=+p.coords.latitude.toFixed(4),lon=+p.coords.longitude.toFixed(4);
-    let name="Here";
-    try{
-      const r=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
-      const j=await r.json();name=placeFrom(j);
-    }catch(e){}
-    go({name,lat,lon,gps:true});
+    go({name:await resolvePlace(lat,lon),lat,lon,gps:true});
   },()=>stamp("LOCATION BLOCKED"),{timeout:9000,maximumAge:300000});
+}
+/* Two opinions on what this spot is called. BigDataCloud first; if it still
+   hands back an administrative blob, ask the NWS — its gridpoint lookup
+   names the nearest real town (US only, which is where our alerts come
+   from anyway). */
+async function resolvePlace(lat,lon){
+  const bad=/\b(parish|county|borough|census|district)\b/i;
+  let name=null;
+  try{
+    const r=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+    name=placeFrom(await r.json());
+  }catch(e){}
+  if(!name||name==="Here"||bad.test(name)){
+    try{
+      const r=await fetch(`https://api.weather.gov/points/${(+lat).toFixed(4)},${(+lon).toFixed(4)}`);
+      const j=await r.json();
+      const rl=j&&j.properties&&j.properties.relativeLocation&&j.properties.relativeLocation.properties;
+      if(rl&&rl.city)name=rl.city;
+    }catch(e){}
+  }
+  return name||"Here";
 }
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 
@@ -983,10 +1009,10 @@ function codeToMark(c,day){
 /* canvas palette follows the sky: white marks on color, dark marks on ice */
 const CPAL_W={night:"rgba(0,0,0,.16)",grid:"rgba(255,255,255,.16)",lbl:"rgba(255,255,255,.62)",dow:"rgba(255,255,255,.85)",div:"rgba(255,255,255,.3)",
  precip:"168,216,255",temp:"#FFD469",tempRGB:"255,212,105",nowline:"rgba(255,255,255,.5)",nowlbl:"#FFFFFF",
- radarbg:"#1A222E",carto:"dark_all",marker:"#FFD469",axis:"rgba(255,255,255,.3)",arc:"rgba(255,255,255,.42)",sunc:"#FFD469",dimc:"rgba(255,255,255,.55)",moonbg:"rgba(255,255,255,.18)"};
+ radarbg:"#D7E8EC",carto:"rastertiles/voyager",marker:"#E8432E",axis:"rgba(255,255,255,.3)",arc:"rgba(255,255,255,.42)",sunc:"#FFD469",dimc:"rgba(255,255,255,.55)",moonbg:"rgba(255,255,255,.18)"};
 const CPAL_ICE={night:"#B9CCDA",grid:"#B7C9D6",lbl:"#5B7285",dow:"#3D566B",div:"#A5BACA",
  precip:"53,118,201",temp:"#C87F16",tempRGB:"200,127,22",nowline:"rgba(23,49,63,.45)",nowlbl:"#17313F",
- radarbg:"#DCE9F5",carto:"light_all",marker:"#C24E2E",axis:"#A9BFCF",arc:"#93AEC2",sunc:"#C87F16",dimc:"#7A93A6",moonbg:"#E2ECF5"};
+ radarbg:"#DCE9F5",carto:"rastertiles/voyager",marker:"#E8432E",axis:"#A9BFCF",arc:"#93AEC2",sunc:"#C87F16",dimc:"#7A93A6",moonbg:"#E2ECF5"};
 const cpal=()=>document.body.classList.contains("sky-ice")?CPAL_ICE:CPAL_W;
 const hv=(h,k,i)=>(h&&h[k]&&h[k][i]!=null)?h[k][i]:null;
 
@@ -1086,10 +1112,9 @@ function drawRadar(){
   }
   const mx=lon2x(loc.lon,z)-oX,my=lat2y(loc.lat,z)-oY;
   if(mx>-20&&mx<W+20&&my>-20&&my<H+20){
-    g.strokeStyle=C.marker;g.lineWidth=2;
-    g.beginPath();g.arc(mx,my,7,0,7);g.stroke();
-    g.beginPath();g.moveTo(mx-13,my);g.lineTo(mx-9,my);g.moveTo(mx+9,my);g.lineTo(mx+13,my);
-    g.moveTo(mx,my-13);g.lineTo(mx,my-9);g.moveTo(mx,my+9);g.lineTo(mx,my+13);g.stroke();
+    g.fillStyle="rgba(0,0,0,.25)";g.beginPath();g.arc(mx,my+1.5,8,0,7);g.fill();
+    g.fillStyle=C.marker;g.beginPath();g.arc(mx,my,6.5,0,7);g.fill();
+    g.strokeStyle="#FFF";g.lineWidth=2.5;g.beginPath();g.arc(mx,my,6.5,0,7);g.stroke();
   }
 }
 function fmtClock(unixSec){
@@ -1316,7 +1341,7 @@ function renderChips(){
   const sn=document.getElementById("suns"),dd=D.daily;
   if(dd&&dd.sunrise&&dd.sunrise[0]&&dd.sunset&&dd.sunset[0]){
     sn.hidden=false;
-    sn.textContent=`SUNRISE ${clockMin(dd.sunrise[0])} · SUNSET ${clockMin(dd.sunset[0])}`;
+    sn.innerHTML=`<u>SUNRISE</u> <b>${clockMin(dd.sunrise[0])}</b> · <u>SUNSET</u> <b>${clockMin(dd.sunset[0])}</b>`;
   }else sn.hidden=true;
 }
 
@@ -1416,11 +1441,7 @@ function gpsSync(){
     const lat=+p.coords.latitude.toFixed(4),lon=+p.coords.longitude.toFixed(4);
     const staleName=/\b(parish|county|borough|census|district)\b/i.test(saved&&saved.name||"");
     if(saved&&saved.gps&&dist(saved.lat,saved.lon,lat,lon)<2&&!staleName)return;
-    let name="Here";
-    try{
-      const r=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
-      const j=await r.json();name=placeFrom(j);
-    }catch(e){}
+    const name=await resolvePlace(lat,lon);
     loc={name,lat,lon,gps:true};box.s("wx.loc",loc);
     stamp("CHECKING…");load();
   },()=>{},{timeout:8000,maximumAge:600000});

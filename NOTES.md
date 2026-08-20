@@ -180,6 +180,7 @@ on plain HTTP in every current browser.
 - v2026.08.20.003 — sunrise/sunset labels go sun-yellow with sun-orange times; NWS gridpoint lookup names the nearest real town when the geocoder answers with a parish; radar basemap swaps to CARTO Voyager (roads, water, names) with a red location pin and light controls; console panels/labels get more contrast
 - v2026.08.20.004 — radar showed "Not Supported" tiles: RainViewer's free tier stops at zoom 7 and the map starts at 8; radar layers now overzoom (fetch the deepest supported tile, scale the right quadrant) so every zoom shows weather
 - v2026.08.20.005 — radar moves to the top of the console (alerts still first); console panels switch from a white wash to smoked glass (a dark tint over the sky) so Details reads clean; radar gets pinch-to-zoom
+- v2026.08.20.006 — place naming round three: ZIP decides. Nearest-town gazetteers skip unincorporated places (answered Folsom); now the reverse geocode's postcode goes through Zippopotam and the postal name (70446 → Loranger) wins; GPS locations carry a resolver version so saved names re-resolve after upgrades
 
 ## Backlog / ideas
 

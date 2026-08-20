@@ -88,6 +88,13 @@
                    console panels go translucent over the same sky. The
                    sun/moon theme button retires: night is just another
                    sky color now, and it happens on its own
+  v2026.08.20.002  three fixes from the first day on a real phone: week
+                   rows said "undefined NaN" on iPhones (Safari refuses
+                   date-only strings with a Z — dates get a full midnight
+                   timestamp now); sunrise & sunset now sit on screen one
+                   under the vitals line; census-designated places like
+                   Loranger count as towns in the reverse-geocode mining,
+                   so the parish shouldn't win anymore
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -162,6 +169,12 @@ body{
   width:100%;flex:none;margin-top:clamp(2px,.8vh,8px);text-align:center;
   font:700 clamp(11.5px,1.7vh,13.5px)/1.5 var(--sans);letter-spacing:.08em;
   color:color-mix(in srgb,var(--fg) 92%,transparent);font-variant-numeric:tabular-nums;
+}
+
+.suns{
+  width:100%;flex:none;margin-top:1px;text-align:center;
+  font:600 clamp(10.5px,1.5vh,12px)/1.4 var(--sans);letter-spacing:.14em;
+  color:var(--ash);font-variant-numeric:tabular-nums;
 }
 
 /* ---- next 12 hours ---- */
@@ -411,6 +424,7 @@ body.sky-ice{
   </div>
 
   <div class="chips" id="chips" hidden></div>
+  <p class="suns" id="suns" hidden></p>
 
   <div class="hours">
     <div class="bars" id="bars"></div>
@@ -425,7 +439,7 @@ body.sky-ice{
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.20.001</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.20.002</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -514,7 +528,7 @@ body.sky-ice{
 
 <script>
 "use strict";
-const VERSION="v2026.08.20.001";
+const VERSION="v2026.08.20.002";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -528,7 +542,9 @@ let sayT=null, sayOrig="";
 const f=c=>F?c*9/5+32:c;
 const mph=k=>k/1.609344;
 const R=v=>Math.round(v);
-const ms=s=>Date.parse(s.length===16?s+":00Z":s+"Z");
+// Safari rejects "2026-08-20Z" (date-only can't carry a zone), so daily
+// dates get a full midnight timestamp. Chrome forgave this; iPhones did not.
+const ms=s=>Date.parse(s.length===10?s+"T00:00:00Z":s.length===16?s+":00Z":s+"Z");
 const now=()=>Date.now()+(D?D.utc_offset_seconds*1000:0);
 function clock(s){let h=+s.slice(11,13);const ap=h>=12?"PM":"AM";h=h%12||12;return h+" "+ap}
 function clockMin(s){let h=+s.slice(11,13);const mm=s.slice(14,16),ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+mm+" "+ap}
@@ -1297,6 +1313,11 @@ function renderChips(){
   ch.textContent=`FEELS ${r0v(f(c.apparent_temperature))}°  ·  `+
     `${compass(c.wind_direction_10m)} ${r0v(U.spd(c.wind_speed_10m))} ${U.spdU().toUpperCase()}  ·  `+
     `${r0v(c.relative_humidity_2m)}%  ·  UV ${r1v(hv(h,"uv_index",i))}`;
+  const sn=document.getElementById("suns"),dd=D.daily;
+  if(dd&&dd.sunrise&&dd.sunrise[0]&&dd.sunset&&dd.sunset[0]){
+    sn.hidden=false;
+    sn.textContent=`SUNRISE ${clockMin(dd.sunrise[0])} · SUNSET ${clockMin(dd.sunset[0])}`;
+  }else sn.hidden=true;
 }
 
 /* ---------- sun & moon ---------- */
@@ -1382,7 +1403,7 @@ function placeFrom(j){
     for(const e of pool){
       if(!e||!e.name||bad.test(e.name))continue;
       const d=(e.description||"").toLowerCase();
-      const towny=/city|town|village|hamlet|populated place|suburb|community/.test(d)||(e.adminLevel!=null&&e.adminLevel>=7);
+      const towny=/city|town|village|hamlet|populated place|census designated|suburb|community|locality/.test(d)||(e.adminLevel!=null&&e.adminLevel>=7);
       if(towny&&(e.order||0)>bestOrder){best=e.name;bestOrder=e.order||0}
     }
   return best||j.city||j.locality||j.principalSubdivision||"Here";

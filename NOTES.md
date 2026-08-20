@@ -8,7 +8,7 @@ A single-file, offline-first weather app in the SKYWAVE style. (Was two apps —
 |-----|------|------|------------|
 | WX | index.html | ~76 KB | One answer first; the full console below the fold |
 
-One page since v2026.08.16.014; screen one went dense in v2026.08.16.015.
+One page since v2026.08.16.014; screen one went dense in v2026.08.16.015; Big Sky repaint in v2026.08.20.001.
 The first screen now carries a compact hero row (pictograph · temperature ·
 verdict word side by side), the sentence, the TOMORROW line, four snapshot
 chips (feels · wind · humidity · UV), the 12 hourly bars, and the 7-day
@@ -46,7 +46,7 @@ All free, no keys, CORS-enabled, work from `file://` or GitHub Pages:
 
 ## WX Console — the console
 
-Same theme family as WX since v2026.08.16.008: WX's deep blue-black dark palette and pale-sky light palette, following the sun by default with a sun/moon override, share button in the header, and theme-aware canvases — the radar basemap flips between CARTO dark and light tiles with the theme. (Was the dark/amber FeedPoint panadapter through v007.) Sections top to bottom:
+Wears the same Big Sky as the answer screen since v2026.08.20.001: translucent panels over the verdict color, white ink (dark ink on the ice sky), CARTO dark basemap under the radar (light tiles on ice). (Was the shared light/dark theme v008–v015, and the dark/amber FeedPoint panadapter through v007.) Sections top to bottom:
 
 1. **NWS alerts** — expandable, severity-colored, above the fold on purpose (Gulf Coast).
 2. **Current conditions** — big temp, feels-like, wind w/ gusts, 9-cell metrics grid (humidity, dewpoint, pressure, UV, visibility, cloud, rain today, rain chance).
@@ -57,13 +57,22 @@ Same theme family as WX since v2026.08.16.008: WX's deep blue-black dark palette
 
 ## WX — the one answer
 
-Sun-shower aesthetic (matches the app icon): pastel sky gradient, slate ink, sun-gold and water-blue accents, rounded pictographs. Was cave-wall stone/ochre through v2026.08.16.005. One screen, no scrolling. Reading level ~5th grade.
+Big Sky aesthetic since v2026.08.20.001: the whole background is one saturated color chosen by the verdict, with white type drawn straight on it — no cards on screen one. Was the sun-shower pastel through v2026.08.16.015, cave-wall stone/ochre through v2026.08.16.005. One screen, no scrolling. Reading level ~5th grade.
 
-**The sky follows the clock:** three skins driven by daily sunrise/sunset — day (solid pastel sky), dusk (solid warm cream, ~70 min before sunset through ~40 min after sunrise), night (solid deep blue-black, light ink). Flat color on purpose — gradients read as murk on OLED phones. The favicon re-renders to the current verdict's pictograph, so even the tab shows the weather.
+**The sky IS the verdict:** one flat color, cross-fading when conditions change —
+- **blue** `#2C82D6` — FINE, the everyday sky
+- **amber** `#E8862B` — heat verdicts and moderate alerts
+- **slate** `#414E63` — thunderstorms, wind, bad air
+- **teal** `#1F7A8C` — rain and snow
+- **deep navy** `#182236` — after sunset when nothing's wrong (night mode happens by itself; the sun/moon toggle retired with it)
+- **red** `#B23A31` — severe/extreme warnings only, so red always means danger
+- **ice** `#C9D9E6` — dangerous cold; the one sky with dark ink instead of white
 
-**Screen:** hero row (pictograph · temperature · ONE WORD verdict) → one plain sentence → TOMORROW hi/lo + first-rain line → four snapshot chips → 12 hourly bars (taller = warmer, blue = rain likely) → folded 7-day outlook → status stamp. Long alert names wrap to their own line under the hero row.
+Flat color on purpose — gradients read as murk on OLED phones. The console panels are translucent white (or ink, on ice) over the same sky, and the canvases (scope, radar basemap, sun arc, moon) carry white-on-color palettes with a dark-on-ice variant. The favicon re-renders to the current verdict's pictograph, so even the tab shows the weather.
 
-**The taps:** temperature = °F/°C · place name = change location · pictograph or the UPDATED stamp = refresh · the verdict when an alert is up = full NWS text in plain language · any hour bar = that hour's numbers for a few seconds · sun/moon (top right) = light/dark override (the clock decides until you pick) · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A gold pill appears when a newer version is deployed; tapping it reloads.
+**Screen:** place → big thin temperature → ONE WORD verdict under it → one plain sentence → TOMORROW hi/lo + first-rain line → one line of vitals (feels · wind · humidity · UV) → 12 hourly bars (taller = warmer, solid white = rain likely) → 7-day outlook as white hairline rows, folded to three → status stamp. Long alert names drop to a smaller size so they never swallow the screen. The hero pictograph retired with the repaint — the color and the word carry it now (the pictographs live on in the week rows and the favicon).
+
+**The taps:** temperature = °F/°C · place name = change location · the UPDATED stamp = refresh · the verdict when an alert is up = full NWS text in plain language · any hour bar = that hour's numbers for a few seconds · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A white pill appears when a newer version is deployed; tapping it reloads.
 
 **Verdict engine** (priority order — first match wins):
 
@@ -166,6 +175,7 @@ on plain HTTP in every current browser.
 - v2026.08.16.013 — in-house sun/storm/rain icon replaces the sun-shower mark; palette re-tuned to it (richer orange and blue); long place names ellipsize instead of running under the corner buttons
 - v2026.08.16.014 — the merge: console lives below the fold of the one page; one fetch carries every field for both halves (7 days); one settings set with wxc.* migration; console.html becomes a redirect stub
 - v2026.08.16.015 — dense screen one (layouts C+B): compact hero row, snapshot chips, and the 7-day outlook folded to three rows on the first screen with ALL 7 DAYS / FEWER DAYS toggle and tap-for-detail rows; console keeps radar, scope, details, sun & moon
+- v2026.08.20.001 — Big Sky: the background is one saturated color chosen by the verdict (blue FINE, amber heat/moderate alerts, slate storms/wind/bad air, teal rain/snow, navy night, red severe warnings only, ice for dangerous cold with dark ink); white type, no cards on screen one, vitals as one line, week as hairline rows; console panels translucent over the sky, canvases on white-on-color palettes; sun/moon theme toggle retired — night is just another sky
 
 ## Backlog / ideas
 

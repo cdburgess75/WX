@@ -124,6 +124,10 @@
                    are water-blue again instead of white-on-white; the
                    alert window gets an X up top and both sheets pad
                    for the iPhone home bar
+  v2026.08.20.008  the week's weather icons grow from 22 to 32px; the
+                   alert window's X gets bigger and brighter; advisory
+                   cards in the console show a + that turns into an X
+                   while open, so closing them is always visible
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -226,13 +230,13 @@ body{
   border-top:1px solid color-mix(in srgb,var(--fg) 40%,transparent);
 }
 .wrow{
-  display:grid;grid-template-columns:64px 24px 1fr 78px;gap:8px;align-items:center;
+  display:grid;grid-template-columns:64px 36px 1fr 78px;gap:8px;align-items:center;
   padding:clamp(7px,1.1vh,11px) 2px;border:0;border-bottom:1px solid color-mix(in srgb,var(--fg) 22%,transparent);width:100%;
   background:none;color:inherit;font:inherit;cursor:pointer;text-align:left;
 }
 .wrow .dn{font:700 11px/1.2 var(--mono);letter-spacing:.05em;color:var(--bone)}
 .wrow .dn s{display:block;text-decoration:none;color:var(--ash);font-size:9.5px;font-weight:400}
-.wrow .wic{width:22px;height:22px}
+.wrow .wic{width:32px;height:32px}
 .wrow .wic svg{width:100%;height:100%;filter:drop-shadow(0 0 1px rgba(0,0,0,.3))}
 .wrow .whl{font:700 13px/1 var(--mono);text-align:right;color:var(--bone);font-variant-numeric:tabular-nums}
 .wrow .whl s{text-decoration:none;color:var(--ash);font-weight:400;margin-left:5px}
@@ -264,9 +268,9 @@ body{
 }
 .sheet.open{display:flex}
 .sheet .x{
-  position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:12px;width:44px;height:44px;
-  background:rgba(255,255,255,.12);border:0;border-radius:99px;color:#FFF;
-  font-size:18px;line-height:1;cursor:pointer;z-index:2;
+  position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:12px;width:52px;height:52px;
+  background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.4);border-radius:99px;color:#FFF;
+  font-size:22px;font-weight:600;line-height:1;cursor:pointer;z-index:2;
 }
 .sheet input{
   width:100%;font:600 20px/1.2 var(--sans);color:#FFF;background:rgba(255,255,255,.08);
@@ -335,7 +339,9 @@ body.sky-ice{
 .alertsc{margin:16px 0 0;display:grid;gap:8px}
 .alertsc .alert{border:1px solid var(--rust);border-left-width:5px;border-radius:10px;background:var(--alert1);overflow:hidden}
 .alertsc .alert.mod{border-color:var(--warn);background:var(--alert2)}
-.alertsc summary{padding:12px 14px;cursor:pointer;list-style:none;display:flex;gap:10px;align-items:baseline}
+.alertsc summary{padding:12px 14px;cursor:pointer;list-style:none;display:flex;gap:10px;align-items:center}
+.alertsc .tog{flex:none;font:300 24px/1 var(--sans);color:var(--dim);transition:transform .2s;transform-origin:center}
+.alertsc details[open] .tog{transform:rotate(45deg)}
 .alertsc summary::-webkit-details-marker{display:none}
 .alertsc h3{margin:0;font-size:16px;font-weight:700;flex:1;color:var(--bone)}
 .alertsc .sev{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--rust);flex:none}
@@ -479,7 +485,7 @@ body.sky-ice{
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.20.007</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.20.008</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -569,7 +575,7 @@ body.sky-ice{
 
 <script>
 "use strict";
-const VERSION="v2026.08.20.007";
+const VERSION="v2026.08.20.008";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -1085,7 +1091,7 @@ function renderAlertsList(){
     const sev=(a.severity||"").toLowerCase();
     const d=document.createElement("details");
     d.className="alert"+(sev==="extreme"||sev==="severe"?"":" mod");
-    d.innerHTML=`<summary><h3>${esc(a.event)}</h3><span class="sev">${esc((a.severity||"").toUpperCase())}</span></summary>`+
+    d.innerHTML=`<summary><h3>${esc(a.event)}</h3><span class="sev">${esc((a.severity||"").toUpperCase())}</span><span class="tog" aria-hidden="true">+</span></summary>`+
       `<div class="abody">${esc(a.headline||"")}\n\n${esc((a.instruction||a.description||"").trim())}</div>`;
     box.appendChild(d);
   });

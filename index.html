@@ -128,6 +128,9 @@
                    alert window's X gets bigger and brighter; advisory
                    cards in the console show a + that turns into an X
                    while open, so closing them is always visible
+  v2026.08.21.001  bigger type everywhere the letters were small: labels,
+                   tickers, week rows, footer, details grid, radar bar,
+                   scope readout and canvas labels, sun & moon, page foot
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -166,7 +169,7 @@ body{
 /* ---- place ---- */
 .place{
   max-width:calc(100% - 130px);
-  background:none;border:0;color:var(--ash);font:600 clamp(15px,4.2vw,18px)/1.2 var(--sans);
+  background:none;border:0;color:var(--ash);font:600 clamp(16px,4.4vw,19px)/1.2 var(--sans);
   letter-spacing:.16em;text-transform:uppercase;cursor:pointer;padding:8px 12px;min-height:44px;
   display:flex;align-items:center;gap:9px;flex:none;
 }
@@ -195,22 +198,22 @@ body{
 }
 .word.long{font-size:clamp(15px,2.6vh,22px);letter-spacing:.1em;line-height:1.2;padding-left:.1em}
 .say{
-  font:500 clamp(14px,2vh,17px)/1.4 var(--sans);color:var(--bone);opacity:.92;
+  font:500 clamp(15.5px,2.2vh,18.5px)/1.4 var(--sans);color:var(--bone);opacity:.92;
   text-align:center;max-width:32ch;text-wrap:balance;margin-top:clamp(2px,.6vh,6px);
 }
-.tmrw{font:700 11.5px/1 var(--sans);letter-spacing:.18em;color:var(--ash);text-align:center}
-.soon{font:700 11.5px/1.3 var(--sans);letter-spacing:.18em;color:var(--rainink);text-align:center}
+.tmrw{font:700 13px/1.3 var(--sans);letter-spacing:.18em;color:var(--ash);text-align:center}
+.soon{font:700 13px/1.3 var(--sans);letter-spacing:.18em;color:var(--rainink);text-align:center}
 
 /* ---- one line of vitals ---- */
 .chips{
   width:100%;flex:none;margin-top:clamp(2px,.8vh,8px);text-align:center;
-  font:700 clamp(11.5px,1.7vh,13.5px)/1.5 var(--sans);letter-spacing:.08em;
+  font:700 clamp(13px,1.9vh,15px)/1.5 var(--sans);letter-spacing:.08em;
   color:color-mix(in srgb,var(--fg) 92%,transparent);font-variant-numeric:tabular-nums;
 }
 
 .suns{
   width:100%;flex:none;margin-top:1px;text-align:center;
-  font:600 clamp(10.5px,1.5vh,12px)/1.4 var(--sans);letter-spacing:.14em;
+  font:600 clamp(12px,1.7vh,13.5px)/1.4 var(--sans);letter-spacing:.14em;
   color:var(--ash);font-variant-numeric:tabular-nums;
 }
 .suns u{text-decoration:none;color:var(--sunlbl);font-weight:800}
@@ -222,7 +225,7 @@ body{
 .bars i{flex:1;border-radius:3px;background:color-mix(in srgb,var(--fg) 55%,transparent);min-height:5px}
 .bars i.wet{background:#A8D8FF}
 .bars i.now{background:var(--fg);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--bg) 75%,#000)}
-.ticks{display:flex;justify-content:space-between;margin-top:9px;font:600 11.5px/1 var(--sans);letter-spacing:.18em;color:var(--ash)}
+.ticks{display:flex;justify-content:space-between;margin-top:9px;font:600 13px/1 var(--sans);letter-spacing:.18em;color:var(--ash)}
 
 /* ---- the week: white lines on the sky ---- */
 .week{
@@ -234,19 +237,19 @@ body{
   padding:clamp(7px,1.1vh,11px) 2px;border:0;border-bottom:1px solid color-mix(in srgb,var(--fg) 22%,transparent);width:100%;
   background:none;color:inherit;font:inherit;cursor:pointer;text-align:left;
 }
-.wrow .dn{font:700 11px/1.2 var(--mono);letter-spacing:.05em;color:var(--bone)}
-.wrow .dn s{display:block;text-decoration:none;color:var(--ash);font-size:9.5px;font-weight:400}
+.wrow .dn{font:700 12.5px/1.2 var(--mono);letter-spacing:.05em;color:var(--bone)}
+.wrow .dn s{display:block;text-decoration:none;color:var(--ash);font-size:11px;font-weight:400}
 .wrow .wic{width:32px;height:32px}
 .wrow .wic svg{width:100%;height:100%;filter:drop-shadow(0 0 1px rgba(0,0,0,.3))}
-.wrow .whl{font:700 13px/1 var(--mono);text-align:right;color:var(--bone);font-variant-numeric:tabular-nums}
+.wrow .whl{font:700 15px/1 var(--mono);text-align:right;color:var(--bone);font-variant-numeric:tabular-nums}
 .wrow .whl s{text-decoration:none;color:var(--ash);font-weight:400;margin-left:5px}
 .wshow{
   display:block;width:100%;text-align:center;padding:10px 9px;border:0;cursor:pointer;
-  background:none;color:var(--ash);font:700 10.5px/1 var(--sans);letter-spacing:.2em;
+  background:none;color:var(--ash);font:700 12px/1 var(--sans);letter-spacing:.2em;
 }
 
 /* ---- footer ---- */
-.foot{flex:none;font:500 11px/1.6 var(--sans);letter-spacing:.1em;color:var(--ash);text-align:center;padding-top:10px}
+.foot{flex:none;font:500 12.5px/1.6 var(--sans);letter-spacing:.1em;color:var(--ash);text-align:center;padding-top:10px}
 .foot b{
   display:inline-flex;align-items:center;gap:7px;color:var(--ash);font-weight:700;cursor:pointer;
   border:1.5px solid currentColor;border-radius:99px;padding:9px 15px;margin-bottom:7px;
@@ -257,7 +260,7 @@ body{
 .foot a::after{content:" ↗"}
 .upd{
   display:block;margin:0 auto 8px;background:var(--fg);color:var(--bg);border:0;border-radius:99px;
-  padding:10px 16px;font:700 12px/1 var(--sans);letter-spacing:.12em;cursor:pointer;
+  padding:11px 17px;font:700 13.5px/1 var(--sans);letter-spacing:.12em;cursor:pointer;
 }
 .upd[hidden]{display:none}
 
@@ -324,17 +327,17 @@ body.sky-ice{
 }
 .more{
   background:none;border:0;color:var(--ash);cursor:pointer;
-  font:700 11px/1 var(--sans);letter-spacing:.18em;padding:10px 16px 14px;
+  font:700 12.5px/1 var(--sans);letter-spacing:.18em;padding:10px 16px 14px;
 }
 .console{max-width:940px;margin:0 auto;padding:6px 14px 44px;font-size:17px;line-height:1.45}
 .console section{margin-top:22px}
 .console h2{
-  font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;
+  font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;
   color:var(--dim);margin:0 0 9px;display:flex;align-items:center;gap:10px;font-weight:700;
 }
 .console h2::after{content:"";flex:1;height:1px;background:var(--line)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.skel{color:var(--dimmer);font-family:var(--mono);font-size:14px;padding:26px 16px;text-align:center}
+.skel{color:var(--dimmer);font-family:var(--mono);font-size:15px;padding:26px 16px;text-align:center}
 /* alerts */
 .alertsc{margin:16px 0 0;display:grid;gap:8px}
 .alertsc .alert{border:1px solid var(--rust);border-left-width:5px;border-radius:10px;background:var(--alert1);overflow:hidden}
@@ -343,16 +346,16 @@ body.sky-ice{
 .alertsc .tog{flex:none;font:300 24px/1 var(--sans);color:var(--dim);transition:transform .2s;transform-origin:center}
 .alertsc details[open] .tog{transform:rotate(45deg)}
 .alertsc summary::-webkit-details-marker{display:none}
-.alertsc h3{margin:0;font-size:16px;font-weight:700;flex:1;color:var(--bone)}
-.alertsc .sev{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--rust);flex:none}
+.alertsc h3{margin:0;font-size:17.5px;font-weight:700;flex:1;color:var(--bone)}
+.alertsc .sev{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--rust);flex:none}
 .alertsc .alert.mod .sev{color:var(--warn)}
-.alertsc .abody{padding:12px 14px 14px;font-size:15px;color:var(--bodytext);white-space:pre-wrap;border-top:1px solid var(--line)}
+.alertsc .abody{padding:12px 14px 14px;font-size:16px;color:var(--bodytext);white-space:pre-wrap;border-top:1px solid var(--line)}
 /* metrics */
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
 .m{background:var(--panel);padding:11px 12px}
-.m label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
-.m div{font-family:var(--mono);font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:3px;color:var(--bone)}
-.m div s{text-decoration:none;font-size:12px;color:var(--dim);font-weight:400;margin-left:2px}
+.m label{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
+.m div{font-family:var(--mono);font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:3px;color:var(--bone)}
+.m div s{text-decoration:none;font-size:13px;color:var(--dim);font-weight:400;margin-left:2px}
 @media (max-width:520px){.metrics{grid-template-columns:repeat(2,1fr)}}
 /* radar */
 .radarwrap{position:relative;background:var(--radarbg)}
@@ -374,22 +377,22 @@ body.sky-ice{
 .track button.fut{background:var(--trackfut)}
 .track button.on{height:22px;background:var(--ochre)}
 .rsrc{
-  flex:none;font:700 11px/1 var(--mono);letter-spacing:.08em;color:var(--dim);
+  flex:none;font:700 12.5px/1 var(--mono);letter-spacing:.08em;color:var(--dim);
   background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;cursor:pointer;
 }
-.rtime{font-family:var(--mono);font-size:13px;color:var(--bone);flex:none;min-width:96px;text-align:right;font-variant-numeric:tabular-nums}
-.rtime s{display:block;text-decoration:none;font-size:10px;letter-spacing:.14em;color:var(--dimmer)}
+.rtime{font-family:var(--mono);font-size:14.5px;color:var(--bone);flex:none;min-width:96px;text-align:right;font-variant-numeric:tabular-nums}
+.rtime s{display:block;text-decoration:none;font-size:11px;letter-spacing:.14em;color:var(--dimmer)}
 .rtime s.fut{color:var(--water)}
 .scale{
   position:absolute;left:12px;bottom:12px;display:flex;align-items:center;
   background:var(--scrim);border:1px solid rgba(0,0,0,.18);border-radius:6px;padding:6px 8px;
 }
 .scale i{width:15px;height:9px;display:block}
-.scale span{font-family:var(--mono);font-size:9.5px;color:#52646F;letter-spacing:.1em;margin:0 5px}
+.scale span{font-family:var(--mono);font-size:11px;color:#52646F;letter-spacing:.1em;margin:0 5px}
 /* scope */
 .readout{
   display:flex;gap:18px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);
-  font-family:var(--mono);font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums;
+  font-family:var(--mono);font-size:14.5px;color:var(--dim);font-variant-numeric:tabular-nums;
 }
 .readout b{color:var(--bone);font-weight:600}
 .readout .t{color:var(--ochre)}
@@ -398,7 +401,7 @@ body.sky-ice{
 .scroller canvas{display:block;width:1180px;height:240px;touch-action:pan-x}
 .legend{
   display:flex;gap:16px;padding:10px 16px;border-top:1px solid var(--line);
-  font-family:var(--mono);font-size:11px;color:var(--dimmer);letter-spacing:.08em;
+  font-family:var(--mono);font-size:12.5px;color:var(--dimmer);letter-spacing:.08em;
 }
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
 /* daily */
@@ -418,11 +421,11 @@ body.sky-ice{
 .hl s{text-decoration:none;color:var(--dim);margin-left:7px}
 .pop{font-family:var(--mono);font-size:13px;color:var(--water);text-align:right;font-variant-numeric:tabular-nums}
 .pop.zero{color:var(--dimmer)}
-.dayx{padding:0 16px 14px;font-size:15px;color:var(--bodytext);display:none}
+.dayx{padding:0 16px 14px;font-size:16px;color:var(--bodytext);display:none}
 .dayx.open{display:block}
 .dayx dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:2px 0 0}
-.dayx dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--dimmer);text-transform:uppercase}
-.dayx dd{margin:2px 0 0;font-family:var(--mono);font-size:16px;font-variant-numeric:tabular-nums}
+.dayx dt{font-family:var(--mono);font-size:12px;letter-spacing:.13em;color:var(--dimmer);text-transform:uppercase}
+.dayx dd{margin:2px 0 0;font-family:var(--mono);font-size:17px;font-variant-numeric:tabular-nums}
 @media (max-width:720px){
   .radarwrap canvas{height:300px}
 }
@@ -431,16 +434,16 @@ body.sky-ice{
 .sky>div{background:var(--panel);padding:16px}
 .sky h4{margin:0 0 10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
 .arc{width:100%;height:78px;display:block}
-.suntimes{display:flex;justify-content:space-between;font-family:var(--mono);font-size:14px;margin-top:6px;font-variant-numeric:tabular-nums;color:var(--bone)}
-.suntimes s{text-decoration:none;color:var(--dim);font-size:11px;display:block;letter-spacing:.1em}
+.suntimes{display:flex;justify-content:space-between;font-family:var(--mono);font-size:15px;margin-top:6px;font-variant-numeric:tabular-nums;color:var(--bone)}
+.suntimes s{text-decoration:none;color:var(--dim);font-size:12px;display:block;letter-spacing:.1em}
 .moonrow{display:flex;align-items:center;gap:16px}
 .moonrow canvas{width:76px;height:76px;flex:none}
-.moonrow .mi{font-family:var(--mono);font-size:14px;line-height:1.7;font-variant-numeric:tabular-nums;color:var(--bone)}
-.moonrow .mi b{display:block;font-family:var(--sans);font-size:16px;font-weight:600;margin-bottom:2px}
+.moonrow .mi{font-family:var(--mono);font-size:15px;line-height:1.7;font-variant-numeric:tabular-nums;color:var(--bone)}
+.moonrow .mi b{display:block;font-family:var(--sans);font-size:17.5px;font-weight:600;margin-bottom:2px}
 .moonrow .mi span{color:var(--dim)}
 @media (max-width:720px){.sky{grid-template-columns:1fr}}
 .pagefoot{
-  margin-top:26px;font-family:var(--mono);font-size:11.5px;color:var(--dimmer);
+  margin-top:26px;font-family:var(--mono);font-size:13px;color:var(--dimmer);
   line-height:1.9;letter-spacing:.03em;text-align:left;
 }
 .pagefoot a{color:var(--dim)}
@@ -485,7 +488,7 @@ body.sky-ice{
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.20.008</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.21.001</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -575,7 +578,7 @@ body.sky-ice{
 
 <script>
 "use strict";
-const VERSION="v2026.08.20.008";
+const VERSION="v2026.08.21.001";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -1323,7 +1326,7 @@ function renderScope(){
     if(nightH&&sBand===null)sBand=k;
     if((!nightH||k===idx.length-1)&&sBand!==null){const a=X(Math.max(sBand-.5,0)),b=X(Math.min((nightH?k:k-1)+.5,idx.length-1));g.fillRect(a,padT,b-a,ph);sBand=null}
   });
-  g.font="11px ui-monospace,Menlo,monospace";g.textBaseline="middle";
+  g.font="12.5px ui-monospace,Menlo,monospace";g.textBaseline="middle";
   const stepR=F?10:5,g0=Math.ceil(lo/stepR)*stepR;
   for(let t2=g0;t2<hi;t2+=stepR){
     g.strokeStyle=C.grid;g.lineWidth=1;g.beginPath();g.moveTo(left,Y(t2)+.5);g.lineTo(W-right,Y(t2)+.5);g.stroke();

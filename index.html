@@ -131,6 +131,7 @@
   v2026.08.21.001  bigger type everywhere the letters were small: labels,
                    tickers, week rows, footer, details grid, radar bar,
                    scope readout and canvas labels, sun & moon, page foot
+  v2026.08.21.002  sunrise/sunset line bumped a little bigger too
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -213,7 +214,7 @@ body{
 
 .suns{
   width:100%;flex:none;margin-top:1px;text-align:center;
-  font:600 clamp(12px,1.7vh,13.5px)/1.4 var(--sans);letter-spacing:.14em;
+  font:600 clamp(13.5px,1.9vh,15.5px)/1.4 var(--sans);letter-spacing:.14em;
   color:var(--ash);font-variant-numeric:tabular-nums;
 }
 .suns u{text-decoration:none;color:var(--sunlbl);font-weight:800}
@@ -488,7 +489,7 @@ body.sky-ice{
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.21.001</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.21.002</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -578,7 +579,7 @@ body.sky-ice{
 
 <script>
 "use strict";
-const VERSION="v2026.08.21.001";
+const VERSION="v2026.08.21.002";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},

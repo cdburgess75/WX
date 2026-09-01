@@ -184,6 +184,7 @@ on plain HTTP in every current browser.
 - v2026.08.20.007 — rain never goes unsaid: water-blue RAIN/STORMS AROUND line under the sentence when rain is inside the 12 hours but heat or an advisory owns the big word; rain-likely hour bars water-blue again; alert window gets a top-right ✕ and sheets pad for the iPhone home bar
 - v2026.08.20.008 — week icons grow 22→32px; alert window's ✕ bigger and brighter; advisory cards show a + that rotates to ✕ while open
 - v2026.08.21.001 — bigger type everywhere the letters were small: labels, tickers, week rows, footer, details grid, radar bar, scope readout and canvas labels, sun & moon, page foot
+- v2026.08.21.002 — sunrise/sunset line bumped a little bigger too
 
 ## Backlog / ideas
 

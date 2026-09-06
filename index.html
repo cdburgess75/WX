@@ -7,12 +7,18 @@
 <meta name="theme-color" content="#2C82D6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="WX">
 <link rel="manifest" href="manifest.webmanifest">
+<!-- shake hands with the data servers while the page is still parsing -->
+<link rel="preconnect" href="https://api.open-meteo.com" crossorigin>
+<link rel="preconnect" href="https://api.weather.gov" crossorigin>
+<link rel="preconnect" href="https://air-quality-api.open-meteo.com" crossorigin>
+<link rel="dns-prefetch" href="https://basemaps.cartocdn.com">
+<link rel="dns-prefetch" href="https://tilecache.rainviewer.com">
 <title>WX</title>
 <meta name="description" content="One screen. One answer. Weather without the dashboard.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%23EAF3FC%22/%3E%3Ccircle cx=%2226%22 cy=%2223%22 r=%2210.5%22 fill=%22%23F5A02E%22/%3E%3Ccircle cx=%2226%22 cy=%2223%22 r=%2210.5%22 fill=%22none%22 stroke=%22%23E8842C%22 stroke-width=%221.6%22 opacity=%22.45%22/%3E%3Cline x1=%2226.0%22 y1=%228.0%22 x2=%2226.0%22 y2=%222.0%22 stroke=%22%23F5A02E%22 stroke-width=%224.6%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2236.6%22 y1=%2212.4%22 x2=%2240.8%22 y2=%228.2%22 stroke=%22%23F5A02E%22 stroke-width=%224.6%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2241.0%22 y1=%2223.0%22 x2=%2247.0%22 y2=%2223.0%22 stroke=%22%23F5A02E%22 stroke-width=%224.6%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2236.6%22 y1=%2233.6%22 x2=%2240.8%22 y2=%2237.8%22 stroke=%22%23F5A02E%22 stroke-width=%224.6%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2226.0%22 y1=%2238.0%22 x2=%2226.0%22 y2=%2244.0%22 stroke=%22%23F5A02E%22 stroke-width=%224.6%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2215.4%22 y1=%2233.6%22 x2=%2211.2%22 y2=%2237.8%22 stroke=%22%23F5A02E%22 stroke-width=%224.6%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2211.0%22 y1=%2223.0%22 x2=%225.0%22 y2=%2223.0%22 stroke=%22%23F5A02E%22 stroke-width=%224.6%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2215.4%22 y1=%2212.4%22 x2=%2211.2%22 y2=%228.2%22 stroke=%22%23F5A02E%22 stroke-width=%224.6%22 stroke-linecap=%22round%22/%3E%3Cg transform=%22translate%2864,33%29 scale%280.9%29%22%3E%3Cellipse cx=%220%22 cy=%226%22 rx=%2226%22 ry=%2210%22 fill=%22%234A90E2%22/%3E%3Ccircle cx=%22-12%22 cy=%22-1%22 r=%2211%22 fill=%22%234A90E2%22/%3E%3Ccircle cx=%222%22 cy=%22-7%22 r=%2214%22 fill=%22%234A90E2%22/%3E%3Ccircle cx=%2215%22 cy=%22-1%22 r=%2210%22 fill=%22%234A90E2%22/%3E%3Cellipse cx=%220%22 cy=%228%22 rx=%2219%22 ry=%224.5%22 fill=%22%233576C9%22 opacity=%22.55%22/%3E%3C/g%3E%3Cpath d=%22M67 24 L57 39 h6 L59 53 L75 35 h-7 L73 24 Z%22 fill=%22%23F5B82E%22 stroke=%22%23F5B82E%22 stroke-width=%221.4%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M84 36 L78 46 h4 L80 55 L89 43 h-4 L88 36 Z%22 fill=%22%23FFFFFF%22 stroke=%22%23FFFFFF%22 stroke-width=%221%22 stroke-linejoin=%22round%22/%3E%3Cg transform=%22translate%2841,52%29 scale%281.06%29%22%3E%3Cellipse cx=%220%22 cy=%226%22 rx=%2226%22 ry=%2210%22 fill=%22%23FFFFFF%22/%3E%3Ccircle cx=%22-12%22 cy=%22-1%22 r=%2211%22 fill=%22%23FFFFFF%22/%3E%3Ccircle cx=%222%22 cy=%22-7%22 r=%2214%22 fill=%22%23FFFFFF%22/%3E%3Ccircle cx=%2215%22 cy=%22-1%22 r=%2210%22 fill=%22%23FFFFFF%22/%3E%3Cellipse cx=%220%22 cy=%228%22 rx=%2219%22 ry=%224.5%22 fill=%22%23DFE9F3%22 opacity=%22.55%22/%3E%3C/g%3E%3Cpath transform=%22translate%2834,72%29 scale%280.66%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235B8DEF%22/%3E%3Cpath transform=%22translate%2848,72%29 scale%280.66%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235B8DEF%22/%3E%3Cpath transform=%22translate%2827,84%29 scale%280.6%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235B8DEF%22/%3E%3Cpath transform=%22translate%2841,85%29 scale%280.64%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235B8DEF%22/%3E%3Cpath transform=%22translate%2855,84%29 scale%280.6%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%235B8DEF%22/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%232C82D6%22/%3E%3Ccircle cx=%2266%22 cy=%2232%22 r=%2214%22 fill=%22%23FFD469%22/%3E%3Cline x1=%2266.0%22 y1=%2212.5%22 x2=%2266.0%22 y2=%226.0%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2279.8%22 y1=%2218.2%22 x2=%2284.4%22 y2=%2213.6%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2285.5%22 y1=%2232.0%22 x2=%2292.0%22 y2=%2232.0%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2279.8%22 y1=%2245.8%22 x2=%2284.4%22 y2=%2250.4%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2266.0%22 y1=%2251.5%22 x2=%2266.0%22 y2=%2258.0%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2252.2%22 y1=%2245.8%22 x2=%2247.6%22 y2=%2250.4%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2246.5%22 y1=%2232.0%22 x2=%2240.0%22 y2=%2232.0%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2252.2%22 y1=%2218.2%22 x2=%2247.6%22 y2=%2213.6%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cg transform=%22translate%2846,58%29 scale%281.05%29%22%3E%3Crect x=%22-30%22 y=%22-4%22 width=%2260%22 height=%2218%22 rx=%229%22 fill=%22%23FFFFFF%22/%3E%3Ccircle cx=%22-14%22 cy=%22-6%22 r=%2213%22 fill=%22%23FFFFFF%22/%3E%3Ccircle cx=%223%22 cy=%22-13%22 r=%2217%22 fill=%22%23FFFFFF%22/%3E%3Ccircle cx=%2219%22 cy=%22-5%22 r=%2212%22 fill=%22%23FFFFFF%22/%3E%3C/g%3E%3Cpath transform=%22translate%2830,84%29 scale%280.62%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%23FFFFFF%22/%3E%3Cpath transform=%22translate%2846,88%29 scale%280.66%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%23FFFFFF%22/%3E%3Cpath transform=%22translate%2862,84%29 scale%280.62%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%23FFFFFF%22/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!--
   WX v2026.08.20.001 — Big Sky: the background IS the verdict.
@@ -132,6 +138,14 @@
                    tickers, week rows, footer, details grid, radar bar,
                    scope readout and canvas labels, sun & moon, page foot
   v2026.08.21.002  sunrise/sunset line bumped a little bigger too
+  v2026.09.06.001  new home-screen icon (blue sky, white cloud, gold sun,
+                   three drops) and a speed/ease pass: the shell is served
+                   from cache first so the app opens instantly, the data
+                   servers get preconnected, the radar waits until you
+                   scroll to it, the sky runs under the status bar, pull
+                   down to refresh, the humidity gets its label back, week
+                   rows show a › so you know they open, the location sheet
+                   gets an ✕, and a one-time tip names the hidden taps
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -234,7 +248,7 @@ body{
   border-top:1px solid color-mix(in srgb,var(--fg) 40%,transparent);
 }
 .wrow{
-  display:grid;grid-template-columns:64px 36px 1fr 78px;gap:8px;align-items:center;
+  display:grid;grid-template-columns:64px 36px 1fr 78px 14px;gap:8px;align-items:center;
   padding:clamp(7px,1.1vh,11px) 2px;border:0;border-bottom:1px solid color-mix(in srgb,var(--fg) 22%,transparent);width:100%;
   background:none;color:inherit;font:inherit;cursor:pointer;text-align:left;
 }
@@ -244,6 +258,8 @@ body{
 .wrow .wic svg{width:100%;height:100%;filter:drop-shadow(0 0 1px rgba(0,0,0,.3))}
 .wrow .whl{font:700 15px/1 var(--mono);text-align:right;color:var(--bone);font-variant-numeric:tabular-nums}
 .wrow .whl s{text-decoration:none;color:var(--ash);font-weight:400;margin-left:5px}
+.wrow .wgo{font:400 17px/1 var(--sans);color:var(--ash);text-align:right;transition:transform .2s}
+.wrow[aria-expanded="true"] .wgo{transform:rotate(90deg)}
 .wshow{
   display:block;width:100%;text-align:center;padding:10px 9px;border:0;cursor:pointer;
   background:none;color:var(--ash);font:700 12px/1 var(--sans);letter-spacing:.2em;
@@ -264,6 +280,19 @@ body{
   padding:11px 17px;font:700 13.5px/1 var(--sans);letter-spacing:.12em;cursor:pointer;
 }
 .upd[hidden]{display:none}
+/* one-time hint for the two gestures you can't see */
+.tip{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 14px);
+  z-index:4;max-width:min(94vw,460px);display:flex;align-items:center;gap:10px;
+  background:#10161F;color:#FFF;border:1px solid rgba(255,255,255,.16);
+  border-radius:14px;padding:12px 12px 12px 16px;
+  font:600 13.5px/1.35 var(--sans);box-shadow:0 8px 28px rgba(0,0,0,.45);
+}
+.tip[hidden]{display:none}
+.tip button{
+  flex:none;width:34px;height:34px;border:0;border-radius:99px;cursor:pointer;
+  background:rgba(255,255,255,.18);color:#FFF;font-size:15px;line-height:1;
+}
 
 /* ---- change place (sheets stay deep navy on every sky) ---- */
 .sheet{
@@ -276,9 +305,10 @@ body{
   background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.4);border-radius:99px;color:#FFF;
   font-size:22px;font-weight:600;line-height:1;cursor:pointer;z-index:2;
 }
+#sheetX{top:calc(env(safe-area-inset-top) + 20px)}
 .sheet input{
   width:100%;font:600 20px/1.2 var(--sans);color:#FFF;background:rgba(255,255,255,.08);
-  border:2px solid rgba(255,255,255,.25);border-radius:12px;padding:16px;letter-spacing:.02em;
+  border:2px solid rgba(255,255,255,.25);border-radius:12px;padding:16px 66px 16px 16px;letter-spacing:.02em;
 }
 .sheet input::placeholder{color:rgba(255,255,255,.45)}
 .sheet input:focus{outline:0;border-color:#FFD469}
@@ -489,9 +519,14 @@ body.sky-ice{
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.08.21.002</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.06.001</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
+</div>
+
+<div class="tip" id="tip" hidden>
+  <span>Tap the big temperature for °C · tap the UPDATED chip, or pull down, to refresh.</span>
+  <button type="button" id="tipX" aria-label="Got it">✕</button>
 </div>
 
 <div class="console" id="console">
@@ -566,6 +601,7 @@ body.sky-ice{
 </div>
 
 <div class="sheet" id="sheet">
+  <button class="x" id="sheetX" aria-label="Close">✕</button>
   <input id="q" type="search" placeholder="Town name or ZIP" autocomplete="off" enterkeyhint="search">
   <ul class="hits" id="hits"></ul>
   <button class="shut" id="shut">Close</button>
@@ -579,7 +615,7 @@ body.sky-ice{
 
 <script>
 "use strict";
-const VERSION="v2026.08.21.002";
+const VERSION="v2026.09.06.001";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -822,7 +858,9 @@ function setSkin(v){
 /* ---------- the tab shows the weather too ---------- */
 function setFavicon(mark){
   const l=document.querySelector('link[rel="icon"]');if(!l)return;
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="#EAF3FC"/>${pict(mark)}</svg>`;
+  const k=(document.body.className.match(/sky-(\w+)/)||[])[1]||"fine";
+  const bg=k==="ice"?"#17313F":(SKYBG[k]||"#2C82D6");
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="${bg}"/>${pict(mark)}</svg>`;
   l.setAttribute("href","data:image/svg+xml,"+encodeURIComponent(svg));
 }
 
@@ -890,11 +928,23 @@ async function checkUpdate(){
     if(m&&m[1]!==VERSION){UPDV=m[1];document.getElementById("updBtn").hidden=false}
   }catch(e){}
 }
-document.getElementById("updBtn").addEventListener("click",()=>location.reload());
+/* The shell is served cache-first now, so a plain reload would hand back the
+   same old page. Clear the caches and nudge the worker, then reload. */
+document.getElementById("updBtn").addEventListener("click",async()=>{
+  try{
+    if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}
+    if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations){
+      const rs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(rs.map(r=>r.update().catch(()=>{})));
+    }
+  }catch(e){}
+  location.reload();
+});
 
 const sheet=document.getElementById("sheet"),q=document.getElementById("q"),hits=document.getElementById("hits");
 document.getElementById("place").addEventListener("click",()=>{sheet.classList.add("open");showRecent();setTimeout(()=>q.focus(),60)});
 document.getElementById("shut").addEventListener("click",close);
+document.getElementById("sheetX").addEventListener("click",close);
 function close(){sheet.classList.remove("open");q.value="";hits.innerHTML=""}
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){close();closeAlert()}});
 
@@ -1411,7 +1461,8 @@ function renderWeek(){
     row.innerHTML=`<span class="dn">${dayName(t2,i)==="TOMORROW"?"TOMRW":dayName(t2,i)}<s>${shortDate(t2)}</s></span>`+
       `<span class="wic"><svg viewBox="0 0 100 100">${pict(codeToMark(code,true))}</svg></span>`+
       `<span class="range"><i style="left:${l}%;width:${w}%"></i></span>`+
-      `<span class="whl">${r0v(his[i])}°<s>${r0v(los[i])}°</s></span>`;
+      `<span class="whl">${r0v(his[i])}°<s>${r0v(los[i])}°</s></span>`+
+      `<span class="wgo" aria-hidden="true">›</span>`;
     const ex=document.createElement("div");ex.className="dayx";
     ex.innerHTML='<dl>'+
       `<div><dt>Conditions</dt><dd style="font-size:14px">${esc(wmoText(code))}</dd></div>`+
@@ -1435,7 +1486,7 @@ function renderChips(){
   ch.hidden=false;
   ch.textContent=`FEELS ${r0v(f(c.apparent_temperature))}°  ·  `+
     `${compass(c.wind_direction_10m)} ${r0v(U.spd(c.wind_speed_10m))} ${U.spdU().toUpperCase()}  ·  `+
-    `${r0v(c.relative_humidity_2m)}%  ·  UV ${r1v(hv(h,"uv_index",i))}`;
+    `HUM ${r0v(c.relative_humidity_2m)}%  ·  UV ${r1v(hv(h,"uv_index",i))}`;
   const sn=document.getElementById("suns"),dd=D.daily;
   if(dd&&dd.sunrise&&dd.sunrise[0]&&dd.sunset&&dd.sunset[0]){
     sn.hidden=false;
@@ -1490,16 +1541,33 @@ function drawMoon(){
     `<b>${name}</b><span>ILLUMINATED</span> ${Math.round(illum*100)}%<br><span>MOON AGE</span> ${age.toFixed(1)} days`;
 }
 
+/* The radar is the most expensive thing on the page — tiles, frames, a loop.
+   Nothing loads until you actually scroll it into view. */
+let RADAR_SEEN=false;
+function watchRadar(){
+  const card=document.getElementById("radarwrap");
+  if(!card||!("IntersectionObserver" in window)){RADAR_SEEN=true;return}
+  const io=new IntersectionObserver(es=>{
+    if(es.some(x=>x.isIntersecting)){
+      io.disconnect();RADAR_SEEN=true;
+      if(D)try{renderRadar()}catch(e){}
+    }
+  },{rootMargin:"0px"});   // the console starts just below the fold, so no pre-margin
+  io.observe(card);
+}
+watchRadar();
 function renderConsole(){
   try{
     const ln=document.getElementById("legendNight");
     if(ln)ln.style.background=cpal().night;
-    renderAlertsList();renderMetrics();renderRadar();renderScope();renderSky();
+    renderAlertsList();renderMetrics();
+    if(RADAR_SEEN)renderRadar();
+    renderScope();renderSky();
   }catch(e){}
 }
 document.getElementById("moreBtn").addEventListener("click",()=>document.getElementById("console").scrollIntoView({behavior:"smooth"}));
 let rzT2;
-window.addEventListener("resize",()=>{clearTimeout(rzT2);rzT2=setTimeout(()=>{if(D){renderScope();sizeRadar();drawRadar()}},150)});
+window.addEventListener("resize",()=>{clearTimeout(rzT2);rzT2=setTimeout(()=>{if(D){renderScope();if(RADAR_SEEN){sizeRadar();drawRadar()}}},150)});
 drawScale();setPlayIcon();
 
 /* ---------- boot ---------- */
@@ -1509,6 +1577,42 @@ if("scrollRestoration" in history)history.scrollRestoration="manual";
 if(location.hash==="#console")setTimeout(()=>{const cs=document.getElementById("console");cs&&cs.scrollIntoView()},60);
 else scrollTo(0,0);
 load();
+/* ---------- pull down to refresh ----------
+   Every thumb tries this first. Only fires from the very top of the page,
+   with no sheet open, after a deliberate 70px drag. */
+(function pullRefresh(){
+  let y0=null,armed=false,was="";
+  const top=()=>(window.scrollY||document.documentElement.scrollTop||0)<=2;
+  const busy=()=>!!document.querySelector(".sheet.open");
+  window.addEventListener("touchstart",e=>{
+    if(e.touches.length!==1||!top()||busy()){y0=null;return}
+    y0=e.touches[0].clientY;armed=false;was=document.getElementById("stamp").textContent;
+  },{passive:true});
+  window.addEventListener("touchmove",e=>{
+    if(y0==null||e.touches.length!==1)return;
+    if(!top()){y0=null;if(armed){stamp(was);armed=false}return}
+    const dy=e.touches[0].clientY-y0;
+    if(dy>=70&&!armed){armed=true;stamp("RELEASE TO REFRESH")}
+    else if(dy<70&&armed){armed=false;stamp(was)}
+  },{passive:true});
+  const done=()=>{
+    if(armed){armed=false;stamp("CHECKING…");load();checkUpdate()}
+    y0=null;
+  };
+  window.addEventListener("touchend",done,{passive:true});
+  window.addEventListener("touchcancel",()=>{if(armed){stamp(was);armed=false}y0=null},{passive:true});
+})();
+
+/* ---------- the two invisible gestures, said once ---------- */
+(function firstTip(){
+  if(box.g("wx.tip",false))return;
+  const t=document.getElementById("tip");if(!t)return;
+  const hide=()=>{t.hidden=true;box.s("wx.tip",true)};
+  setTimeout(()=>{t.hidden=false},1400);
+  document.getElementById("tipX").addEventListener("click",hide);
+  setTimeout(hide,12000);
+})();
+
 /* GPS decides where "here" is — quietly, after the first paint. A location the
    person typed in stays put; one that came from GPS follows them around.
    First run has nothing saved, so GPS wins there too (Loranger is only the

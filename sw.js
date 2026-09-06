@@ -1,7 +1,7 @@
 /* WX service worker — offline shell only. The apps do their own data caching
    in localStorage; this just keeps the pages and icons loadable with no
    network. Weather API calls pass through untouched. */
-const CACHE = "wx-v2026.08.21.002";
+const CACHE = "wx-v2026.09.06.001";
 const ASSETS = ["./", "apple-touch-icon.png", "icon-512.png", "manifest.webmanifest"];
 
 self.addEventListener("install", e => {
@@ -18,17 +18,22 @@ self.addEventListener("activate", e => {
 
 self.addEventListener("fetch", e => {
   const u = new URL(e.request.url);
-  if (u.origin !== location.origin) return; // Open-Meteo / NWS go straight out
+  if (u.origin !== location.origin) return;      // Open-Meteo / NWS go straight out
+  if (e.request.method !== "GET") return;
+  if (u.search) return;                          // cache-busting checks bypass us
   if (e.request.mode === "navigate") {
-    // Network-first for pages so new versions land immediately; cache is the
-    // fallback when the network is gone. Cached per-URL, so /console.html
-    // works offline too without poisoning the root.
+    // Cache-first: the page paints immediately, even on a bad connection, and
+    // a background fetch refreshes the copy for next time. The in-app update
+    // pill clears these caches when a new version is actually deployed.
     e.respondWith(
-      fetch(e.request).then(r => {
-        const copy = r.clone();
-        caches.open(CACHE).then(c => c.put(e.request, copy));
-        return r;
-      }).catch(() => caches.match(e.request).then(r => r || caches.match("./")))
+      caches.match(e.request).then(hit => {
+        const net = fetch(e.request).then(r => {
+          const copy = r.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+          return r;
+        }).catch(() => hit || caches.match("./"));
+        return hit || net;
+      })
     );
   } else {
     e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));

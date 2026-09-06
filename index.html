@@ -146,6 +146,11 @@
                    down to refresh, the humidity gets its label back, week
                    rows show a › so you know they open, the location sheet
                    gets an ✕, and a one-time tip names the hidden taps
+  v2026.09.06.002  the advisory is a box now: when an alert is up, the
+                   verdict and its sentence sit inside a bordered, tinted
+                   panel with a READ THE FULL ALERT › row along the
+                   bottom, and the whole panel opens the NWS text. The
+                   sentences stop saying "tap" — the button says it
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -212,6 +217,25 @@ body{
   color:var(--bone);text-align:center;padding-left:.18em;
 }
 .word.long{font-size:clamp(15px,2.6vh,22px);letter-spacing:.1em;line-height:1.2;padding-left:.1em}
+/* When an alert is up, the word and the sentence become one obvious button —
+   a box you can see, not a word you have to guess is tappable. */
+.verdict{
+  display:flex;flex-direction:column;align-items:center;width:100%;
+  border:0;background:none;color:inherit;font:inherit;padding:0;text-align:center;
+}
+.verdict.tap{
+  cursor:pointer;border:2px solid color-mix(in srgb,var(--fg) 60%,transparent);
+  background:rgba(0,0,0,.18);border-radius:16px;
+  padding:clamp(9px,1.7vh,15px) clamp(13px,4vw,20px);
+  max-width:min(100%,36ch);
+}
+.verdict.tap:active{background:rgba(0,0,0,.30)}
+.vgo{
+  width:100%;margin-top:clamp(5px,1.1vh,10px);padding-top:clamp(5px,1.1vh,10px);
+  border-top:1px solid color-mix(in srgb,var(--fg) 32%,transparent);
+  font:800 12.5px/1 var(--sans);letter-spacing:.14em;color:var(--fg);
+}
+.vgo[hidden]{display:none}
 .say{
   font:500 clamp(15.5px,2.2vh,18.5px)/1.4 var(--sans);color:var(--bone);opacity:.92;
   text-align:center;max-width:32ch;text-wrap:balance;margin-top:clamp(2px,.6vh,6px);
@@ -327,7 +351,6 @@ body{
 button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(--bone);outline-offset:3px}
 
 /* ---- the verdict opens the alert when there is one ---- */
-.word.tap{cursor:pointer}
 .alerttext{flex:1;overflow:auto;color:#EAF2FA;font:500 17px/1.55 var(--sans);padding:6px 56px 6px 2px;white-space:pre-wrap}
 .alerttext h2{font:800 22px/1.2 var(--sans);margin:0 0 10px;color:#FFD469}
 .alerttext h2.bad{color:#FF9B85}
@@ -496,9 +519,12 @@ body.sky-ice{
   <div class="answer">
     <div class="hero">
       <button class="deg" id="deg" aria-label="Switch between Fahrenheit and Celsius">--<u>°</u></button>
-      <div class="word" id="word">&nbsp;</div>
     </div>
-    <p class="say" id="say">Reading the sky…</p>
+    <div class="verdict" id="verdict">
+      <div class="word" id="word">&nbsp;</div>
+      <p class="say" id="say">Reading the sky…</p>
+      <span class="vgo" id="vgo" hidden>READ THE FULL ALERT ›</span>
+    </div>
     <p class="soon" id="soon" hidden></p>
     <p class="tmrw" id="tmrw" hidden></p>
   </div>
@@ -519,13 +545,13 @@ body.sky-ice{
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.06.001</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.06.002</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
 
 <div class="tip" id="tip" hidden>
-  <span>Tap the big temperature for °C · tap the UPDATED chip, or pull down, to refresh.</span>
+  <span>Tap the big temperature for °C · pull down to refresh · when an alert is up, tap the boxed advisory to read it.</span>
   <button type="button" id="tipX" aria-label="Got it">✕</button>
 </div>
 
@@ -615,7 +641,7 @@ body.sky-ice{
 
 <script>
 "use strict";
-const VERSION="v2026.09.06.001";
+const VERSION="v2026.09.06.002";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -698,8 +724,8 @@ function verdict(){
     const grave=sev==="extreme"||sev==="severe";
     const trop=/hurricane|tropical|surge/i.test(a.event||"");
     return{mark:grave?"warn":"warn2",cls:grave?"bad":"",word:shortEvent(a.event),alert:a,
-      say:trop?(grave?"The real thing. Finish getting ready — tap for details.":"The tropics are stirring. Tap the words to read it.")
-              :(grave?"Take this one seriously. Tap for details.":"There's an alert for this area. Tap it to read.")};
+      say:trop?(grave?"The real thing. Finish getting ready.":"The tropics are stirring.")
+              :(grave?"Take this one seriously.":"There's an alert for this area.")};
   }
   // 2. happening right now
   if(STORM.has(c.weather_code))return{mark:"storm",cls:"bad",word:"Storms",
@@ -789,7 +815,16 @@ function paint(){
   if(sayT){clearTimeout(sayT);sayT=null}
   document.getElementById("deg").innerHTML=R(f(c.temperature_2m))+"<u>°</u>";
   const w=document.getElementById("word");w.textContent=v.word;
-  w.className="word "+v.cls+(v.word.length>14?" long":"")+(v.alert?" tap":"");
+  w.className="word "+v.cls+(v.word.length>14?" long":"");
+  const vb=document.getElementById("verdict");
+  vb.classList.toggle("tap",!!v.alert);
+  document.getElementById("vgo").hidden=!v.alert;
+  if(v.alert){
+    vb.setAttribute("role","button");vb.setAttribute("tabindex","0");
+    vb.setAttribute("aria-label","Read the full alert: "+v.word);
+  }else{
+    vb.removeAttribute("role");vb.removeAttribute("tabindex");vb.removeAttribute("aria-label");
+  }
   document.getElementById("say").textContent=v.say;
   const sEl=document.getElementById("soon");
   const saidAlready=/rain|storm|snow/i.test(v.word)||
@@ -953,7 +988,7 @@ const alertSheet=document.getElementById("alertSheet");
 function closeAlert(){alertSheet.classList.remove("open")}
 document.getElementById("alertShut").addEventListener("click",closeAlert);
 document.getElementById("alertX").addEventListener("click",closeAlert);
-document.getElementById("word").addEventListener("click",()=>{
+function openAlert(){
   const a=CURRENT_ALERT;if(!a)return;
   const sev=(a.severity||"").toLowerCase(),bad=sev==="extreme"||sev==="severe";
   document.getElementById("alertText").innerHTML=
@@ -962,6 +997,10 @@ document.getElementById("word").addEventListener("click",()=>{
     (a.instruction?`<b>What to do</b>${esc(String(a.instruction).trim())}`:"")+
     (a.description?`<b>Details</b>${esc(String(a.description).trim())}`:"");
   alertSheet.classList.add("open");
+}
+document.getElementById("verdict").addEventListener("click",openAlert);
+document.getElementById("verdict").addEventListener("keydown",e=>{
+  if(e.key==="Enter"||e.key===" "){e.preventDefault();openAlert()}
 });
 
 /* tap an hour bar to hear about that hour */

@@ -50,7 +50,7 @@ Wears the same Big Sky as the answer screen since v2026.08.20.001: translucent p
 
 1. **NWS alerts** — expandable, severity-colored, above the fold on purpose (Gulf Coast).
 2. **Current conditions** — big temp, feels-like, wind w/ gusts, 9-cell metrics grid (humidity, dewpoint, pressure, UV, visibility, cloud, rain today, rain chance).
-3. **Radar** — hand-rolled slippy-map on canvas (no Leaflet). CARTO base + RainViewer overlay. Drag to pan, wheel/+− to zoom (z4–z11), crosshair recenters. 8 past frames + nowcast loop; forecast frames dimmer, timestamp flips to FORECAST in cyan. Loop pauses when tab hidden. Tiles refresh every 5 min. LRU-ish tile cache capped at 600.
+3. **Radar** — hand-rolled slippy-map on canvas (no Leaflet). CARTO base + RainViewer overlay. Drag to pan, pinch or wheel/+− to zoom (z4–z11), crosshair recenters, fourth button goes full screen. 8 past frames + nowcast loop; forecast frames dimmer, timestamp flips to FORECAST in cyan. Loop pauses when tab hidden. Tiles refresh every 5 min. LRU-ish tile cache capped at 600.
 4. **48-hour scope** — canvas temp trace w/ night bands, cyan precip-probability bars, day dividers, NOW marker. Drag to scrub; readout row shows that hour's temp/feels/condition/precip/wind/RH/dewpoint.
 5. **7-day outlook** — rows with proportional hi/lo range bar; tap to expand (precip total, dominant wind, max gust, UV, sun times).
 6. **Sun & moon** — sun arc w/ live position; moon phase computed from synodic age (29.530588853 d, epoch 2000-01-06 18:14 UTC) — no data call.
@@ -189,6 +189,7 @@ on plain HTTP in every current browser.
 - v2026.08.21.002 — sunrise/sunset line bumped a little bigger too
 - v2026.09.06.001 — new home-screen icon (Big Sky blue, white cloud, gold sun, three drops) plus a speed/ease pass: cache-first shell so the app opens instantly offline or on bad signal (the update pill now clears caches before reloading); preconnect to the data APIs and dns-prefetch for the tile hosts; radar defers until scrolled into view (IntersectionObserver, no pre-margin — the console starts just below the fold); status bar goes black-translucent so the sky runs edge to edge; pull down to refresh; HUM label on the humidity; › affordance on week rows; ✕ on the location sheet; one-time tip naming the two invisible gestures
 - v2026.09.06.002 — the advisory is a box: when an alert is up the verdict and its sentence sit in a bordered, tinted panel with a READ THE FULL ALERT › row, and the whole panel opens the NWS text (keyboard-reachable, role=button). The alert sentences stop saying "tap" — the button says it
+- v2026.09.06.003 — full-screen radar: a fourth map button fills the screen with it and back again. CSS, not the Fullscreen API (iOS won't grant it to a div), so it works in the home-screen app; canvas is re-measured on toggle, Escape exits, sheets moved to z-index 30 so they stay on top
 
 ## Backlog / ideas
 

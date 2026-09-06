@@ -72,7 +72,7 @@ Flat color on purpose — gradients read as murk on OLED phones. The console pan
 
 **Screen:** place → big thin temperature → ONE WORD verdict under it → one plain sentence → TOMORROW hi/lo + first-rain line → one line of vitals (feels · wind · humidity · UV) with sunrise · sunset under it → 12 hourly bars (taller = warmer, water-blue = rain likely) → 7-day outlook as white hairline rows, folded to three → status stamp. Long alert names drop to a smaller size so they never swallow the screen. The hero pictograph retired with the repaint — the color and the word carry it now (the pictographs live on in the week rows and the favicon).
 
-**The taps:** temperature = °F/°C · place name = change location · the UPDATED stamp (or a pull down from the top) = refresh · the verdict when an alert is up = full NWS text in plain language · any hour bar = that hour's numbers for a few seconds · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A white pill appears when a newer version is deployed; tapping it reloads.
+**The taps:** temperature = °F/°C · place name = change location · the UPDATED stamp (or a pull down from the top) = refresh · the boxed advisory when an alert is up (the whole panel, not just the words) = full NWS text in plain language · any hour bar = that hour's numbers for a few seconds · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A white pill appears when a newer version is deployed; tapping it reloads.
 
 **Verdict engine** (priority order — first match wins):
 
@@ -188,6 +188,7 @@ on plain HTTP in every current browser.
 - v2026.08.21.001 — bigger type everywhere the letters were small: labels, tickers, week rows, footer, details grid, radar bar, scope readout and canvas labels, sun & moon, page foot
 - v2026.08.21.002 — sunrise/sunset line bumped a little bigger too
 - v2026.09.06.001 — new home-screen icon (Big Sky blue, white cloud, gold sun, three drops) plus a speed/ease pass: cache-first shell so the app opens instantly offline or on bad signal (the update pill now clears caches before reloading); preconnect to the data APIs and dns-prefetch for the tile hosts; radar defers until scrolled into view (IntersectionObserver, no pre-margin — the console starts just below the fold); status bar goes black-translucent so the sky runs edge to edge; pull down to refresh; HUM label on the humidity; › affordance on week rows; ✕ on the location sheet; one-time tip naming the two invisible gestures
+- v2026.09.06.002 — the advisory is a box: when an alert is up the verdict and its sentence sit in a bordered, tinted panel with a READ THE FULL ALERT › row, and the whole panel opens the NWS text (keyboard-reachable, role=button). The alert sentences stop saying "tap" — the button says it
 
 ## Backlog / ideas
 

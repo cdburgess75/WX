@@ -74,6 +74,8 @@ Flat color on purpose — gradients read as murk on OLED phones. The console pan
 
 **The taps:** temperature = °F/°C · place name = change location · the UPDATED stamp (or a pull down from the top) = refresh · the boxed advisory when an alert is up (the whole panel, not just the words) = full NWS text in plain language · any hour bar = that hour's numbers for a few seconds · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A white pill appears when a newer version is deployed; tapping it reloads.
 
+**Alert ranking:** `alertRank()` scores every active alert 0–5 from its NWS `severity` *and* its event name, whichever is louder (tornado/flash-flood/hurricane/storm-surge/tsunami warnings = 5, any Warning = 3, Watch/Advisory/Statement = 2). Anything scoring 2+ is kept, deduped by event|severity, and sorted worst-first, so `ALERTS[0]` — the one the answer screen shows — is always the most dangerous. Rank ≥ 3 is "grave": red sky, warn pictograph.
+
 **Verdict engine** (priority order — first match wins):
 
 1. Active NWS alert (severity ≥ moderate) → event name; severe/extreme are coral, moderate is amber; tropical events (hurricane/tropical/surge) get their own wording; the verdict is tappable and opens the full alert text. Long event names render at a smaller size.
@@ -191,6 +193,7 @@ on plain HTTP in every current browser.
 - v2026.09.06.002 — the advisory is a box: when an alert is up the verdict and its sentence sit in a bordered, tinted panel with a READ THE FULL ALERT › row, and the whole panel opens the NWS text (keyboard-reachable, role=button). The alert sentences stop saying "tap" — the button says it
 - v2026.09.06.003 — full-screen radar: a fourth map button fills the screen with it and back again. CSS, not the Fullscreen API (iOS won't grant it to a div), so it works in the home-screen app; canvas is re-measured on toggle, Escape exits, sheets moved to z-index 30 so they stay on top
 - v2026.09.07.001 — the advisory box slims down: inside the box the alert name drops to a heading size with narrow tracking (so "Heat Advisory" and even "Severe Thunderstorm Warning" fit one line), the sentence and READ THE ALERT row tighten, padding comes in — roughly half the height for the same information
+- v2026.09.07.002 — **the worst alert wins the screen** (safety fix). Alerts were used in whatever order api.weather.gov returned them, so a Heat Advisory could stand in front of a Severe Thunderstorm Warning and be the only one the answer screen showed. Alerts are now ranked and sorted worst-first; the rank reads the event name as well as the `severity` field, because real warnings have shipped tagged Minor/Unknown and the old moderate-and-up filter dropped them outright. Grave (red sky) follows the rank, the box reads READ ALL N ALERTS when several are active, and the sheet shows every one
 
 ## Backlog / ideas
 

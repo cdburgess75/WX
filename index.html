@@ -159,6 +159,15 @@
                    name shrinks and loses its wide tracking (so "Heat
                    Advisory" fits one line), the sentence and the read
                    row tighten, and the padding comes in
+  v2026.09.07.002  the worst alert wins the screen. Alerts were shown in
+                   whatever order the NWS returned them, so a Heat
+                   Advisory could stand in front of a Severe Thunderstorm
+                   Warning and be the only one you ever saw; they are now
+                   ranked and sorted worst-first. The rank reads the event
+                   name as well as the severity field (real warnings have
+                   shipped tagged Minor or Unknown, and those were being
+                   dropped entirely). The box says how many are active and
+                   opens all of them
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -367,6 +376,7 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
 .alerttext{flex:1;overflow:auto;color:#EAF2FA;font:500 17px/1.55 var(--sans);padding:6px 56px 6px 2px;white-space:pre-wrap}
 .alerttext h2{font:800 22px/1.2 var(--sans);margin:0 0 10px;color:#FFD469}
 .alerttext h2.bad{color:#FF9B85}
+.alerttext .asep{border:0;border-top:1px solid rgba(255,255,255,.22);margin:26px 0 20px}
 .alerttext b{display:block;margin:16px 0 4px;font:700 12px/1 var(--sans);letter-spacing:.12em;color:rgba(255,255,255,.6);text-transform:uppercase}
 @media (prefers-reduced-motion:no-preference){
   .answer{animation:rise .5s ease-out}
@@ -569,7 +579,7 @@ body.rfull{overflow:hidden}
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.07.001</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.07.002</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -666,7 +676,7 @@ body.rfull{overflow:hidden}
 
 <script>
 "use strict";
-const VERSION="v2026.09.07.001";
+const VERSION="v2026.09.07.002";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -745,8 +755,8 @@ function verdict(){
 
   // 1. a real warning beats everything — and the word is a door now, not a wall
   if(ALERTS.length){
-    const a=ALERTS[0],sev=(a.severity||"").toLowerCase();
-    const grave=sev==="extreme"||sev==="severe";
+    const a=ALERTS[0];
+    const grave=alertRank(a)>=3;
     const trop=/hurricane|tropical|surge/i.test(a.event||"");
     return{mark:grave?"warn":"warn2",cls:grave?"bad":"",word:shortEvent(a.event),alert:a,
       say:trop?(grave?"The real thing. Finish getting ready.":"The tropics are stirring.")
@@ -785,6 +795,21 @@ function verdict(){
     word:feels>=(F?80:27)?"Warm":"Good",
     say:`${R(temp)}° and no rain coming. ${tail}`};
 }
+/* How loud is this alert? NWS severity is the starting point, but the field
+   is not always what you'd expect — real warnings have shipped tagged Minor or
+   Unknown — so the words in the event name get a vote too, and the louder of
+   the two wins. 5 = life-threatening, 3 = a warning, 2 = watch or advisory. */
+const SEVN={extreme:4,severe:3,moderate:2,minor:1,unknown:0};
+function alertRank(p){
+  const ev=String(p&&p.event||"");
+  let r=SEVN[String(p&&p.severity||"").toLowerCase()];
+  if(r==null)r=0;
+  if(/tornado warning|extreme wind warning|flash flood warning|hurricane warning|storm surge warning|tsunami warning/i.test(ev))r=Math.max(r,5);
+  else if(/\bwarning\b/i.test(ev))r=Math.max(r,3);
+  else if(/\b(watch|advisory|statement)\b/i.test(ev))r=Math.max(r,2);
+  return r;
+}
+
 /* The 15-minute nowcast: minutes until rain reaches this spot, or null.
    Dark Sky's old trick — Open-Meteo serves the same data for free. */
 function rainSoonMinutes(){
@@ -843,7 +868,9 @@ function paint(){
   w.className="word "+v.cls+(v.word.length>14?" long":"");
   const vb=document.getElementById("verdict");
   vb.classList.toggle("tap",!!v.alert);
-  document.getElementById("vgo").hidden=!v.alert;
+  const vg=document.getElementById("vgo");
+  vg.hidden=!v.alert;
+  if(v.alert)vg.textContent=ALERTS.length>1?`READ ALL ${ALERTS.length} ALERTS ›`:"READ THE ALERT ›";
   if(v.alert){
     vb.setAttribute("role","button");vb.setAttribute("tabindex","0");
     vb.setAttribute("aria-label","Read the full alert: "+v.word);
@@ -938,8 +965,12 @@ async function load(){
         .then(r=>r.ok?r.json():{features:[]}).then(j=>{
           const seen=new Set();
           return (j.features||[]).map(x=>x.properties)
-            .filter(p=>p&&p.event&&["extreme","severe","moderate"].includes((p.severity||"").toLowerCase()))
-            .filter(p=>{const k=p.event+"|"+p.severity;if(seen.has(k))return false;seen.add(k);return true});
+            .filter(p=>p&&p.event&&alertRank(p)>=2)
+            .filter(p=>{const k=p.event+"|"+p.severity;if(seen.has(k))return false;seen.add(k);return true})
+            // Worst first. NWS returns them in its own order, so without this a
+            // Heat Advisory can sit in front of a Severe Thunderstorm Warning
+            // and be the only one the answer screen ever shows.
+            .sort((a,b)=>alertRank(b)-alertRank(a));
         }).catch(()=>[]),
       fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${loc.lat}&longitude=${loc.lon}&current=us_aqi`)
         .then(r=>r.ok?r.json():null).then(j=>j&&j.current&&j.current.us_aqi!=null?Math.round(j.current.us_aqi):null)
@@ -1014,13 +1045,15 @@ function closeAlert(){alertSheet.classList.remove("open")}
 document.getElementById("alertShut").addEventListener("click",closeAlert);
 document.getElementById("alertX").addEventListener("click",closeAlert);
 function openAlert(){
-  const a=CURRENT_ALERT;if(!a)return;
-  const sev=(a.severity||"").toLowerCase(),bad=sev==="extreme"||sev==="severe";
-  document.getElementById("alertText").innerHTML=
-    `<h2 class="${bad?"bad":""}">${esc(a.event)}</h2>`+
+  if(!CURRENT_ALERT&&!ALERTS.length)return;
+  // Every active alert, worst first — not just the one on the answer screen.
+  const list=ALERTS.length?ALERTS:[CURRENT_ALERT];
+  document.getElementById("alertText").innerHTML=list.map((a,i)=>
+    `<h2 class="${alertRank(a)>=3?"bad":""}">${esc(a.event)}</h2>`+
     (a.headline?`${esc(a.headline)}\n`:"")+
     (a.instruction?`<b>What to do</b>${esc(String(a.instruction).trim())}`:"")+
-    (a.description?`<b>Details</b>${esc(String(a.description).trim())}`:"");
+    (a.description?`<b>Details</b>${esc(String(a.description).trim())}`:"")+
+    (i<list.length-1?'<hr class="asep">':"")).join("");
   alertSheet.classList.add("open");
 }
 document.getElementById("verdict").addEventListener("click",openAlert);
@@ -1206,9 +1239,8 @@ const hv=(h,k,i)=>(h&&h[k]&&h[k][i]!=null)?h[k][i]:null;
 function renderAlertsList(){
   const box=document.getElementById("alerts");box.innerHTML="";
   ALERTS.slice(0,6).forEach(a=>{
-    const sev=(a.severity||"").toLowerCase();
     const d=document.createElement("details");
-    d.className="alert"+(sev==="extreme"||sev==="severe"?"":" mod");
+    d.className="alert"+(alertRank(a)>=3?"":" mod");
     d.innerHTML=`<summary><h3>${esc(a.event)}</h3><span class="sev">${esc((a.severity||"").toUpperCase())}</span><span class="tog" aria-hidden="true">+</span></summary>`+
       `<div class="abody">${esc(a.headline||"")}\n\n${esc((a.instruction||a.description||"").trim())}</div>`;
     box.appendChild(d);

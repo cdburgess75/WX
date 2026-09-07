@@ -168,6 +168,13 @@
                    shipped tagged Minor or Unknown, and those were being
                    dropped entirely). The box says how many are active and
                    opens all of them
+  v2026.09.07.003  what the weather radio hears, the app now hears. Alerts
+                   were only ever requested for one GPS point, so a warning
+                   whose polygon covered part of the parish went out over
+                   NOAA Weather Radio — which alerts by county SAME code —
+                   while this app showed nothing. It now also asks for the
+                   county and forecast zone, merges and dedupes, and marks
+                   anything that arrived that way as NEARBY
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -426,6 +433,7 @@ body.sky-ice{
 .alertsc h3{margin:0;font-size:17.5px;font-weight:700;flex:1;color:var(--bone)}
 .alertsc .sev{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--rust);flex:none}
 .alertsc .alert.mod .sev{color:var(--warn)}
+.alertsc .sev.near{color:var(--dim)}
 .alertsc .abody{padding:12px 14px 14px;font-size:16px;color:var(--bodytext);white-space:pre-wrap;border-top:1px solid var(--line)}
 /* metrics */
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
@@ -579,7 +587,7 @@ body.rfull{overflow:hidden}
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.07.002</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.07.003</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -676,7 +684,7 @@ body.rfull{overflow:hidden}
 
 <script>
 "use strict";
-const VERSION="v2026.09.07.002";
+const VERSION="v2026.09.07.003";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -758,9 +766,11 @@ function verdict(){
     const a=ALERTS[0];
     const grave=alertRank(a)>=3;
     const trop=/hurricane|tropical|surge/i.test(a.event||"");
+    const near=a._scope==="area";   // reached us via the county, not our point
     return{mark:grave?"warn":"warn2",cls:grave?"bad":"",word:shortEvent(a.event),alert:a,
       say:trop?(grave?"The real thing. Finish getting ready.":"The tropics are stirring.")
-              :(grave?"Take this one seriously.":"There's an alert for this area.")};
+              :grave?(near?"Out for your county now. Take it seriously.":"Take this one seriously.")
+                    :(near?"An alert is out nearby.":"There's an alert for this area.")};
   }
   // 2. happening right now
   if(STORM.has(c.weather_code))return{mark:"storm",cls:"bad",word:"Storms",
@@ -795,6 +805,58 @@ function verdict(){
     word:feels>=(F?80:27)?"Warm":"Good",
     say:`${R(temp)}° and no rain coming. ${tail}`};
 }
+/* Which NWS zones is this spot in? Cached, because it only changes when you
+   move. `county` is the one that matters most: NOAA Weather Radio alerts by
+   county SAME code, so a warning can be broadcast to the whole parish while
+   its polygon misses your exact GPS point. */
+async function zonesFor(lat,lon){
+  const key=(+lat).toFixed(2)+","+(+lon).toFixed(2);
+  const saved=box.g("wx.zones",null);
+  if(saved&&saved.key===key&&saved.ids&&saved.ids.length)return saved.ids;
+  try{
+    const r=await fetch(`https://api.weather.gov/points/${(+lat).toFixed(4)},${(+lon).toFixed(4)}`);
+    const p=(await r.json()).properties||{};
+    const ids=[p.county,p.forecastZone]
+      .map(u=>typeof u==="string"?u.split("/").filter(Boolean).pop():null)
+      .filter((z,i,a)=>z&&a.indexOf(z)===i);
+    if(ids.length)box.s("wx.zones",{key,ids});
+    return ids;
+  }catch(e){return (saved&&saved.ids)||[]}
+}
+
+/* Alerts for this exact spot AND for the county/zone around it, merged.
+   The point query alone is why a severe warning could be blaring on the
+   weather radio while this app showed nothing: NWR goes out to the whole
+   county, the point query only answers for the polygon you stand in.
+   Anything that arrived only from the county query is tagged _scope:"area"
+   so the screen can say so rather than implying it is right on top of you. */
+async function fetchAlerts(){
+  const get=u=>fetch(u).then(r=>r.ok?r.json():{features:[]}).then(j=>j.features||[]).catch(()=>[]);
+  const tag=(feats,scope)=>(feats||[]).map(x=>{
+    const p=Object.assign({},x&&x.properties);
+    p._scope=scope;p._id=p.id||(x&&x.id)||null;
+    return p;
+  });
+  const here=tag(await get(`https://api.weather.gov/alerts/active?point=${loc.lat.toFixed(4)},${loc.lon.toFixed(4)}`),"here");
+  const ids=await zonesFor(loc.lat,loc.lon);
+  const areaRaw=(await Promise.all(ids.map(z=>
+    get(`https://api.weather.gov/alerts/active?zone=${encodeURIComponent(z)}`)))).reduce((a,b)=>a.concat(b),[]);
+  const area=tag(areaRaw,"area");
+  const seenId=new Set(),seenKey=new Set(),out=[];
+  for(const p of here.concat(area)){          // point first, so "here" wins a tie
+    if(!p||!p.event||alertRank(p)<2)continue;
+    if(p._id&&seenId.has(p._id))continue;
+    const k=p.event+"|"+p.severity;
+    if(seenKey.has(k))continue;
+    if(p._id)seenId.add(p._id);
+    seenKey.add(k);
+    out.push(p);
+  }
+  // Worst first; on a tie the one covering your spot leads.
+  return out.sort((a,b)=>alertRank(b)-alertRank(a)||
+    ((a._scope==="here"?0:1)-(b._scope==="here"?0:1)));
+}
+
 /* How loud is this alert? NWS severity is the starting point, but the field
    is not always what you'd expect — real warnings have shipped tagged Minor or
    Unknown — so the words in the event name get a vote too, and the louder of
@@ -961,17 +1023,7 @@ async function load(){
       `&daily=temperature_2m_min,temperature_2m_max,sunrise,sunset,weather_code,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,uv_index_max&timezone=auto&forecast_days=7`;
     const [fc,al,aq]=await Promise.all([
       fetch(u).then(r=>{if(!r.ok)throw new Error("forecast");return r.json()}),
-      fetch(`https://api.weather.gov/alerts/active?point=${loc.lat.toFixed(4)},${loc.lon.toFixed(4)}`)
-        .then(r=>r.ok?r.json():{features:[]}).then(j=>{
-          const seen=new Set();
-          return (j.features||[]).map(x=>x.properties)
-            .filter(p=>p&&p.event&&alertRank(p)>=2)
-            .filter(p=>{const k=p.event+"|"+p.severity;if(seen.has(k))return false;seen.add(k);return true})
-            // Worst first. NWS returns them in its own order, so without this a
-            // Heat Advisory can sit in front of a Severe Thunderstorm Warning
-            // and be the only one the answer screen ever shows.
-            .sort((a,b)=>alertRank(b)-alertRank(a));
-        }).catch(()=>[]),
+      fetchAlerts().catch(()=>[]),
       fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${loc.lat}&longitude=${loc.lon}&current=us_aqi`)
         .then(r=>r.ok?r.json():null).then(j=>j&&j.current&&j.current.us_aqi!=null?Math.round(j.current.us_aqi):null)
         .catch(()=>null)
@@ -1050,7 +1102,8 @@ function openAlert(){
   const list=ALERTS.length?ALERTS:[CURRENT_ALERT];
   document.getElementById("alertText").innerHTML=list.map((a,i)=>
     `<h2 class="${alertRank(a)>=3?"bad":""}">${esc(a.event)}</h2>`+
-    (a.headline?`${esc(a.headline)}\n`:"")+
+    (a.areaDesc?`<b>Where</b>${esc(a.areaDesc)}`:"")+
+    (a.headline?`\n${esc(a.headline)}\n`:"")+
     (a.instruction?`<b>What to do</b>${esc(String(a.instruction).trim())}`:"")+
     (a.description?`<b>Details</b>${esc(String(a.description).trim())}`:"")+
     (i<list.length-1?'<hr class="asep">':"")).join("");
@@ -1241,7 +1294,9 @@ function renderAlertsList(){
   ALERTS.slice(0,6).forEach(a=>{
     const d=document.createElement("details");
     d.className="alert"+(alertRank(a)>=3?"":" mod");
-    d.innerHTML=`<summary><h3>${esc(a.event)}</h3><span class="sev">${esc((a.severity||"").toUpperCase())}</span><span class="tog" aria-hidden="true">+</span></summary>`+
+    d.innerHTML=`<summary><h3>${esc(a.event)}</h3>`+
+      (a._scope==="area"?`<span class="sev near">NEARBY</span>`:"")+
+      `<span class="sev">${esc((a.severity||"").toUpperCase())}</span><span class="tog" aria-hidden="true">+</span></summary>`+
       `<div class="abody">${esc(a.headline||"")}\n\n${esc((a.instruction||a.description||"").trim())}</div>`;
     box.appendChild(d);
   });

@@ -175,6 +175,16 @@
                    while this app showed nothing. It now also asks for the
                    county and forecast zone, merges and dedupes, and marks
                    anything that arrived that way as NEARBY
+  v2026.09.07.004  a storm on top of you outranks an advisory. Any active
+                   alert used to win the screen outright, so a Heat
+                   Advisory sat there through thunder, lightning and
+                   60 mph gusts; now only warnings do, and a live storm
+                   or damaging gust takes the word while the advisory
+                   moves to a tappable line under it. Damaging gusts are
+                   their own verdict instead of being buried below the
+                   heat check. And the app now asks the nearest NWS
+                   station what is ACTUALLY happening — models miss
+                   pop-up storms, the instrument does not
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -271,6 +281,10 @@ body{
 }
 .tmrw{font:700 13px/1.3 var(--sans);letter-spacing:.18em;color:var(--ash);text-align:center}
 .soon{font:700 13px/1.3 var(--sans);letter-spacing:.18em;color:var(--rainink);text-align:center}
+.soon.tapline{
+  color:var(--fg);cursor:pointer;border:1.5px solid color-mix(in srgb,var(--fg) 45%,transparent);
+  border-radius:99px;padding:6px 14px;margin-top:2px;
+}
 
 /* ---- one line of vitals ---- */
 .chips{
@@ -587,7 +601,7 @@ body.rfull{overflow:hidden}
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.07.003</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.07.004</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -684,7 +698,7 @@ body.rfull{overflow:hidden}
 
 <script>
 "use strict";
-const VERSION="v2026.09.07.003";
+const VERSION="v2026.09.07.004";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -693,6 +707,7 @@ const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.
 const HOME={name:"Loranger",lat:30.6013,lon:-90.3573};
 // One app, one set of settings. Old console (wxc.*) settings migrate where WX has none.
 let loc=box.g("wx.loc",box.g("wxc.loc",HOME)), F=box.g("wx.f",true), D=null, ALERTS=[], AQI=null, CURRENT_ALERT=null;
+let OBS=null;   // latest report from the nearest real weather station
 let sayT=null, sayOrig="";
 
 const f=c=>F?c*9/5+32:c;
@@ -761,10 +776,20 @@ function verdict(){
   const night=c.is_day===0;
   const uvMax=h.uv_index?Math.max(...nxt("uv_index")):0;
 
-  // 1. a real warning beats everything — and the word is a door now, not a wall
-  if(ALERTS.length){
-    const a=ALERTS[0];
-    const grave=alertRank(a)>=3;
+  // What is on top of us this minute — the station's word beats the model's,
+  // because the model is a forecast and the station is a measurement.
+  const gustNow=Math.max(mph(c.wind_gusts_10m||0),obsGustKmh()!=null?mph(obsGustKmh()):0);
+  const stormNow=STORM.has(c.weather_code)||obsThunder();
+  const damaging=gustNow>=45;
+
+  // 1. A warning beats everything. An advisory does NOT beat a storm that is
+  //    already overhead — that is how a Heat Advisory came to sit on screen
+  //    through thunder, lightning and 60 mph gusts.
+  const top=ALERTS.length?ALERTS[0]:null;
+  const topRank=top?alertRank(top):0;
+  if(top&&(topRank>=3||!(stormNow||damaging))){
+    const a=top;
+    const grave=topRank>=3;
     const trop=/hurricane|tropical|surge/i.test(a.event||"");
     const near=a._scope==="area";   // reached us via the county, not our point
     return{mark:grave?"warn":"warn2",cls:grave?"bad":"",word:shortEvent(a.event),alert:a,
@@ -772,11 +797,16 @@ function verdict(){
               :grave?(near?"Out for your county now. Take it seriously.":"Take this one seriously.")
                     :(near?"An alert is out nearby.":"There's an alert for this area.")};
   }
-  // 2. happening right now
-  if(STORM.has(c.weather_code))return{mark:"storm",cls:"bad",word:"Storms",
-    say:pick(["Thunderstorms overhead. Stay inside.","Lightning close by. Head in.","Storming right now. Wait it out inside."])};
+  // 2. happening right now — and if we stepped over an advisory to say it,
+  //    carry the advisory along so it still shows on screen.
+  const also=top||null;
+  if(stormNow)return{mark:"storm",cls:"bad",word:"Storms",also,
+    say:obsThunder()&&OBS?`${OBS.text} reported at ${OBS.station}. Stay inside.`
+      :pick(["Thunderstorms overhead. Stay inside.","Lightning close by. Head in.","Storming right now. Wait it out inside."])};
+  if(damaging)return{mark:"wind",cls:"bad",word:"Damaging winds",also,
+    say:`Gusts to ${R(gustNow)} mph right now. Stay away from trees and lines.`};
   if(SNOW.has(c.weather_code))return{mark:"snow",cls:"wet",word:"Snow",say:"Snow falling now. Roads get slick."};
-  if(WET.has(c.weather_code))return{mark:"rain",cls:"wet",word:"Raining",say:rainEnds(codes,pops,t)};
+  if(WET.has(c.weather_code)||obsRain())return{mark:"rain",cls:"wet",word:"Raining",say:rainEnds(codes,pops,t)};
   // 3. dangerous air
   if(feels>=(F?103:39))return{mark:"hot",cls:"bad",word:"Dangerous heat",
     say:`Feels like ${R(feels)}°. ${pick(["Shade and water, no yard work.","Stay in the AC this afternoon.","This heat hurts people. Take it easy."])}`};
@@ -809,20 +839,56 @@ function verdict(){
    move. `county` is the one that matters most: NOAA Weather Radio alerts by
    county SAME code, so a warning can be broadcast to the whole parish while
    its polygon misses your exact GPS point. */
-async function zonesFor(lat,lon){
+async function siteInfo(lat,lon){
   const key=(+lat).toFixed(2)+","+(+lon).toFixed(2);
-  const saved=box.g("wx.zones",null);
-  if(saved&&saved.key===key&&saved.ids&&saved.ids.length)return saved.ids;
+  const saved=box.g("wx.site",null);
+  if(saved&&saved.key===key&&(saved.zones&&saved.zones.length||saved.station))return saved;
+  const out={key,zones:[],station:null};
   try{
-    const r=await fetch(`https://api.weather.gov/points/${(+lat).toFixed(4)},${(+lon).toFixed(4)}`);
-    const p=(await r.json()).properties||{};
-    const ids=[p.county,p.forecastZone]
+    const p=(await (await fetch(`https://api.weather.gov/points/${(+lat).toFixed(4)},${(+lon).toFixed(4)}`)).json()).properties||{};
+    out.zones=[p.county,p.forecastZone]
       .map(u=>typeof u==="string"?u.split("/").filter(Boolean).pop():null)
       .filter((z,i,a)=>z&&a.indexOf(z)===i);
-    if(ids.length)box.s("wx.zones",{key,ids});
-    return ids;
-  }catch(e){return (saved&&saved.ids)||[]}
+    if(typeof p.observationStations==="string"){
+      const sj=await (await fetch(p.observationStations)).json();
+      const f=(sj.features||[])[0];
+      out.station=(f&&f.properties&&f.properties.stationIdentifier)||null;
+    }
+  }catch(e){if(saved&&saved.key===key)return saved}
+  if(out.zones.length||out.station)box.s("wx.site",out);
+  return out;
 }
+async function zonesFor(lat,lon){return (await siteInfo(lat,lon)).zones||[]}
+
+/* What is actually happening, according to an instrument rather than a model.
+   Forecast models routinely miss pop-up convection; the nearest ASOS station
+   does not — it reports "Thunderstorm" and the gust it just measured. This is
+   the difference between an app that says HOT while lightning is overhead and
+   one that says STORMS. */
+function kmh(q){
+  if(!q||q.value==null)return null;
+  const u=String(q.unitCode||"");
+  if(/m_s-1|m\/s/.test(u))return q.value*3.6;
+  if(/mi_h-1|mph/.test(u))return q.value*1.609344;
+  return q.value;                       // km_h-1
+}
+async function fetchObs(){
+  const st=(await siteInfo(loc.lat,loc.lon)).station;
+  if(!st)return null;
+  try{
+    const r=await fetch(`https://api.weather.gov/stations/${encodeURIComponent(st)}/observations/latest`);
+    if(!r.ok)return null;
+    const p=(await r.json()).properties||{};
+    const at=Date.parse(p.timestamp||"");
+    if(!at||Date.now()-at>75*60000)return null;    // too old to describe "now"
+    return{station:st,at:p.timestamp,text:String(p.textDescription||""),
+      gust:kmh(p.windGust),wind:kmh(p.windSpeed),
+      rain1h:(p.precipitationLastHour&&p.precipitationLastHour.value)||0};
+  }catch(e){return null}
+}
+const obsThunder=()=>!!(OBS&&/thunder|squall|funnel|tornado/i.test(OBS.text));
+const obsRain=()=>!!(OBS&&(/rain|shower|drizzle|storm/i.test(OBS.text)||OBS.rain1h>0.2));
+const obsGustKmh=()=>(OBS&&OBS.gust!=null)?OBS.gust:null;
 
 /* Alerts for this exact spot AND for the county/zone around it, merged.
    The point query alone is why a severe warning could be blaring on the
@@ -941,10 +1007,20 @@ function paint(){
   }
   document.getElementById("say").textContent=v.say;
   const sEl=document.getElementById("soon");
-  const saidAlready=/rain|storm|snow/i.test(v.word)||
-    (v.alert&&/storm|tornado|rain|flood|hurricane|tropical|squall/i.test(v.alert.event||""));
-  const note=saidAlready?null:rainAhead();
-  if(note){sEl.hidden=false;sEl.textContent=note}else sEl.hidden=true;
+  sEl.classList.remove("tapline");sEl.onclick=null;
+  if(v.also){
+    // A storm took the headline, but the advisory is still in effect — say so.
+    CURRENT_ALERT=v.also;
+    sEl.hidden=false;
+    sEl.textContent=shortEvent(v.also.event).toUpperCase()+" ALSO IN EFFECT · TAP";
+    sEl.classList.add("tapline");
+    sEl.onclick=openAlert;
+  }else{
+    const saidAlready=/rain|storm|snow|wind/i.test(v.word)||
+      (v.alert&&/storm|tornado|rain|flood|hurricane|tropical|squall/i.test(v.alert.event||""));
+    const note=saidAlready?null:rainAhead();
+    if(note){sEl.hidden=false;sEl.textContent=note}else sEl.hidden=true;
+  }
   document.getElementById("placeName").textContent=loc.name.toUpperCase();
   setFavicon(v.mark);
   // Tomorrow in one small line: hi/lo and the first thing that falls
@@ -1021,24 +1097,25 @@ async function load(){
       `&hourly=temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_gusts_10m,uv_index,relative_humidity_2m,dew_point_2m,precipitation,wind_speed_10m,wind_direction_10m,visibility,is_day`+
       `&minutely_15=precipitation&forecast_minutely_15=16`+
       `&daily=temperature_2m_min,temperature_2m_max,sunrise,sunset,weather_code,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,uv_index_max&timezone=auto&forecast_days=7`;
-    const [fc,al,aq]=await Promise.all([
+    const [fc,al,aq,ob]=await Promise.all([
       fetch(u).then(r=>{if(!r.ok)throw new Error("forecast");return r.json()}),
       fetchAlerts().catch(()=>[]),
       fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${loc.lat}&longitude=${loc.lon}&current=us_aqi`)
         .then(r=>r.ok?r.json():null).then(j=>j&&j.current&&j.current.us_aqi!=null?Math.round(j.current.us_aqi):null)
-        .catch(()=>null)
+        .catch(()=>null),
+      fetchObs().catch(()=>null)
     ]);
-    D=fc;ALERTS=al;AQI=aq;box.s("wx.cache",{at:Date.now(),loc,fc,al,aqi:aq});
+    D=fc;ALERTS=al;AQI=aq;OBS=ob;box.s("wx.cache",{at:Date.now(),loc,fc,al,aqi:aq,obs:ob});
     paint();stamp("UPDATED "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}));
     checkUpdate();
   }catch(e){
     const c=box.g("wx.cache",null);
     if(c&&c.loc.lat===loc.lat&&c.loc.lon===loc.lon&&c.fc&&c.fc.hourly&&c.fc.hourly.relative_humidity_2m){
-      D=c.fc;ALERTS=c.al||[];AQI=c.aqi!=null?c.aqi:null;paint();
+      D=c.fc;ALERTS=c.al||[];AQI=c.aqi!=null?c.aqi:null;OBS=c.obs||null;paint();
       const m=Math.round((Date.now()-c.at)/60000);
       stamp("OFFLINE · "+(m<60?m+" MIN OLD":Math.round(m/60)+" HR OLD"));
     }else{
-      D=demoData();ALERTS=[];AQI=null;paint();
+      D=demoData();ALERTS=[];AQI=null;OBS=null;paint();
       stamp("SAMPLE · OPEN IN A BROWSER FOR LIVE DATA");
     }
   }
@@ -1315,6 +1392,7 @@ function renderMetrics(){
     ["Cloud cover",r0v(c.cloud_cover),"%"],
     ["Rain today",r2v(U.len(dd&&dd.precipitation_sum?dd.precipitation_sum[0]:null)),U.lenU()],
   ];
+  if(OBS&&OBS.text)cells.unshift(["Reported now",esc(OBS.text),OBS.station?"@"+esc(OBS.station):""]);
   document.getElementById("metrics").innerHTML=cells.map(([l,v,u])=>
     `<div class="m"><label>${l}</label><div>${v}<s>${u}</s></div></div>`).join("");
 }
@@ -1739,7 +1817,7 @@ drawScale();setPlayIcon();setRFull(false);
 
 /* ---------- boot ---------- */
 const cached=box.g("wx.cache",null);
-if(cached&&cached.loc.lat===loc.lat&&cached.loc.lon===loc.lon&&cached.fc&&cached.fc.hourly&&cached.fc.hourly.relative_humidity_2m){D=cached.fc;ALERTS=cached.al||[];AQI=cached.aqi!=null?cached.aqi:null;paint();stamp("SAVED COPY")}
+if(cached&&cached.loc.lat===loc.lat&&cached.loc.lon===loc.lon&&cached.fc&&cached.fc.hourly&&cached.fc.hourly.relative_humidity_2m){D=cached.fc;ALERTS=cached.al||[];AQI=cached.aqi!=null?cached.aqi:null;OBS=cached.obs||null;paint();stamp("SAVED COPY")}
 if("scrollRestoration" in history)history.scrollRestoration="manual";
 if(location.hash==="#console")setTimeout(()=>{const cs=document.getElementById("console");cs&&cs.scrollIntoView()},60);
 else scrollTo(0,0);

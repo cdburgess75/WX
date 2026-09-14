@@ -198,6 +198,14 @@
                    and the 15-minute series was downloaded but only read
                    forwards — the bucket we are standing in says whether
                    it is raining now, no radar or CORS required
+  v2026.09.14.002  the radar probe never actually read a pixel. The map
+                   draws the same tiles at the same default zoom with no
+                   crossOrigin, so the browser handed our CORS request
+                   the cached CORS-less copy and then refused the pixels.
+                   The tile is fetched as a blob now (same-origin, so
+                   nothing can be tainted) with cache:"reload", the
+                   threshold drops to 12% so light rain counts, and the
+                   console reports what the radar read or why it could not
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -614,7 +622,7 @@ body.rfull{overflow:hidden}
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.14.001</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.14.002</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -711,7 +719,7 @@ body.rfull{overflow:hidden}
 
 <script>
 "use strict";
-const VERSION="v2026.09.14.001";
+const VERSION="v2026.09.14.002";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -721,7 +729,8 @@ const HOME={name:"Loranger",lat:30.6013,lon:-90.3573};
 // One app, one set of settings. Old console (wxc.*) settings migrate where WX has none.
 let loc=box.g("wx.loc",box.g("wxc.loc",HOME)), F=box.g("wx.f",true), D=null, ALERTS=[], AQI=null, CURRENT_ALERT=null;
 let OBS=null;   // latest report from the nearest real weather station
-let ECHO=null;  // what the radar shows directly over this spot
+let ECHO=null;      // what the radar shows directly over this spot
+let ECHO_WHY="";    // ...or why we could not find out
 let sayT=null, sayOrig="";
 
 const f=c=>F?c*9/5+32:c;
@@ -952,27 +961,48 @@ async function fetchAlerts(){
    of pixels over your coordinates out of one of them and asks whether there is
    an echo there. ~500 m per pixel at z8, so the sample box is about ±1.6 km. */
 const ECHO_Z=8, ECHO_R=3;
+/* Decode a PNG blob to something drawable. A blob is same-origin, so nothing
+   it is drawn into is ever tainted. */
+async function bitmapFrom(blob){
+  if(typeof createImageBitmap==="function"){
+    try{return await createImageBitmap(blob)}catch(e){}
+  }
+  const u=URL.createObjectURL(blob);
+  try{
+    return await new Promise((res,rej)=>{
+      const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error("img"));i.src=u;
+    });
+  }catch(e){return null}
+  finally{setTimeout(()=>URL.revokeObjectURL(u),5000)}
+}
 async function radarEcho(){
+  const fail=r=>{ECHO_WHY=r;return null};
   try{
     let host=RAD.host,path=null;
-    const past=RAD.frames.filter(f=>!f.fut&&f.path);
-    if(past.length){path=past[past.length-1].path}
+    const past=(RAD.frames||[]).filter(f=>!f.fut&&f.path);
+    if(past.length)path=past[past.length-1].path;
     if(!path||!host){
-      const j=await (await fetch("https://api.rainviewer.com/public/weather-maps.json")).json();
+      const r=await fetch("https://api.rainviewer.com/public/weather-maps.json");
+      if(!r.ok)return fail("index "+r.status);
+      const j=await r.json();
       host=j.host||"https://tilecache.rainviewer.com";
       const p2=(j.radar&&j.radar.past)||[];
-      if(!p2.length)return null;
+      if(!p2.length)return fail("no frames");
       path=p2[p2.length-1].path;
     }
     const fx=lon2x(loc.lon,ECHO_Z)/TS, fy=lat2y(loc.lat,ECHO_Z)/TS;
     const tx=Math.floor(fx), ty=Math.floor(fy);
     const px=Math.floor((fx-tx)*TS), py=Math.floor((fy-ty)*TS);
-    const im=await new Promise((res,rej)=>{
-      const i=new Image();
-      i.crossOrigin="anonymous";          // tainted canvas = no pixels to read
-      i.onload=()=>res(i);i.onerror=()=>rej(new Error("tile"));
-      i.src=`${host}${path}/${TS}/${ECHO_Z}/${tx}/${ty}/6/1_1.png`;
-    });
+    const url=`${host}${path}/${TS}/${ECHO_Z}/${tx}/${ty}/6/1_1.png`;
+    /* Fetch the tile as a blob rather than pointing an <img crossOrigin> at it.
+       The map draws these very same URLs (it also defaults to z8) with no
+       crossOrigin, and the browser will reuse that cached, CORS-less response
+       for our request and then refuse to hand over the pixels. cache:"reload"
+       and the blob hop together sidestep that completely. */
+    const tr=await fetch(url,{mode:"cors",cache:"reload"});
+    if(!tr.ok)return fail("tile "+tr.status);
+    const im=await bitmapFrom(await tr.blob());
+    if(!im)return fail("decode");
     const cv=document.createElement("canvas");cv.width=TS;cv.height=TS;
     const g=cv.getContext("2d",{willReadFrequently:true});
     g.drawImage(im,0,0);
@@ -989,10 +1019,11 @@ async function radarEcho(){
         if(d[k]>150&&d[k+1]<150)warm++;
       }
     }
-    if(!tot)return null;
+    if(!tot)return fail("empty");
     const cover=hits/tot;
-    return{rain:cover>=0.2,heavy:hits>0&&warm/hits>=0.3,cover:+cover.toFixed(2),at:Date.now()};
-  }catch(e){return null}
+    ECHO_WHY="";
+    return{rain:cover>=0.12,heavy:hits>0&&warm/hits>=0.3,cover:+cover.toFixed(2),at:Date.now()};
+  }catch(e){return fail((e&&e.name)||"error")}
 }
 const echoRain=()=>!!(ECHO&&ECHO.rain);
 
@@ -1488,8 +1519,9 @@ function renderMetrics(){
     ["Rain today",r2v(U.len(dd&&dd.precipitation_sum?dd.precipitation_sum[0]:null)),U.lenU()],
   ];
   if(OBS&&OBS.text)cells.unshift(["Reported now",esc(OBS.text),OBS.station?"@"+esc(OBS.station):""]);
-  if(ECHO)cells.unshift(["Radar overhead",ECHO.rain?(ECHO.heavy?"Heavy":"Rain"):"Clear",
-    ECHO.rain?Math.round(ECHO.cover*100)+"%":""]);
+  cells.unshift(["Radar overhead",
+    ECHO?(ECHO.rain?(ECHO.heavy?"Heavy":"Rain"):"Clear"):(ECHO_WHY?"—":"…"),
+    ECHO?Math.round(ECHO.cover*100)+"%":esc(ECHO_WHY)]);
   document.getElementById("metrics").innerHTML=cells.map(([l,v,u])=>
     `<div class="m"><label>${l}</label><div>${v}<s>${u}</s></div></div>`).join("");
 }

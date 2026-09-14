@@ -185,6 +185,19 @@
                    heat check. And the app now asks the nearest NWS
                    station what is ACTUALLY happening — models miss
                    pop-up storms, the instrument does not
+  v2026.09.14.001  the app finally looks out of the window. Rain was
+                   still being missed: the model said dry, no alert was
+                   out, and the nearest station was miles away and dry —
+                   while it rained here. It now reads the radar pixel
+                   directly over your coordinates out of the same
+                   RainViewer tiles the console map draws, and a wet
+                   pixel means RAINING (or HEAVY RAIN) no matter what
+                   the forecast claims. The console shows the reading.
+                   Two free signals were also being thrown away: the
+                   current block never asked for precipitation at all,
+                   and the 15-minute series was downloaded but only read
+                   forwards — the bucket we are standing in says whether
+                   it is raining now, no radar or CORS required
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -601,7 +614,7 @@ body.rfull{overflow:hidden}
   <div class="foot">
     <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
     <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.07.004</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.14.001</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">CONSOLE ⌄</button>
 </div>
@@ -698,7 +711,7 @@ body.rfull{overflow:hidden}
 
 <script>
 "use strict";
-const VERSION="v2026.09.07.004";
+const VERSION="v2026.09.14.001";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -708,6 +721,7 @@ const HOME={name:"Loranger",lat:30.6013,lon:-90.3573};
 // One app, one set of settings. Old console (wxc.*) settings migrate where WX has none.
 let loc=box.g("wx.loc",box.g("wxc.loc",HOME)), F=box.g("wx.f",true), D=null, ALERTS=[], AQI=null, CURRENT_ALERT=null;
 let OBS=null;   // latest report from the nearest real weather station
+let ECHO=null;  // what the radar shows directly over this spot
 let sayT=null, sayOrig="";
 
 const f=c=>F?c*9/5+32:c;
@@ -806,7 +820,15 @@ function verdict(){
   if(damaging)return{mark:"wind",cls:"bad",word:"Damaging winds",also,
     say:`Gusts to ${R(gustNow)} mph right now. Stay away from trees and lines.`};
   if(SNOW.has(c.weather_code))return{mark:"snow",cls:"wet",word:"Snow",say:"Snow falling now. Roads get slick."};
-  if(WET.has(c.weather_code)||obsRain())return{mark:"rain",cls:"wet",word:"Raining",say:rainEnds(codes,pops,t)};
+  const wetModel=WET.has(c.weather_code)||precipNow();
+  if(wetModel||obsRain()||echoRain()){
+    // If the radar is the only witness, say so — the forecast will be insisting
+    // it is dry, and you can see out of a window.
+    const radarOnly=!wetModel&&!obsRain()&&echoRain();
+    return{mark:"rain",cls:"wet",word:ECHO&&ECHO.heavy?"Heavy rain":"Raining",also,
+      say:radarOnly?`Radar shows rain over you right now. ${rainEnds(codes,pops,t)}`
+                   :rainEnds(codes,pops,t)};
+  }
   // 3. dangerous air
   if(feels>=(F?103:39))return{mark:"hot",cls:"bad",word:"Dangerous heat",
     say:`Feels like ${R(feels)}°. ${pick(["Shade and water, no yard work.","Stay in the AC this afternoon.","This heat hurts people. Take it easy."])}`};
@@ -921,6 +943,78 @@ async function fetchAlerts(){
   // Worst first; on a tie the one covering your spot leads.
   return out.sort((a,b)=>alertRank(b)-alertRank(a)||
     ((a._scope==="here"?0:1)-(b._scope==="here"?0:1)));
+}
+
+/* Is it raining ON YOU, right now?
+   Forecast models miss pop-up rain and the nearest reporting station can be
+   twenty miles away and bone dry. Radar is the only source that looks at your
+   roof. The console map already downloads these tiles; this reads the handful
+   of pixels over your coordinates out of one of them and asks whether there is
+   an echo there. ~500 m per pixel at z8, so the sample box is about ±1.6 km. */
+const ECHO_Z=8, ECHO_R=3;
+async function radarEcho(){
+  try{
+    let host=RAD.host,path=null;
+    const past=RAD.frames.filter(f=>!f.fut&&f.path);
+    if(past.length){path=past[past.length-1].path}
+    if(!path||!host){
+      const j=await (await fetch("https://api.rainviewer.com/public/weather-maps.json")).json();
+      host=j.host||"https://tilecache.rainviewer.com";
+      const p2=(j.radar&&j.radar.past)||[];
+      if(!p2.length)return null;
+      path=p2[p2.length-1].path;
+    }
+    const fx=lon2x(loc.lon,ECHO_Z)/TS, fy=lat2y(loc.lat,ECHO_Z)/TS;
+    const tx=Math.floor(fx), ty=Math.floor(fy);
+    const px=Math.floor((fx-tx)*TS), py=Math.floor((fy-ty)*TS);
+    const im=await new Promise((res,rej)=>{
+      const i=new Image();
+      i.crossOrigin="anonymous";          // tainted canvas = no pixels to read
+      i.onload=()=>res(i);i.onerror=()=>rej(new Error("tile"));
+      i.src=`${host}${path}/${TS}/${ECHO_Z}/${tx}/${ty}/6/1_1.png`;
+    });
+    const cv=document.createElement("canvas");cv.width=TS;cv.height=TS;
+    const g=cv.getContext("2d",{willReadFrequently:true});
+    g.drawImage(im,0,0);
+    const x0=Math.max(0,px-ECHO_R),y0=Math.max(0,py-ECHO_R);
+    const w=Math.min(TS-x0,ECHO_R*2+1),h=Math.min(TS-y0,ECHO_R*2+1);
+    const d=g.getImageData(x0,y0,w,h).data;
+    let hits=0,tot=0,warm=0;
+    for(let k=0;k<d.length;k+=4){
+      tot++;
+      if(d[k+3]>40){
+        hits++;
+        // RainViewer's palette runs blue -> green -> yellow -> red: a red-heavy
+        // pixel with little green is the heavy end of it.
+        if(d[k]>150&&d[k+1]<150)warm++;
+      }
+    }
+    if(!tot)return null;
+    const cover=hits/tot;
+    return{rain:cover>=0.2,heavy:hits>0&&warm/hits>=0.3,cover:+cover.toFixed(2),at:Date.now()};
+  }catch(e){return null}
+}
+const echoRain=()=>!!(ECHO&&ECHO.rain);
+
+/* Water falling on us this minute, from the numbers we already have. The
+   weather_code is a categorical summary and lags light or patchy rain; these
+   are measurements-in-millimetres from the same payload. The 15-minute series
+   was already being downloaded and only ever read forwards — the bucket we are
+   standing in was right there. */
+function precipNow(){
+  const c=D.current,h=D.hourly,i=hourNow();
+  if(c&&c.precipitation!=null&&c.precipitation>0.05)return true;
+  if(c&&((c.rain||0)>0.05||(c.showers||0)>0.05))return true;
+  if(hv(h,"precipitation",i)>0.1)return true;
+  const m=D.minutely_15;
+  if(m&&m.time&&m.precipitation){
+    const n=now();
+    for(let k=0;k<m.time.length;k++){
+      const st=ms(m.time[k]);
+      if(st<=n&&n<st+900000)return (m.precipitation[k]||0)>0.05;
+    }
+  }
+  return false;
 }
 
 /* How loud is this alert? NWS severity is the starting point, but the field
@@ -1093,7 +1187,7 @@ function setFavicon(mark){
 async function load(){
   try{
     const u=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`+
-      `&current=temperature_2m,apparent_temperature,is_day,weather_code,wind_gusts_10m,relative_humidity_2m,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m`+
+      `&current=temperature_2m,apparent_temperature,is_day,weather_code,wind_gusts_10m,relative_humidity_2m,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation,rain,showers`+
       `&hourly=temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_gusts_10m,uv_index,relative_humidity_2m,dew_point_2m,precipitation,wind_speed_10m,wind_direction_10m,visibility,is_day`+
       `&minutely_15=precipitation&forecast_minutely_15=16`+
       `&daily=temperature_2m_min,temperature_2m_max,sunrise,sunset,weather_code,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,uv_index_max&timezone=auto&forecast_days=7`;
@@ -1105,12 +1199,13 @@ async function load(){
         .catch(()=>null),
       fetchObs().catch(()=>null)
     ]);
+    radarEcho().then(e=>{ECHO=e;if(D)paint()}).catch(()=>{});
     D=fc;ALERTS=al;AQI=aq;OBS=ob;box.s("wx.cache",{at:Date.now(),loc,fc,al,aqi:aq,obs:ob});
     paint();stamp("UPDATED "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}));
     checkUpdate();
   }catch(e){
     const c=box.g("wx.cache",null);
-    if(c&&c.loc.lat===loc.lat&&c.loc.lon===loc.lon&&c.fc&&c.fc.hourly&&c.fc.hourly.relative_humidity_2m){
+    if(c&&c.loc.lat===loc.lat&&c.loc.lon===loc.lon&&c.fc&&c.fc.hourly&&c.fc.hourly.relative_humidity_2m&&c.fc.current&&"precipitation" in c.fc.current){
       D=c.fc;ALERTS=c.al||[];AQI=c.aqi!=null?c.aqi:null;OBS=c.obs||null;paint();
       const m=Math.round((Date.now()-c.at)/60000);
       stamp("OFFLINE · "+(m<60?m+" MIN OLD":Math.round(m/60)+" HR OLD"));
@@ -1393,6 +1488,8 @@ function renderMetrics(){
     ["Rain today",r2v(U.len(dd&&dd.precipitation_sum?dd.precipitation_sum[0]:null)),U.lenU()],
   ];
   if(OBS&&OBS.text)cells.unshift(["Reported now",esc(OBS.text),OBS.station?"@"+esc(OBS.station):""]);
+  if(ECHO)cells.unshift(["Radar overhead",ECHO.rain?(ECHO.heavy?"Heavy":"Rain"):"Clear",
+    ECHO.rain?Math.round(ECHO.cover*100)+"%":""]);
   document.getElementById("metrics").innerHTML=cells.map(([l,v,u])=>
     `<div class="m"><label>${l}</label><div>${v}<s>${u}</s></div></div>`).join("");
 }
@@ -1817,7 +1914,7 @@ drawScale();setPlayIcon();setRFull(false);
 
 /* ---------- boot ---------- */
 const cached=box.g("wx.cache",null);
-if(cached&&cached.loc.lat===loc.lat&&cached.loc.lon===loc.lon&&cached.fc&&cached.fc.hourly&&cached.fc.hourly.relative_humidity_2m){D=cached.fc;ALERTS=cached.al||[];AQI=cached.aqi!=null?cached.aqi:null;OBS=cached.obs||null;paint();stamp("SAVED COPY")}
+if(cached&&cached.loc.lat===loc.lat&&cached.loc.lon===loc.lon&&cached.fc&&cached.fc.hourly&&cached.fc.hourly.relative_humidity_2m&&cached.fc.current&&"precipitation" in cached.fc.current){D=cached.fc;ALERTS=cached.al||[];AQI=cached.aqi!=null?cached.aqi:null;OBS=cached.obs||null;paint();stamp("SAVED COPY")}
 if("scrollRestoration" in history)history.scrollRestoration="manual";
 if(location.hash==="#console")setTimeout(()=>{const cs=document.getElementById("console");cs&&cs.scrollIntoView()},60);
 else scrollTo(0,0);

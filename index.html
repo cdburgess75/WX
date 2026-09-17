@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<meta name="theme-color" content="#2C82D6">
+<meta name="theme-color" content="#256EB6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -206,29 +206,55 @@
                    nothing can be tainted) with cache:"reload", the
                    threshold drops to 12% so light rain counts, and the
                    console reports what the radar read or why it could not
+  v2026.09.17.001  the everyone-can-use-it pass, from a full interface
+                   review. The skies go a shade deeper (blue, amber, teal)
+                   so white type clears 4.5:1 on all of them, and the sun
+                   and rain accents are re-tinted per sky to match. The
+                   temperature, the town and the week's conditions are now
+                   read out by screen readers (their labels used to replace
+                   them). Hour bars are real buttons — arrow keys walk
+                   them — and rain-likely hours carry a drop as well as a
+                   color, which no longer vanishes on the ice sky. The
+                   "also in effect" line, the refresh stamp and the town
+                   list are real buttons; the scope and the radar take the
+                   arrow keys. Both sheets are native dialogs (focus stays
+                   inside, comes back after). The radar loop and smooth
+                   scrolling wait for people who haven't asked for reduced
+                   motion. A blocked location is explained inside the sheet
+                   with what to do next; sample data now says NO SIGNAL in
+                   the headline instead of whispering in the footer. One
+                   type scale (nine sizes, 12px floor), a tip that no longer
+                   covers the refresh button, hover and press feedback
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
    (or near-white) drawn straight on it — no cards on screen one. */
-:root{
-  --bg:#2C82D6;   /* FINE — the everyday sky */
+/* On body as well as :root: tokens built from --fg must be re-derived where
+   a sky overrides --fg, or they keep the white they resolved to at :root. */
+:root,body{
+  --bg:#256EB6;   /* FINE — the everyday sky */
   --fg:#FFFFFF;
   --bone:var(--fg);
-  --ash:color-mix(in srgb,var(--fg) 72%,transparent);
+  /* Every sky is dark enough (or, on ice, light enough) that --fg and --ash
+     both clear 4.5:1 — --ash-a is the lowest opacity that still does. */
+  --ash-a:90%;
+  --ash:color-mix(in srgb,var(--fg) var(--ash-a),transparent);
   --water:var(--fg);
-  --sunlbl:#FFE066;   /* sunrise/sunset labels: sun-yellow */
-  --suntime:#FFAF54;  /* their times: sun-orange */
-  --rainink:#A8D8FF;  /* rain callouts: pale water-blue */
+  --sunlbl:#FFEEAC;   /* sunrise/sunset labels: sun-yellow */
+  --suntime:#FFECD6;  /* their times: sun-orange */
+  --rainink:#E0F1FF;  /* rain callouts: pale water-blue */
+  --fs-12:12px;--fs-13:13px;--fs-14:14px;--fs-15:15px;--fs-16:16px;
+  --fs-17:17px;--fs-19:19px;--fs-22:22px;--fs-30:30px;
   --sans:system-ui,-apple-system,"Segoe UI Variable","Segoe UI",Roboto,sans-serif;
 }
-body.sky-hot{--bg:#E8862B;--sunlbl:#FFF2A8;--suntime:#FFDCA8}  /* heat, and moderate alerts */
-body.sky-storm{--bg:#414E63}   /* thunder, wind, bad air */
-body.sky-rain{--bg:#1F7A8C}    /* rain and snow */
-body.sky-night{--bg:#182236}   /* after sunset, when nothing's wrong */
-body.sky-warn{--bg:#B23A31}    /* severe/extreme warnings only */
-body.sky-ice{--bg:#C9D9E6;--fg:#17313F;--sunlbl:#A87400;--suntime:#C7651A;--rainink:#2563A8}  /* dangerous cold: the one dark-text sky */
+body.sky-hot{--bg:#AD510A;--ash-a:93%;--sunlbl:#FFF2A8;--suntime:#FFEBCE}  /* heat, and moderate alerts */
+body.sky-storm{--bg:#414E63;--ash-a:72%;--sunlbl:#FFE066;--suntime:#FFAF54;--rainink:#A8D8FF}   /* thunder, wind, bad air */
+body.sky-rain{--bg:#1E7688}    /* rain and snow */
+body.sky-night{--bg:#182236;--ash-a:72%;--sunlbl:#FFE066;--suntime:#FFAF54;--rainink:#A8D8FF}   /* after sunset, when nothing's wrong */
+body.sky-warn{--bg:#B23A31;--ash-a:82%;--sunlbl:#FFE066;--suntime:#FFDCB4;--rainink:#C6E5FF}    /* severe/extreme warnings only */
+body.sky-ice{--bg:#C9D9E6;--fg:#17313F;--ash-a:72%;--sunlbl:#7C5600;--suntime:#914A13;--rainink:#245FA1}  /* dangerous cold: the one dark-text sky */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
-html{scroll-behavior:smooth}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 body{
   background:var(--bg); color:var(--bone); font-family:var(--sans);
   margin:0; -webkit-text-size-adjust:100%; position:relative;
@@ -244,7 +270,7 @@ body{
 /* ---- place ---- */
 .place{
   max-width:calc(100% - 130px);
-  background:none;border:0;color:var(--ash);font:600 clamp(16px,4.4vw,19px)/1.2 var(--sans);
+  background:none;border:0;color:var(--ash);font:600 clamp(var(--fs-16),4.4vw,var(--fs-19))/1.2 var(--sans);
   letter-spacing:.16em;text-transform:uppercase;cursor:pointer;padding:8px 12px;min-height:44px;
   display:flex;align-items:center;gap:9px;flex:none;
 }
@@ -266,12 +292,12 @@ body{
   background:none;border:0;color:var(--bone);cursor:pointer;padding:0;
   font:250 clamp(62px,13vh,110px)/1 var(--sans);letter-spacing:-.03em;font-variant-numeric:tabular-nums;
 }
-.deg u{text-decoration:none;font-size:.45em;font-weight:250;color:var(--bone);vertical-align:.42em;margin-left:.02em;letter-spacing:0}
+.deg .unit{text-decoration:none;font-size:.45em;font-weight:250;color:var(--bone);vertical-align:.42em;margin-left:.02em;letter-spacing:0}
 .word{
-  font:800 clamp(19px,3.6vh,30px)/1.15 var(--sans);letter-spacing:.18em;text-transform:uppercase;
+  font:800 clamp(var(--fs-19),3.6vh,var(--fs-30))/1.15 var(--sans);letter-spacing:.18em;text-transform:uppercase;
   color:var(--bone);text-align:center;padding-left:.18em;
 }
-.word.long{font-size:clamp(15px,2.6vh,22px);letter-spacing:.1em;line-height:1.2;padding-left:.1em}
+.word.long{font-size:clamp(var(--fs-15),2.6vh,var(--fs-22));letter-spacing:.1em;line-height:1.2;padding-left:.1em}
 /* When an alert is up, the word and the sentence become one obvious button —
    a box you can see, not a word you have to guess is tappable. */
 .verdict{
@@ -287,48 +313,59 @@ body{
 .verdict.tap:active{background:rgba(0,0,0,.30)}
 /* Inside the box the name is a heading, not the hero — it shrinks and loses
    most of its tracking so "HEAT ADVISORY" fits one line instead of two. */
-.verdict.tap .word{font-size:clamp(16px,2.5vh,23px);letter-spacing:.08em;padding-left:.08em}
-.verdict.tap .word.long{font-size:clamp(13.5px,2vh,18px);letter-spacing:.05em}
-.verdict.tap .say{font-size:clamp(13.5px,1.85vh,16px);margin-top:1px}
+.verdict.tap .word{font-size:clamp(var(--fs-16),2.5vh,var(--fs-22));letter-spacing:.08em;padding-left:.08em}
+.verdict.tap .word.long{font-size:clamp(var(--fs-14),2vh,var(--fs-19));letter-spacing:.05em}
+.verdict.tap .say{font-size:clamp(var(--fs-14),1.85vh,var(--fs-16));margin-top:1px}
 .vgo{
-  width:100%;margin-top:clamp(3px,.7vh,6px);padding-top:clamp(3px,.7vh,6px);
+  text-transform:uppercase;  width:100%;margin-top:clamp(3px,.7vh,6px);padding-top:clamp(3px,.7vh,6px);
   border-top:1px solid color-mix(in srgb,var(--fg) 28%,transparent);
-  font:800 11.5px/1 var(--sans);letter-spacing:.12em;color:var(--fg);opacity:.95;
+  font:800 var(--fs-12)/1 var(--sans);letter-spacing:.12em;color:var(--fg);opacity:.95;
 }
 .vgo[hidden]{display:none}
 .say{
-  font:500 clamp(15.5px,2.2vh,18.5px)/1.4 var(--sans);color:var(--bone);opacity:.92;
+  font:500 clamp(var(--fs-15),2.2vh,var(--fs-19))/1.4 var(--sans);color:var(--bone);opacity:.92;
   text-align:center;max-width:32ch;text-wrap:balance;margin-top:clamp(2px,.6vh,6px);
 }
-.tmrw{font:700 13px/1.3 var(--sans);letter-spacing:.18em;color:var(--ash);text-align:center}
-.soon{font:700 13px/1.3 var(--sans);letter-spacing:.18em;color:var(--rainink);text-align:center}
+.tmrw{text-transform:uppercase;font:700 var(--fs-13)/1.3 var(--sans);letter-spacing:.18em;color:var(--ash);text-align:center}
+.soon{text-transform:uppercase;font:700 var(--fs-13)/1.3 var(--sans);letter-spacing:.18em;color:var(--rainink);text-align:center}
+.soon.tapline[hidden]{display:none}
 .soon.tapline{
-  color:var(--fg);cursor:pointer;border:1.5px solid color-mix(in srgb,var(--fg) 45%,transparent);
+  background:none;color:var(--fg);cursor:pointer;text-transform:uppercase;border:1.5px solid color-mix(in srgb,var(--fg) 45%,transparent);
   border-radius:99px;padding:6px 14px;margin-top:2px;
 }
 
 /* ---- one line of vitals ---- */
 .chips{
-  width:100%;flex:none;margin-top:clamp(2px,.8vh,8px);text-align:center;
-  font:700 clamp(13px,1.9vh,15px)/1.5 var(--sans);letter-spacing:.08em;
+  text-transform:uppercase;  width:100%;flex:none;margin-top:clamp(2px,.8vh,8px);text-align:center;
+  font:700 clamp(var(--fs-13),1.9vh,var(--fs-15))/1.5 var(--sans);letter-spacing:.08em;
   color:color-mix(in srgb,var(--fg) 92%,transparent);font-variant-numeric:tabular-nums;
 }
 
 .suns{
-  width:100%;flex:none;margin-top:1px;text-align:center;
-  font:600 clamp(13.5px,1.9vh,15.5px)/1.4 var(--sans);letter-spacing:.14em;
+  text-transform:uppercase;  width:100%;flex:none;margin-top:1px;text-align:center;
+  font:600 clamp(var(--fs-14),1.9vh,var(--fs-15))/1.4 var(--sans);letter-spacing:.14em;
   color:var(--ash);font-variant-numeric:tabular-nums;
 }
-.suns u{text-decoration:none;color:var(--sunlbl);font-weight:800}
+.suns span.pair{white-space:nowrap}
+.suns .lbl{text-decoration:none;color:var(--sunlbl);font-weight:800}
 .suns b{color:var(--suntime);font-weight:700}
 
 /* ---- next 12 hours ---- */
-.hours{width:100%;flex:none;padding-top:6px}
+.hours{width:100%;flex:none;padding-top:12px}
 .bars{display:flex;align-items:flex-end;gap:clamp(3px,1.4vw,7px);height:clamp(34px,6vh,52px)}
-.bars i{flex:1;border-radius:3px;background:color-mix(in srgb,var(--fg) 55%,transparent);min-height:5px}
-.bars i.wet{background:#A8D8FF}
-.bars i.now{background:var(--fg);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--bg) 75%,#000)}
-.ticks{display:flex;justify-content:space-between;margin-top:9px;font:600 13px/1 var(--sans);letter-spacing:.18em;color:var(--ash)}
+.bars button{
+  flex:1;position:relative;border:0;padding:0;cursor:pointer;border-radius:3px;min-height:5px;
+  background:color-mix(in srgb,var(--fg) 65%,transparent);
+}
+.bars button::after{content:"";position:absolute;left:0;right:0;bottom:0;height:clamp(34px,6vh,52px)}
+/* rain-likely hours say so twice: the water color and a drop over the bar */
+.bars button.wet{background:var(--rainink)}
+.bars button.wet::before{
+  content:"";position:absolute;left:50%;top:-9px;width:5px;height:5px;margin-left:-2.5px;
+  border-radius:50%;background:var(--rainink);
+}
+.bars button.now{background:var(--fg);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--bg) 75%,#000)}
+.ticks{text-transform:uppercase;display:flex;justify-content:space-between;margin-top:9px;font:600 var(--fs-13)/1 var(--sans);letter-spacing:.18em;color:var(--ash)}
 
 /* ---- the week: white lines on the sky ---- */
 .week{
@@ -340,99 +377,118 @@ body{
   padding:clamp(7px,1.1vh,11px) 2px;border:0;border-bottom:1px solid color-mix(in srgb,var(--fg) 22%,transparent);width:100%;
   background:none;color:inherit;font:inherit;cursor:pointer;text-align:left;
 }
-.wrow .dn{font:700 12.5px/1.2 var(--mono);letter-spacing:.05em;color:var(--bone)}
-.wrow .dn s{display:block;text-decoration:none;color:var(--ash);font-size:11px;font-weight:400}
+.wrow .dn{font:700 var(--fs-13)/1.2 var(--mono);letter-spacing:.05em;color:var(--bone)}
+.wrow .dn .sub{display:block;text-decoration:none;color:var(--ash);font-size:var(--fs-12);font-weight:400}
 .wrow .wic{width:32px;height:32px}
 .wrow .wic svg{width:100%;height:100%;filter:drop-shadow(0 0 1px rgba(0,0,0,.3))}
-.wrow .whl{font:700 15px/1 var(--mono);text-align:right;color:var(--bone);font-variant-numeric:tabular-nums}
-.wrow .whl s{text-decoration:none;color:var(--ash);font-weight:400;margin-left:5px}
-.wrow .wgo{font:400 17px/1 var(--sans);color:var(--ash);text-align:right;transition:transform .2s}
+.wrow .whl{font:700 var(--fs-15)/1 var(--mono);text-align:right;color:var(--bone);font-variant-numeric:tabular-nums}
+.wrow .whl .sub{text-decoration:none;color:var(--ash);font-weight:400;margin-left:5px}
+.wrow .wgo{font:400 var(--fs-17)/1 var(--sans);color:var(--ash);text-align:right}
 .wrow[aria-expanded="true"] .wgo{transform:rotate(90deg)}
 .wshow{
-  display:block;width:100%;text-align:center;padding:10px 9px;border:0;cursor:pointer;
-  background:none;color:var(--ash);font:700 12px/1 var(--sans);letter-spacing:.2em;
+  text-transform:uppercase;  display:block;width:100%;text-align:center;padding:10px 9px;border:0;cursor:pointer;
+  background:none;color:var(--ash);font:700 var(--fs-12)/1 var(--sans);letter-spacing:.2em;
 }
 
 /* ---- footer ---- */
-.foot{flex:none;font:500 12.5px/1.6 var(--sans);letter-spacing:.1em;color:var(--ash);text-align:center;padding-top:10px}
-.foot b{
-  display:inline-flex;align-items:center;gap:7px;color:var(--ash);font-weight:700;cursor:pointer;
+.foot{flex:none;font:500 var(--fs-13)/1.6 var(--sans);letter-spacing:.1em;color:var(--ash);text-align:center;padding-top:10px}
+.stampbtn{
+  display:inline-flex;align-items:center;gap:7px;background:none;color:var(--ash);cursor:pointer;
+  font:700 var(--fs-13)/1.6 var(--sans);letter-spacing:.1em;text-transform:uppercase;
   border:1.5px solid currentColor;border-radius:99px;padding:9px 15px;margin-bottom:7px;
 }
-.foot b::before{content:"↻";font-size:14px;line-height:1}
-.foot b:active{color:var(--bone)}
+.stampbtn::before{content:"↻";font-size:var(--fs-14);line-height:1}
+.stampbtn:active{color:var(--bone)}
+@media (hover:hover){
+  .place:hover,.corner button:hover,.wshow:hover,.more:hover,.stampbtn:hover{color:var(--bone)}
+  .verdict.tap:hover{background:rgba(0,0,0,.26)}
+}
 .foot a{color:var(--bone);font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .foot a::after{content:" ↗"}
 .upd{
-  display:block;margin:0 auto 8px;background:var(--fg);color:var(--bg);border:0;border-radius:99px;
-  padding:11px 17px;font:700 13.5px/1 var(--sans);letter-spacing:.12em;cursor:pointer;
+  text-transform:uppercase;  display:block;margin:0 auto 8px;background:var(--fg);color:var(--bg);border:0;border-radius:99px;
+  padding:11px 17px;font:700 var(--fs-14)/1 var(--sans);letter-spacing:.12em;cursor:pointer;
 }
 .upd[hidden]{display:none}
 /* one-time hint for the two gestures you can't see */
 .tip{
-  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 14px);
+  position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(env(safe-area-inset-bottom) + 14px);
   z-index:4;max-width:min(94vw,460px);display:flex;align-items:center;gap:10px;
   background:#10161F;color:#FFF;border:1px solid rgba(255,255,255,.16);
   border-radius:14px;padding:12px 12px 12px 16px;
-  font:600 13.5px/1.35 var(--sans);box-shadow:0 8px 28px rgba(0,0,0,.45);
+  font:600 var(--fs-14)/1.35 var(--sans);box-shadow:0 8px 28px rgba(0,0,0,.45);
 }
 .tip[hidden]{display:none}
 .tip button{
   flex:none;width:34px;height:34px;border:0;border-radius:99px;cursor:pointer;
-  background:rgba(255,255,255,.18);color:#FFF;font-size:15px;line-height:1;
+  background:rgba(255,255,255,.18);color:#FFF;font-size:var(--fs-15);line-height:1;
 }
 
 /* ---- change place (sheets stay deep navy on every sky) ---- */
 .sheet{
-  position:fixed;inset:0;z-index:30;background:rgba(15,22,35,.97);color:#EAF2FA;display:none;
+  position:fixed;inset:0;z-index:30;background:#0F1623;color:#EAF2FA;display:none;
+  width:100%;height:100%;max-width:none;max-height:none;border:0;margin:0;overscroll-behavior:contain;
   flex-direction:column;padding:calc(env(safe-area-inset-top) + 18px) 18px calc(env(safe-area-inset-bottom) + 18px);
 }
-.sheet.open{display:flex}
+.sheet[open]{display:flex}
+.sheet::backdrop{background:none}
 .sheet .x{
   position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:12px;width:52px;height:52px;
   background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.4);border-radius:99px;color:#FFF;
-  font-size:22px;font-weight:600;line-height:1;cursor:pointer;z-index:2;
+  font-size:var(--fs-22);font-weight:600;line-height:1;cursor:pointer;z-index:2;
 }
 #sheetX{top:calc(env(safe-area-inset-top) + 20px)}
 .sheet input{
-  width:100%;font:600 20px/1.2 var(--sans);color:#FFF;background:rgba(255,255,255,.08);
+  width:100%;font:600 var(--fs-19)/1.2 var(--sans);color:#FFF;background:rgba(255,255,255,.08);
   border:2px solid rgba(255,255,255,.25);border-radius:12px;padding:16px 66px 16px 16px;letter-spacing:.02em;
 }
-.sheet input::placeholder{color:rgba(255,255,255,.45)}
+.sheet input::placeholder{color:rgba(255,255,255,.6)}
 .sheet input:focus{outline:0;border-color:#FFD469}
 .hits{list-style:none;margin-top:12px;overflow:auto;flex:1}
-.hits li{
-  padding:17px 4px;border-bottom:1px solid rgba(255,255,255,.14);cursor:pointer;
-  font:600 19px/1.25 var(--sans);display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+.hits li{border-bottom:1px solid rgba(255,255,255,.14);font:600 var(--fs-19)/1.25 var(--sans)}
+.hits li>*{
+  padding:17px 4px;width:100%;display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+  background:none;border:0;color:inherit;font:inherit;text-align:left;
 }
-.hits li span{color:rgba(255,255,255,.55);font-weight:500;font-size:15px;text-align:right}
-.hits li:active{color:#FFD469}
-.hits li.here{color:#FFD469}
+.hits button{cursor:pointer}
+.hits li span span{color:rgba(255,255,255,.6);font-weight:500;font-size:var(--fs-15);text-align:right}
+.hits button:active,.hits li.here{color:#FFD469}
+.sheetmsg{margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(255,212,105,.14);color:#FFE9B0;font:600 var(--fs-16)/1.4 var(--sans)}
+.sheetmsg[hidden]{display:none}
 .shut{
   margin-top:14px;background:none;border:2px solid rgba(255,255,255,.25);border-radius:12px;color:rgba(255,255,255,.8);
-  font:700 16px/1 var(--sans);letter-spacing:.14em;padding:17px;cursor:pointer;text-transform:uppercase;
+  font:700 var(--fs-16)/1 var(--sans);letter-spacing:.14em;padding:17px;cursor:pointer;text-transform:uppercase;
 }
-button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(--bone);outline-offset:3px}
+button:focus-visible,input:focus-visible,canvas:focus-visible,[role=button]:focus-visible{outline:3px solid var(--bone);outline-offset:3px}
+/* sheets are navy on every sky and the map is always pale, so their rings can't follow --fg */
+.sheet :focus-visible{outline-color:#FFF}
+.zoom button:focus-visible{outline-color:#10161F}
+.console canvas:focus-visible{outline-offset:-3px;outline-color:#10161F}
+.scroller canvas:focus-visible{outline-color:var(--bone)}
 
 /* ---- the verdict opens the alert when there is one ---- */
-.alerttext{flex:1;overflow:auto;color:#EAF2FA;font:500 17px/1.55 var(--sans);padding:6px 56px 6px 2px;white-space:pre-wrap}
-.alerttext h2{font:800 22px/1.2 var(--sans);margin:0 0 10px;color:#FFD469}
+.alerttext{flex:1;overflow:auto;color:#EAF2FA;font:500 var(--fs-17)/1.55 var(--sans);padding:6px 56px 6px 2px;white-space:pre-wrap}
+.alerttext h2{font:800 var(--fs-22)/1.2 var(--sans);margin:0 0 10px;color:#FFD469}
 .alerttext h2.bad{color:#FF9B85}
 .alerttext .asep{border:0;border-top:1px solid rgba(255,255,255,.22);margin:26px 0 20px}
-.alerttext b{display:block;margin:16px 0 4px;font:700 12px/1 var(--sans);letter-spacing:.12em;color:rgba(255,255,255,.6);text-transform:uppercase}
+.alerttext b{display:block;margin:16px 0 4px;font:700 var(--fs-12)/1 var(--sans);letter-spacing:.12em;color:rgba(255,255,255,.6);text-transform:uppercase}
 @media (prefers-reduced-motion:no-preference){
+  html{scroll-behavior:smooth}
+  .wrow .wgo,.alertsc .tog{transition:transform .2s}
+  .upd,.stampbtn,.shut,.rsrc,.rbar .play,.zoom button{transition:transform .15s}
+  .upd:active,.stampbtn:active,.shut:active,.rsrc:active,.rbar .play:active,.zoom button:active{transform:scale(.96)}
   .answer{animation:rise .5s ease-out}
   @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 }
 
 /* ================= the console, below the fold ================= */
-:root{
+:root,body{
   --mono:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
   --panel:rgba(0,0,0,.18);
   --panel2:rgba(0,0,0,.30);
   --line:color-mix(in srgb,var(--fg) 26%,transparent);
   --dim:color-mix(in srgb,var(--fg) 85%,transparent);
-  --dimmer:color-mix(in srgb,var(--fg) 70%,transparent);
+  --dimmer:color-mix(in srgb,var(--fg) var(--dimmer-a,76%),transparent);
   --ok:#8FE0A4;--warn:#FFE3B0;--rust:#FFD3C9;--ochre:#FFD469;
   --alert1:rgba(0,0,0,.18);
   --alert2:rgba(0,0,0,.18);
@@ -442,40 +498,40 @@ button:focus-visible,input:focus-visible,li:focus-visible{outline:3px solid var(
   --radarbg:#D7E8EC;--scrim:rgba(255,255,255,.9);
 }
 body.sky-ice{
-  --ok:#3F8F57;--warn:#B36B00;--rust:#C0392B;--ochre:#C87F16;
+  --ok:#214A2D;--warn:#603A00;--rust:#7A241B;--ochre:#5D3B0A;--dimmer-a:86%;
 }
 .more{
-  background:none;border:0;color:var(--ash);cursor:pointer;
-  font:700 12.5px/1 var(--sans);letter-spacing:.18em;padding:10px 16px 14px;
+  text-transform:uppercase;  background:none;border:0;color:var(--ash);cursor:pointer;
+  font:700 var(--fs-13)/1 var(--sans);letter-spacing:.18em;padding:10px 16px 14px;
 }
-.console{max-width:940px;margin:0 auto;padding:6px 14px 44px;font-size:17px;line-height:1.45}
+.console{max-width:940px;margin:0 auto;padding:6px 14px 44px;font-size:var(--fs-17);line-height:1.45}
 .console section{margin-top:22px}
 .console h2{
-  font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;
+  font-family:var(--mono);font-size:var(--fs-13);letter-spacing:.2em;text-transform:uppercase;
   color:var(--dim);margin:0 0 9px;display:flex;align-items:center;gap:10px;font-weight:700;
 }
 .console h2::after{content:"";flex:1;height:1px;background:var(--line)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.skel{color:var(--dimmer);font-family:var(--mono);font-size:15px;padding:26px 16px;text-align:center}
+.skel{color:var(--dimmer);font-family:var(--mono);font-size:var(--fs-15);padding:26px 16px;text-align:center}
 /* alerts */
 .alertsc{margin:16px 0 0;display:grid;gap:8px}
 .alertsc .alert{border:1px solid var(--rust);border-left-width:5px;border-radius:10px;background:var(--alert1);overflow:hidden}
 .alertsc .alert.mod{border-color:var(--warn);background:var(--alert2)}
 .alertsc summary{padding:12px 14px;cursor:pointer;list-style:none;display:flex;gap:10px;align-items:center}
-.alertsc .tog{flex:none;font:300 24px/1 var(--sans);color:var(--dim);transition:transform .2s;transform-origin:center}
+.alertsc .tog{flex:none;font:300 var(--fs-22)/1 var(--sans);color:var(--dim);transform-origin:center}
 .alertsc details[open] .tog{transform:rotate(45deg)}
 .alertsc summary::-webkit-details-marker{display:none}
-.alertsc h3{margin:0;font-size:17.5px;font-weight:700;flex:1;color:var(--bone)}
-.alertsc .sev{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--rust);flex:none}
+.alertsc h3{margin:0;font-size:var(--fs-17);font-weight:700;flex:1;color:var(--bone)}
+.alertsc .sev{font-family:var(--mono);font-size:var(--fs-12);letter-spacing:.12em;color:var(--rust);flex:none}
 .alertsc .alert.mod .sev{color:var(--warn)}
 .alertsc .sev.near{color:var(--dim)}
-.alertsc .abody{padding:12px 14px 14px;font-size:16px;color:var(--bodytext);white-space:pre-wrap;border-top:1px solid var(--line)}
+.alertsc .abody{padding:12px 14px 14px;font-size:var(--fs-16);color:var(--bodytext);white-space:pre-wrap;border-top:1px solid var(--line)}
 /* metrics */
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
 .m{background:var(--panel);padding:11px 12px}
-.m label{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
-.m div{font-family:var(--mono);font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:3px;color:var(--bone)}
-.m div s{text-decoration:none;font-size:13px;color:var(--dim);font-weight:400;margin-left:2px}
+.m .ml{display:block;font-family:var(--mono);font-size:var(--fs-12);letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
+.m div{font-family:var(--mono);font-size:var(--fs-22);font-weight:600;font-variant-numeric:tabular-nums;margin-top:3px;color:var(--bone)}
+.m div .sub{text-decoration:none;font-size:var(--fs-13);color:var(--dim);font-weight:400;margin-left:2px}
 @media (max-width:520px){.metrics{grid-template-columns:repeat(2,1fr)}}
 /* radar */
 .radarwrap{position:relative;background:var(--radarbg)}
@@ -495,35 +551,36 @@ body.rfull{overflow:hidden}
 .zoom{position:absolute;top:12px;right:12px;display:grid;gap:6px}
 .zoom button{
   width:40px;height:40px;border-radius:8px;background:var(--scrim);border:1px solid rgba(0,0,0,.18);
-  color:#26303E;font:600 20px/1 var(--mono);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:#26303E;font:600 var(--fs-19)/1 var(--mono);cursor:pointer;display:flex;align-items:center;justify-content:center;
 }
 .rbar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--line)}
 .rbar .play{
-  width:42px;height:42px;flex:none;border-radius:99px;background:var(--ochre);border:0;color:#FFF;
+  width:42px;height:42px;flex:none;border-radius:99px;background:var(--ochre);border:0;color:#26303E;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
 }
+body.sky-ice .rbar .play{color:#FFF}
 .track{flex:1;display:flex;gap:3px;align-items:flex-end;height:26px}
 .track button{flex:1;height:9px;border:0;border-radius:2px;background:var(--panel2);cursor:pointer;padding:0}
 .track button.past{background:var(--trackpast)}
 .track button.fut{background:var(--trackfut)}
 .track button.on{height:22px;background:var(--ochre)}
 .rsrc{
-  flex:none;font:700 12.5px/1 var(--mono);letter-spacing:.08em;color:var(--dim);
+  flex:none;font:700 var(--fs-13)/1 var(--mono);letter-spacing:.08em;color:var(--dim);
   background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;cursor:pointer;
 }
-.rtime{font-family:var(--mono);font-size:14.5px;color:var(--bone);flex:none;min-width:96px;text-align:right;font-variant-numeric:tabular-nums}
-.rtime s{display:block;text-decoration:none;font-size:11px;letter-spacing:.14em;color:var(--dimmer)}
-.rtime s.fut{color:var(--water)}
+.rtime{font-family:var(--mono);font-size:var(--fs-14);color:var(--bone);flex:none;min-width:96px;text-align:right;font-variant-numeric:tabular-nums}
+.rtime .sub{display:block;text-decoration:none;font-size:var(--fs-12);letter-spacing:.14em;color:var(--dimmer)}
+.rtime .sub.fut{color:var(--water)}
 .scale{
   position:absolute;left:12px;bottom:12px;display:flex;align-items:center;
   background:var(--scrim);border:1px solid rgba(0,0,0,.18);border-radius:6px;padding:6px 8px;
 }
 .scale i{width:15px;height:9px;display:block}
-.scale span{font-family:var(--mono);font-size:11px;color:#52646F;letter-spacing:.1em;margin:0 5px}
+.scale span{font-family:var(--mono);font-size:var(--fs-12);color:#52646F;letter-spacing:.1em;margin:0 5px}
 /* scope */
 .readout{
   display:flex;gap:18px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);
-  font-family:var(--mono);font-size:14.5px;color:var(--dim);font-variant-numeric:tabular-nums;
+  font-family:var(--mono);font-size:var(--fs-14);color:var(--dim);font-variant-numeric:tabular-nums;
 }
 .readout b{color:var(--bone);font-weight:600}
 .readout .t{color:var(--ochre)}
@@ -532,49 +589,35 @@ body.rfull{overflow:hidden}
 .scroller canvas{display:block;width:1180px;height:240px;touch-action:pan-x}
 .legend{
   display:flex;gap:16px;padding:10px 16px;border-top:1px solid var(--line);
-  font-family:var(--mono);font-size:12.5px;color:var(--dimmer);letter-spacing:.08em;
+  font-family:var(--mono);font-size:var(--fs-13);color:var(--dimmer);letter-spacing:.08em;
 }
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
 /* daily */
-.dayrow{
-  display:grid;grid-template-columns:64px 34px 1fr 122px 62px;gap:12px;align-items:center;
-  padding:13px 16px;border-bottom:1px solid var(--line);width:100%;text-align:left;
-  background:none;border-left:0;border-right:0;border-top:0;color:inherit;font:inherit;cursor:pointer;
-}
-.dayrow:last-of-type{border-bottom:0}
-.dayrow .d{font-family:var(--mono);font-size:14px;letter-spacing:.06em;color:var(--bone)}
-.dayrow .d s{display:block;text-decoration:none;color:var(--dimmer);font-size:11px}
-.dayrow .ic{width:30px;height:30px}
-.dayrow .ic svg{width:100%;height:100%}
 .range{position:relative;height:7px;background:var(--panel2);border-radius:4px}
 .range i{position:absolute;top:0;bottom:0;border-radius:4px;background:var(--fg)}
-.hl{font-family:var(--mono);font-size:16px;font-variant-numeric:tabular-nums;text-align:right;color:var(--bone)}
-.hl s{text-decoration:none;color:var(--dim);margin-left:7px}
-.pop{font-family:var(--mono);font-size:13px;color:var(--water);text-align:right;font-variant-numeric:tabular-nums}
-.pop.zero{color:var(--dimmer)}
-.dayx{padding:0 16px 14px;font-size:16px;color:var(--bodytext);display:none}
+.dayx{padding:0 16px 14px;font-size:var(--fs-16);color:var(--bodytext);display:none}
 .dayx.open{display:block}
 .dayx dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:2px 0 0}
-.dayx dt{font-family:var(--mono);font-size:12px;letter-spacing:.13em;color:var(--dimmer);text-transform:uppercase}
-.dayx dd{margin:2px 0 0;font-family:var(--mono);font-size:17px;font-variant-numeric:tabular-nums}
+.dayx dt{font-family:var(--mono);font-size:var(--fs-12);letter-spacing:.13em;color:var(--dimmer);text-transform:uppercase}
+.dayx dd{margin:2px 0 0;font-family:var(--mono);font-size:var(--fs-17);font-variant-numeric:tabular-nums}
 @media (max-width:720px){
   .radarwrap canvas{height:300px}
 }
 /* sky */
 .sky{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
 .sky>div{background:var(--panel);padding:16px}
-.sky h4{margin:0 0 10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
+.sky h3{margin:0 0 10px;font-family:var(--mono);font-size:var(--fs-12);letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase}
 .arc{width:100%;height:78px;display:block}
-.suntimes{display:flex;justify-content:space-between;font-family:var(--mono);font-size:15px;margin-top:6px;font-variant-numeric:tabular-nums;color:var(--bone)}
-.suntimes s{text-decoration:none;color:var(--dim);font-size:12px;display:block;letter-spacing:.1em}
+.suntimes{display:flex;justify-content:space-between;font-family:var(--mono);font-size:var(--fs-15);margin-top:6px;font-variant-numeric:tabular-nums;color:var(--bone)}
+.suntimes .sub{text-decoration:none;color:var(--dim);font-size:var(--fs-12);display:block;letter-spacing:.1em}
 .moonrow{display:flex;align-items:center;gap:16px}
 .moonrow canvas{width:76px;height:76px;flex:none}
-.moonrow .mi{font-family:var(--mono);font-size:15px;line-height:1.7;font-variant-numeric:tabular-nums;color:var(--bone)}
-.moonrow .mi b{display:block;font-family:var(--sans);font-size:17.5px;font-weight:600;margin-bottom:2px}
+.moonrow .mi{font-family:var(--mono);font-size:var(--fs-15);line-height:1.7;font-variant-numeric:tabular-nums;color:var(--bone)}
+.moonrow .mi b{display:block;font-family:var(--sans);font-size:var(--fs-17);font-weight:600;margin-bottom:2px}
 .moonrow .mi span{color:var(--dim)}
 @media (max-width:720px){.sky{grid-template-columns:1fr}}
 .pagefoot{
-  margin-top:26px;font-family:var(--mono);font-size:13px;color:var(--dimmer);
+  margin-top:26px;font-family:var(--mono);font-size:var(--fs-13);color:var(--dimmer);
   line-height:1.9;letter-spacing:.03em;text-align:left;
 }
 .pagefoot a{color:var(--dim)}
@@ -582,27 +625,31 @@ body.rfull{overflow:hidden}
 </head>
 <body>
 
+<main>
+<h1 class="vh">WX weather</h1>
 <div class="app">
   <div class="corner">
     <button id="shareBtn" aria-label="Share WX">
       <svg width="19" height="22" viewBox="0 0 24 27" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 9H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V11a2 2 0 0 0-2-2h-2"/><path d="M12 17V3"/><path d="M8 7l4-4 4 4"/></svg>
     </button>
   </div>
-  <button class="place" id="place" aria-label="Change location">
+  <button class="place" id="place">
     <svg width="13" height="17" viewBox="0 0 13 17" fill="currentColor" aria-hidden="true"><path d="M6.5 0C2.9 0 0 2.8 0 6.3 0 11 6.5 17 6.5 17S13 11 13 6.3C13 2.8 10.1 0 6.5 0zm0 8.9a2.6 2.6 0 1 1 0-5.2 2.6 2.6 0 0 1 0 5.2z"/></svg>
-    <span id="placeName" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">FINDING YOU</span>
+    <span class="vh">Change location. Now showing</span>
+    <span id="placeName" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Finding you</span>
   </button>
 
   <div class="answer">
     <div class="hero">
-      <button class="deg" id="deg" aria-label="Switch between Fahrenheit and Celsius">--<u>°</u></button>
+      <button class="deg" id="deg">--<span class="unit">°</span><span class="vh">Switch units</span></button>
     </div>
     <div class="verdict" id="verdict">
       <div class="word" id="word">&nbsp;</div>
       <p class="say" id="say">Reading the sky…</p>
-      <span class="vgo" id="vgo" hidden>READ THE ALERT ›</span>
+      <span class="vgo" id="vgo" hidden>Read the alert ›</span>
     </div>
     <p class="soon" id="soon" hidden></p>
+    <button type="button" class="soon tapline" id="alsoBtn" hidden></button>
     <p class="tmrw" id="tmrw" hidden></p>
   </div>
 
@@ -610,21 +657,22 @@ body.rfull{overflow:hidden}
   <p class="suns" id="suns" hidden></p>
 
   <div class="hours">
-    <div class="bars" id="bars"></div>
-    <div class="ticks"><span>NOW</span><span id="tickMid">+6</span><span>+12 HRS</span></div>
+    <div class="bars" id="bars" role="group" aria-label="Next 12 hours. Arrow keys move between hours."></div>
+    <div class="ticks"><span>Now</span><span id="tickMid">+6</span><span>+12 hrs</span></div>
   </div>
 
   <div class="week" id="week">
     <div id="weekRows"></div>
-    <button type="button" class="wshow" id="weekMore">ALL 7 DAYS ⌄</button>
+    <button type="button" class="wshow" id="weekMore" aria-expanded="false">All 7 days ⌄</button>
   </div>
 
   <div class="foot">
-    <button class="upd" id="updBtn" hidden>NEW VERSION — TAP TO UPDATE</button>
-    <b id="stamp" role="button" tabindex="0" title="Tap to refresh">—</b><br>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.14.002</a> · Open-Meteo · NWS alerts
+    <button class="upd" id="updBtn" hidden>Update to the new version</button>
+    <button type="button" class="stampbtn" id="stampBtn"><span class="vh">Refresh.</span> <span id="stamp">—</span></button><br>
+    <p class="vh" role="status" id="live"></p>
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.17.001</a> · Open-Meteo · NWS alerts
   </div>
-  <button class="more" id="moreBtn">CONSOLE ⌄</button>
+  <button class="more" id="moreBtn">Console ⌄</button>
 </div>
 
 <div class="tip" id="tip" hidden>
@@ -639,7 +687,7 @@ body.rfull{overflow:hidden}
     <h2>Radar</h2>
     <div class="card" id="radarCard">
       <div class="radarwrap" id="radarwrap">
-        <canvas id="radar"></canvas>
+        <canvas id="radar" tabindex="0" role="application" aria-label="Radar map. Arrow keys pan, plus and minus zoom."></canvas>
         <div class="zoom">
           <button type="button" id="zIn" aria-label="Zoom in">+</button>
           <button type="button" id="zOut" aria-label="Zoom out">−</button>
@@ -652,7 +700,7 @@ body.rfull{overflow:hidden}
         <button type="button" class="play" id="rPlay" aria-label="Pause radar loop"></button>
         <div class="track" id="rTrack"></div>
         <button type="button" class="rsrc" id="rSrc" title="Switch radar source">RV</button>
-        <div class="rtime" id="rTime">--:--<s>LOADING</s></div>
+        <div class="rtime" id="rTime">--:--<span class="sub">LOADING</span></div>
       </div>
     </div>
   </section>
@@ -665,8 +713,8 @@ body.rfull{overflow:hidden}
   <section>
     <h2>48-hour scope</h2>
     <div class="card">
-      <div class="readout" id="readout"><span>Drag across the trace to scrub</span></div>
-      <div class="scroller"><canvas id="scope"></canvas></div>
+      <div class="readout" id="readout"><span>Drag across the trace, or use the arrow keys, to read any hour</span></div>
+      <div class="scroller"><canvas id="scope" tabindex="0" role="slider" aria-label="Hour in the 48-hour forecast" aria-valuemin="0" aria-valuemax="47" aria-valuenow="0"></canvas></div>
       <div class="legend">
         <span><i style="background:#FFD469"></i>TEMP</span>
         <span><i style="background:#A8D8FF"></i>PRECIP CHANCE</span>
@@ -679,16 +727,16 @@ body.rfull{overflow:hidden}
     <h2>Sun &amp; moon</h2>
     <div class="card sky">
       <div>
-        <h4>Daylight</h4>
+        <h3>Daylight</h3>
         <svg class="arc" id="sunArc" viewBox="0 0 300 78" preserveAspectRatio="none"></svg>
         <div class="suntimes">
-          <span id="sunUp">--<s>SUNRISE</s></span>
-          <span style="text-align:center" id="dayLen">--<s>DAYLIGHT</s></span>
-          <span style="text-align:right" id="sunDown">--<s>SUNSET</s></span>
+          <span id="sunUp">--<span class="sub">SUNRISE</span></span>
+          <span style="text-align:center" id="dayLen">--<span class="sub">DAYLIGHT</span></span>
+          <span style="text-align:right" id="sunDown">--<span class="sub">SUNSET</span></span>
         </div>
       </div>
       <div>
-        <h4>Moon</h4>
+        <h3>Moon</h3>
         <div class="moonrow">
           <canvas id="moon" width="152" height="152"></canvas>
           <div class="mi" id="moonInfo"></div>
@@ -703,23 +751,26 @@ body.rfull{overflow:hidden}
     Not for use in life-threatening weather. Always confirm with NWS or your local emergency management.
   </footer>
 </div>
+</main>
 
-<div class="sheet" id="sheet">
+<dialog class="sheet" id="sheet" aria-label="Change location">
   <button class="x" id="sheetX" aria-label="Close">✕</button>
-  <input id="q" type="search" placeholder="Town name or ZIP" autocomplete="off" enterkeyhint="search">
+  <label for="q" class="vh">Town name or ZIP</label>
+  <input id="q" type="search" placeholder="Town name or ZIP" autocomplete="off" enterkeyhint="search" autofocus>
+  <p class="sheetmsg" id="sheetMsg" role="alert" hidden></p>
   <ul class="hits" id="hits"></ul>
   <button class="shut" id="shut">Close</button>
-</div>
+</dialog>
 
-<div class="sheet" id="alertSheet" role="dialog" aria-label="Alert details">
+<dialog class="sheet" id="alertSheet" aria-label="Alert details">
   <button class="x" id="alertX" aria-label="Close">✕</button>
   <div class="alerttext" id="alertText"></div>
   <button class="shut" id="alertShut">Close</button>
-</div>
+</dialog>
 
 <script>
 "use strict";
-const VERSION="v2026.09.14.002";
+const VERSION="v2026.09.17.001";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -732,6 +783,7 @@ let OBS=null;   // latest report from the nearest real weather station
 let ECHO=null;      // what the radar shows directly over this spot
 let ECHO_WHY="";    // ...or why we could not find out
 let sayT=null, sayOrig="";
+let SAMPLE=false;   // true only while the made-up fallback day is on screen
 
 const f=c=>F?c*9/5+32:c;
 const mph=k=>k/1.609344;
@@ -1116,53 +1168,55 @@ function paint(){
   setSkin(v);
   CURRENT_ALERT=v.alert||null;
   if(sayT){clearTimeout(sayT);sayT=null}
-  document.getElementById("deg").innerHTML=R(f(c.temperature_2m))+"<u>°</u>";
+  if(SAMPLE){
+    // Never let invented numbers pass for a forecast: the headline says so.
+    v.word="No signal";v.alert=null;v.also=null;
+    v.say="Sample numbers, not a real forecast. Check your connection or ad blocker, then refresh.";
+  }
+  document.getElementById("deg").innerHTML=R(f(c.temperature_2m))+"<span class='unit'>°</span>"+
+    `<span class="vh">${F?"Fahrenheit. Switch to Celsius":"Celsius. Switch to Fahrenheit"}</span>`;
   const w=document.getElementById("word");w.textContent=v.word;
   w.className="word "+v.cls+(v.word.length>14?" long":"");
   const vb=document.getElementById("verdict");
   vb.classList.toggle("tap",!!v.alert);
   const vg=document.getElementById("vgo");
   vg.hidden=!v.alert;
-  if(v.alert)vg.textContent=ALERTS.length>1?`READ ALL ${ALERTS.length} ALERTS ›`:"READ THE ALERT ›";
-  if(v.alert){
-    vb.setAttribute("role","button");vb.setAttribute("tabindex","0");
-    vb.setAttribute("aria-label","Read the full alert: "+v.word);
-  }else{
-    vb.removeAttribute("role");vb.removeAttribute("tabindex");vb.removeAttribute("aria-label");
-  }
+  if(v.alert)vg.textContent=ALERTS.length>1?`Read all ${ALERTS.length} alerts ›`:"Read the alert ›";
+  // A div, not a <button>: it is only a control while an alert is up, and its
+  // own text (name, sentence, "Read the alert") is the accessible name.
+  if(v.alert){vb.setAttribute("role","button");vb.setAttribute("tabindex","0")}
+  else{vb.removeAttribute("role");vb.removeAttribute("tabindex")}
   document.getElementById("say").textContent=v.say;
-  const sEl=document.getElementById("soon");
-  sEl.classList.remove("tapline");sEl.onclick=null;
+  const sEl=document.getElementById("soon"),also=document.getElementById("alsoBtn");
+  also.hidden=!v.also;
   if(v.also){
     // A storm took the headline, but the advisory is still in effect — say so.
     CURRENT_ALERT=v.also;
-    sEl.hidden=false;
-    sEl.textContent=shortEvent(v.also.event).toUpperCase()+" ALSO IN EFFECT · TAP";
-    sEl.classList.add("tapline");
-    sEl.onclick=openAlert;
+    sEl.hidden=true;
+    also.textContent=shortEvent(v.also.event)+" also in effect ›";
   }else{
     const saidAlready=/rain|storm|snow|wind/i.test(v.word)||
       (v.alert&&/storm|tornado|rain|flood|hurricane|tropical|squall/i.test(v.alert.event||""));
     const note=saidAlready?null:rainAhead();
     if(note){sEl.hidden=false;sEl.textContent=note}else sEl.hidden=true;
   }
-  document.getElementById("placeName").textContent=loc.name.toUpperCase();
+  document.getElementById("placeName").textContent=loc.name;
   setFavicon(v.mark);
   // Tomorrow in one small line: hi/lo and the first thing that falls
   const tEl=document.getElementById("tmrw"),dd=D.daily;
   if(v.alert||!dd||!dd.time||!dd.time[1]){tEl.hidden=true}
   else{
-    const day2=dd.time[1];let ev="NO RAIN";
+    const day2=dd.time[1];let ev="no rain";
     for(let j=0;j<h.time.length;j++){
       if(h.time[j].slice(0,10)!==day2)continue;
-      if(STORM.has(h.weather_code[j])&&(h.precipitation_probability[j]||0)>=40){ev="STORMS AROUND "+clock(h.time[j]);break}
+      if(STORM.has(h.weather_code[j])&&(h.precipitation_probability[j]||0)>=40){ev="storms around "+clock(h.time[j]);break}
     }
-    if(ev==="NO RAIN")for(let j=0;j<h.time.length;j++){
+    if(ev==="no rain")for(let j=0;j<h.time.length;j++){
       if(h.time[j].slice(0,10)!==day2)continue;
-      if(WET.has(h.weather_code[j])&&(h.precipitation_probability[j]||0)>=45){ev="RAIN AROUND "+clock(h.time[j]);break}
+      if(WET.has(h.weather_code[j])&&(h.precipitation_probability[j]||0)>=45){ev="rain around "+clock(h.time[j]);break}
     }
     tEl.hidden=false;
-    tEl.textContent=`TOMORROW ${R(f(dd.temperature_2m_max[1]))}°/${R(f(dd.temperature_2m_min[1]))}° · ${ev}`;
+    tEl.textContent=`Tomorrow ${R(f(dd.temperature_2m_max[1]))}°/${R(f(dd.temperature_2m_min[1]))}° · ${ev}`;
   }
 
   const bars=document.getElementById("bars");bars.innerHTML="";
@@ -1170,12 +1224,13 @@ function paint(){
   const lo=Math.min(...temps),hi=Math.max(...temps),sp=Math.max(hi-lo,F?12:7);
   temps.forEach((tp,k)=>{
     const j=i+k,pop=h.precipitation_probability[j]||0;
-    const b=document.createElement("i");
+    const b=document.createElement("button");b.type="button";
     b.style.height=(22+((tp-lo)/sp)*74).toFixed(0)+"%";
     if(pop>=45)b.className="wet";
     if(k===0)b.className+=" now";
-    b.title=clock(h.time[j])+" · "+R(tp)+"° · "+pop+"%";
+    b.tabIndex=k===0?0:-1;   // one tab stop; the arrow keys walk the hours
     b.dataset.info=clock(h.time[j])+" — "+R(tp)+"°, "+pop+"% chance of rain";
+    b.setAttribute("aria-label",(k===0?"Now, ":"")+b.dataset.info);
     bars.appendChild(b);
   });
   document.getElementById("tickMid").textContent=temps.length>6?clock(h.time[i+6]):"+6";
@@ -1185,7 +1240,7 @@ function paint(){
 }
 
 /* ---------- the sky IS the verdict ---------- */
-const SKYBG={fine:"#2C82D6",hot:"#E8862B",storm:"#414E63",rain:"#1F7A8C",night:"#182236",warn:"#B23A31",ice:"#C9D9E6"};
+const SKYBG={fine:"#256EB6",hot:"#AD510A",storm:"#414E63",rain:"#1E7688",night:"#182236",warn:"#B23A31",ice:"#C9D9E6"};
 function isNight(){
   try{const d=D.daily,n=now();return n<ms(d.sunrise[0])||n>ms(d.sunset[0])}
   catch(e){return !!(D&&D.current&&D.current.is_day===0)}
@@ -1209,7 +1264,7 @@ function setSkin(v){
 function setFavicon(mark){
   const l=document.querySelector('link[rel="icon"]');if(!l)return;
   const k=(document.body.className.match(/sky-(\w+)/)||[])[1]||"fine";
-  const bg=k==="ice"?"#17313F":(SKYBG[k]||"#2C82D6");
+  const bg=k==="ice"?"#17313F":(SKYBG[k]||"#256EB6");
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="${bg}"/>${pict(mark)}</svg>`;
   l.setAttribute("href","data:image/svg+xml,"+encodeURIComponent(svg));
 }
@@ -1231,22 +1286,24 @@ async function load(){
       fetchObs().catch(()=>null)
     ]);
     radarEcho().then(e=>{ECHO=e;if(D)paint()}).catch(()=>{});
-    D=fc;ALERTS=al;AQI=aq;OBS=ob;box.s("wx.cache",{at:Date.now(),loc,fc,al,aqi:aq,obs:ob});
-    paint();stamp("UPDATED "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}));
+    SAMPLE=false;D=fc;ALERTS=al;AQI=aq;OBS=ob;box.s("wx.cache",{at:Date.now(),loc,fc,al,aqi:aq,obs:ob});
+    paint();stamp("Updated "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}));
     checkUpdate();
   }catch(e){
     const c=box.g("wx.cache",null);
     if(c&&c.loc.lat===loc.lat&&c.loc.lon===loc.lon&&c.fc&&c.fc.hourly&&c.fc.hourly.relative_humidity_2m&&c.fc.current&&"precipitation" in c.fc.current){
-      D=c.fc;ALERTS=c.al||[];AQI=c.aqi!=null?c.aqi:null;OBS=c.obs||null;paint();
+      SAMPLE=false;D=c.fc;ALERTS=c.al||[];AQI=c.aqi!=null?c.aqi:null;OBS=c.obs||null;paint();
       const m=Math.round((Date.now()-c.at)/60000);
-      stamp("OFFLINE · "+(m<60?m+" MIN OLD":Math.round(m/60)+" HR OLD"));
+      stamp("Offline · "+(m<60?m+" min old":Math.round(m/60)+" hr old"));
     }else{
-      D=demoData();ALERTS=[];AQI=null;OBS=null;paint();
-      stamp("SAMPLE · OPEN IN A BROWSER FOR LIVE DATA");
+      SAMPLE=true;D=demoData();ALERTS=[];AQI=null;OBS=null;paint();
+      stamp("Sample data · try again");
     }
   }
 }
-const stamp=t=>document.getElementById("stamp").textContent=t;
+// The visible stamp lives inside the refresh button; the hidden live region
+// is what a screen reader hears when it changes.
+const stamp=t=>{document.getElementById("stamp").textContent=t;document.getElementById("live").textContent=t};
 
 /* ---------- taps ---------- */
 document.getElementById("deg").addEventListener("click",()=>{F=!F;box.s("wx.f",F);if(D)paint()});
@@ -1255,14 +1312,12 @@ document.getElementById("deg").addEventListener("click",()=>{F=!F;box.s("wx.f",F
 document.getElementById("shareBtn").addEventListener("click",async()=>{
   try{
     if(navigator.share)await navigator.share({title:"WX",text:"One screen. One answer.",url:location.href});
-    else if(navigator.clipboard){await navigator.clipboard.writeText(location.href);stamp("LINK COPIED")}
+    else if(navigator.clipboard){await navigator.clipboard.writeText(location.href);stamp("Link copied")}
   }catch(e){}
 });
 
 /* the timestamp refreshes when tapped */
-const stampEl=document.getElementById("stamp");
-stampEl.addEventListener("click",()=>{stamp("CHECKING…");load();checkUpdate()});
-stampEl.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();stamp("CHECKING…");load();checkUpdate()}});
+document.getElementById("stampBtn").addEventListener("click",()=>{stamp("Checking…");load();checkUpdate()});
 
 /* a new deploy shows a pill; tapping it pulls the fresh page */
 let UPDV=null;
@@ -1288,15 +1343,24 @@ document.getElementById("updBtn").addEventListener("click",async()=>{
 });
 
 const sheet=document.getElementById("sheet"),q=document.getElementById("q"),hits=document.getElementById("hits");
-document.getElementById("place").addEventListener("click",()=>{sheet.classList.add("open");showRecent();setTimeout(()=>q.focus(),60)});
+const sheetMsg=document.getElementById("sheetMsg");
+function sayInSheet(t){sheetMsg.textContent=t||"";sheetMsg.hidden=!t}
+// Native <dialog>: showModal() traps focus, makes the page behind inert,
+// closes on Escape and hands focus back to the button that opened it.
+document.getElementById("place").addEventListener("click",()=>{showRecent();sayInSheet("");sheet.showModal()});
 document.getElementById("shut").addEventListener("click",close);
 document.getElementById("sheetX").addEventListener("click",close);
-function close(){sheet.classList.remove("open");q.value="";hits.innerHTML=""}
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){close();closeAlert();setRFull(false)}});
+function close(){if(sheet.open)sheet.close()}
+sheet.addEventListener("close",()=>{q.value="";hits.innerHTML="";sayInSheet("")});
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  const d=document.querySelector("dialog[open]");
+  if(d)d.close();else setRFull(false);
+});
 
 /* tap the verdict to read the actual alert */
 const alertSheet=document.getElementById("alertSheet");
-function closeAlert(){alertSheet.classList.remove("open")}
+function closeAlert(){if(alertSheet.open)alertSheet.close()}
 document.getElementById("alertShut").addEventListener("click",closeAlert);
 document.getElementById("alertX").addEventListener("click",closeAlert);
 function openAlert(){
@@ -1310,16 +1374,23 @@ function openAlert(){
     (a.instruction?`<b>What to do</b>${esc(String(a.instruction).trim())}`:"")+
     (a.description?`<b>Details</b>${esc(String(a.description).trim())}`:"")+
     (i<list.length-1?'<hr class="asep">':"")).join("");
-  alertSheet.classList.add("open");
+  if(!alertSheet.open)alertSheet.showModal();
 }
 document.getElementById("verdict").addEventListener("click",openAlert);
 document.getElementById("verdict").addEventListener("keydown",e=>{
   if(e.key==="Enter"||e.key===" "){e.preventDefault();openAlert()}
 });
+document.getElementById("alsoBtn").addEventListener("click",openAlert);
 
 /* tap an hour bar to hear about that hour */
 const barsEl=document.getElementById("bars");
-barsEl.addEventListener("pointerdown",e=>{
+barsEl.addEventListener("keydown",e=>{
+  const all=[...barsEl.children],at=all.indexOf(document.activeElement);if(at<0)return;
+  const to=e.key==="ArrowRight"?at+1:e.key==="ArrowLeft"?at-1:e.key==="Home"?0:e.key==="End"?all.length-1:-1;
+  if(to<0||to>=all.length)return;
+  e.preventDefault();all[at].tabIndex=-1;all[to].tabIndex=0;all[to].focus();
+});
+barsEl.addEventListener("click",e=>{
   const b=e.target&&e.target.dataset&&e.target.dataset.info?e.target:null;if(!b)return;
   const sayEl=document.getElementById("say");
   if(!sayT)sayOrig=sayEl.textContent;
@@ -1329,13 +1400,11 @@ barsEl.addEventListener("pointerdown",e=>{
 });
 
 function row(text,sub,fn,cls){
-  const li=document.createElement("li");li.tabIndex=0;if(cls)li.className=cls;
-  li.innerHTML=`<b>${esc(text)}</b>`+(sub?`<span>${esc(sub)}</span>`:"");
-  if(typeof fn==="function"){
-    li.addEventListener("click",fn);
-    li.addEventListener("keydown",e=>{if(e.key==="Enter")fn()});
-  }
-  hits.appendChild(li);
+  const li=document.createElement("li");if(cls)li.className=cls;
+  const el=document.createElement(typeof fn==="function"?"button":"span");
+  el.innerHTML=`<b>${esc(text)}</b>`+(sub?`<span>${esc(sub)}</span>`:"");
+  if(typeof fn==="function"){el.type="button";el.addEventListener("click",fn)}
+  li.appendChild(el);hits.appendChild(li);
 }
 function showRecent(){
   hits.innerHTML="";
@@ -1344,32 +1413,38 @@ function showRecent(){
 }
 let typing;
 q.addEventListener("input",()=>{
-  clearTimeout(typing);const v=q.value.trim();
+  clearTimeout(typing);sayInSheet("");const v=q.value.trim();
   if(v.length<2){showRecent();return}
   typing=setTimeout(async()=>{
     try{
       const r=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(v)}&count=8&language=en&format=json`);
       const list=(await r.json()).results||[];
       hits.innerHTML="";
-      if(!list.length){row("Nothing by that name");return}
+      if(!list.length){row(`Nothing called “${v}”`,"try a nearby town or a ZIP");return}
       list.forEach(x=>row(x.name,[x.admin1,x.country_code].filter(Boolean).join(", "),
         ()=>go({name:x.name,lat:x.latitude,lon:x.longitude})));
-    }catch(e){hits.innerHTML="";row("Search is down","try again")}
+    }catch(e){showRecent();sayInSheet("Search isn’t answering. Check your connection, then type again.")}
   },330);
 });
 function go(p){
   loc=p;box.s("wx.loc",p);
   const rec=box.g("wx.recent",[HOME]).filter(x=>x.name!==p.name);
   rec.unshift(p);box.s("wx.recent",rec.slice(0,5));
-  close();stamp("CHECKING…");load();
+  close();stamp("Checking…");load();
 }
 function here(){
-  if(!navigator.geolocation)return;
-  stamp("FINDING YOU…");
+  if(!navigator.geolocation){sayInSheet("This browser can’t share your location. Search for a town instead.");return}
+  sayInSheet("");stamp("Finding you…");
   navigator.geolocation.getCurrentPosition(async p=>{
     const lat=+p.coords.latitude.toFixed(4),lon=+p.coords.longitude.toFixed(4);
     go({name:await resolvePlace(lat,lon),lat,lon,gps:true,rv:RESOLVER_V});
-  },()=>stamp("LOCATION BLOCKED"),{timeout:9000,maximumAge:300000});
+  },err=>{
+    // Said inside the sheet — the stamp is hidden behind it — and with a way out.
+    stamp("Location unavailable");
+    sayInSheet(err&&err.code===1
+      ?"Location is blocked. Allow it for this site in your browser settings, or search for a town."
+      :"Couldn’t find you just now. Try again, or search for a town.");
+  },{timeout:9000,maximumAge:300000});
 }
 /* Two opinions on what this spot is called. BigDataCloud first; if it still
    hands back an administrative blob, ask the NWS — its gridpoint lookup
@@ -1523,12 +1598,14 @@ function renderMetrics(){
     ECHO?(ECHO.rain?(ECHO.heavy?"Heavy":"Rain"):"Clear"):(ECHO_WHY?"—":"…"),
     ECHO?Math.round(ECHO.cover*100)+"%":esc(ECHO_WHY)]);
   document.getElementById("metrics").innerHTML=cells.map(([l,v,u])=>
-    `<div class="m"><label>${l}</label><div>${v}<s>${u}</s></div></div>`).join("");
+    `<div class="m"><span class="ml">${l}</span><div>${v}<span class='sub'>${u}</span></div></div>`).join("");
 }
 
 /* ---------- radar: canvas slippy map, RV/NX sources ---------- */
 const TS=256,ZMIN=4,ZMAX=11;
-const RAD={z:8,cx:0,cy:0,frames:[],idx:0,playing:true,host:"",tiles:new Map(),at:0,anchor:null,timer:null,pending:false,
+// the loop only starts itself for people who have not asked for less motion
+const CALM=!!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);
+const RAD={z:8,cx:0,cy:0,frames:[],idx:0,playing:!CALM,host:"",tiles:new Map(),at:0,anchor:null,timer:null,pending:false,
   src:box.g("wx.radar",box.g("wxc.radar","rv"))};
 const lon2x=(lon,z)=>(lon+180)/360*TS*Math.pow(2,z);
 const lat2y=(lat,z)=>{const r=lat*Math.PI/180;return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*TS*Math.pow(2,z)};
@@ -1626,8 +1703,8 @@ function renderTrack(){
   });
   const fr=RAD.frames[RAD.idx];
   document.getElementById("rTime").innerHTML=fr
-    ?fmtClock(fr.time)+`<s class="${fr.fut?"fut":""}">${fr.fut?"FORECAST":"OBSERVED"}</s>`
-    :"--:--<s>NO DATA</s>";
+    ?fmtClock(fr.time)+`<span class="sub ${fr.fut?"fut":""}">${fr.fut?"FORECAST":"OBSERVED"}</span>`
+    :"--:--<span class='sub'>NO DATA</span>";
 }
 function stepFrame(){
   RAD.idx=(RAD.idx+1)%RAD.frames.length;
@@ -1678,7 +1755,7 @@ async function renderRadar(force){
     renderTrack();drawRadar();
     if(RAD.playing)startLoop();
   }catch(e){
-    if(!RAD.frames.length)document.getElementById("rTime").innerHTML="--:--<s>OFFLINE</s>";
+    if(!RAD.frames.length)document.getElementById("rTime").innerHTML="--:--<span class='sub'>OFFLINE</span>";
   }
 }
 (function radarControls(){
@@ -1707,12 +1784,19 @@ async function renderRadar(force){
   const end=e=>{pts.delete(e.pointerId);pinch0=0;drag=null};
   c.addEventListener("pointerup",end);c.addEventListener("pointercancel",end);
   c.addEventListener("wheel",e=>{e.preventDefault();zoomBy(e.deltaY<0?1:-1)},{passive:false});
+  c.addEventListener("keydown",e=>{
+    const pan={ArrowLeft:[-60,0],ArrowRight:[60,0],ArrowUp:[0,-60],ArrowDown:[0,60]}[e.key];
+    if(pan){e.preventDefault();RAD.cx+=pan[0];RAD.cy+=pan[1];queueRadar()}
+    else if(e.key==="+"||e.key==="="){e.preventDefault();zoomBy(1)}
+    else if(e.key==="-"||e.key==="_"){e.preventDefault();zoomBy(-1)}
+  });
   document.getElementById("zIn").addEventListener("click",()=>zoomBy(1));
   document.getElementById("zOut").addEventListener("click",()=>zoomBy(-1));
   document.getElementById("zHome").addEventListener("click",()=>{radarCenter();drawRadar()});
   document.getElementById("rPlay").addEventListener("click",()=>{RAD.playing?stopLoop():startLoop()});
   const srcBtn=document.getElementById("rSrc");
   const lbl=()=>{srcBtn.textContent=RAD.src==="nx"?"NX":"RV";
+    srcBtn.setAttribute("aria-label",RAD.src==="nx"?"Radar source: NEXRAD. Switch to RainViewer":"Radar source: RainViewer. Switch to NEXRAD");
     srcBtn.title=RAD.src==="nx"?"NEXRAD (Iowa Mesonet) — tap for RainViewer":"RainViewer — tap for raw NEXRAD"};
   lbl();
   srcBtn.addEventListener("click",()=>{
@@ -1795,6 +1879,7 @@ function updateReadout(k){
   const h=D.hourly,i=idx[Math.max(0,Math.min(k,idx.length-1))];
   const gustV=hv(h,"wind_gusts_10m",i),spdV=hv(h,"wind_speed_10m",i);
   const gust=(gustV!=null&&spdV!=null&&gustV>spdV+3)?" G"+r0v(U.spd(gustV)):"";
+  cvScope.setAttribute("aria-valuemax",idx.length-1);cvScope.setAttribute("aria-valuenow",Math.max(0,Math.min(k,idx.length-1)));
   document.getElementById("readout").innerHTML=
     `<span><b>${k===0&&scopeCursor==null?"NOW":shortDate(h.time[i])+" "+clockMin(h.time[i])}</b></span>`+
     `<span class="t"><b>${r0v(f(h.temperature_2m[i]))}°</b> feels ${r0v(f(hv(h,"apparent_temperature",i)))}°</span>`+
@@ -1802,6 +1887,7 @@ function updateReadout(k){
     `<span class="p">${r0v(hv(h,"precipitation_probability",i))}% · ${r2v(U.len(hv(h,"precipitation",i)))} ${U.lenU()}</span>`+
     `<span>${compass(hv(h,"wind_direction_10m",i))} ${r0v(U.spd(spdV))}${gust} ${U.spdU()}</span>`+
     `<span>RH ${r0v(hv(h,"relative_humidity_2m",i))}% · DP ${r0v(hv(h,"dew_point_2m",i)!=null?f(hv(h,"dew_point_2m",i)):null)}°</span>`;
+  cvScope.setAttribute("aria-valuetext",[...document.getElementById("readout").children].map(x=>x.textContent).join(", "));
 }
 function scrubScope(e){
   if(!cvScope._idx)return;
@@ -1815,7 +1901,17 @@ let scrubbing=false;
 cvScope.addEventListener("pointerdown",e=>{scrubbing=true;cvScope.setPointerCapture(e.pointerId);scrubScope(e)});
 cvScope.addEventListener("pointermove",e=>{if(scrubbing||e.pointerType==="mouse")scrubScope(e)});
 cvScope.addEventListener("pointerup",()=>{scrubbing=false});
-cvScope.addEventListener("pointerleave",()=>{if(!scrubbing){scopeCursor=null;renderScope()}});
+cvScope.addEventListener("pointerleave",()=>{if(!scrubbing&&document.activeElement!==cvScope){scopeCursor=null;renderScope()}});
+cvScope.addEventListener("keydown",e=>{
+  const n=cvScope._idx?cvScope._idx.length:0;if(!n)return;
+  const at=scopeCursor==null?0:scopeCursor;
+  const to=e.key==="ArrowRight"?at+1:e.key==="ArrowLeft"?at-1:e.key==="PageDown"?at+6:e.key==="PageUp"?at-6:e.key==="Home"?0:e.key==="End"?n-1:null;
+  if(to==null)return;
+  e.preventDefault();scopeCursor=Math.max(0,Math.min(to,n-1));renderScope();
+  // keep the cursor on screen inside the sideways scroller
+  const sc=cvScope.parentNode,x=cvScope._left+cvScope._pw*scopeCursor/(n-1);
+  if(x<sc.scrollLeft+40||x>sc.scrollLeft+sc.clientWidth-40)sc.scrollLeft=x-sc.clientWidth/2;
+});
 
 /* ---------- the week, on screen one: 3 rows folded, 7 unfolded ---------- */
 let weekOpen=false;
@@ -1832,14 +1928,14 @@ function renderWeek(){
     const code=dd.weather_code?dd.weather_code[i]:2;
     const row=document.createElement("button");
     row.className="wrow";row.type="button";row.setAttribute("aria-expanded","false");
-    row.innerHTML=`<span class="dn">${dayName(t2,i)==="TOMORROW"?"TOMRW":dayName(t2,i)}<s>${shortDate(t2)}</s></span>`+
-      `<span class="wic"><svg viewBox="0 0 100 100">${pict(codeToMark(code,true))}</svg></span>`+
+    row.innerHTML=`<span class="dn">${dayName(t2,i)==="TOMORROW"?"<abbr title='Tomorrow' style='text-decoration:none'>TOMRW</abbr>":dayName(t2,i)}<span class='sub'>${shortDate(t2)}</span></span>`+
+      `<span class="wic"><svg viewBox="0 0 100 100" aria-hidden="true">${pict(codeToMark(code,true))}</svg><span class="vh">${esc(wmoText(code))}, high and low</span></span>`+
       `<span class="range"><i style="left:${l}%;width:${w}%"></i></span>`+
-      `<span class="whl">${r0v(his[i])}°<s>${r0v(los[i])}°</s></span>`+
+      `<span class="whl">${r0v(his[i])}°<span class='sub'>${r0v(los[i])}°</span></span>`+
       `<span class="wgo" aria-hidden="true">›</span>`;
     const ex=document.createElement("div");ex.className="dayx";
     ex.innerHTML='<dl>'+
-      `<div><dt>Conditions</dt><dd style="font-size:14px">${esc(wmoText(code))}</dd></div>`+
+      `<div><dt>Conditions</dt><dd style="font-size:var(--fs-14)">${esc(wmoText(code))}</dd></div>`+
       `<div><dt>Rain chance</dt><dd>${r0v(dd.precipitation_probability_max?dd.precipitation_probability_max[i]:null)}%</dd></div>`+
       `<div><dt>Precip total</dt><dd>${r2v(U.len(dd.precipitation_sum?dd.precipitation_sum[i]:null))} ${U.lenU()}</dd></div>`+
       `<div><dt>Wind</dt><dd>${compass(dd.wind_direction_10m_dominant?dd.wind_direction_10m_dominant[i]:null)} ${r0v(U.spd(dd.wind_speed_10m_max?dd.wind_speed_10m_max[i]:null))} ${U.spdU()}</dd></div>`+
@@ -1850,7 +1946,8 @@ function renderWeek(){
     row.addEventListener("click",()=>{const o=ex.classList.toggle("open");row.setAttribute("aria-expanded",o?"true":"false")});
     rows.appendChild(row);rows.appendChild(ex);
   }
-  document.getElementById("weekMore").textContent=weekOpen?"FEWER DAYS ⌃":"ALL 7 DAYS ⌄";
+  const wm=document.getElementById("weekMore");
+  wm.textContent=weekOpen?"Fewer days ⌃":"All 7 days ⌄";wm.setAttribute("aria-expanded",weekOpen?"true":"false");
 }
 document.getElementById("weekMore").addEventListener("click",()=>{weekOpen=!weekOpen;renderWeek()});
 
@@ -1858,13 +1955,13 @@ document.getElementById("weekMore").addEventListener("click",()=>{weekOpen=!week
 function renderChips(){
   const c=D.current,h=D.hourly,i=hourNow(),ch=document.getElementById("chips");
   ch.hidden=false;
-  ch.textContent=`FEELS ${r0v(f(c.apparent_temperature))}°  ·  `+
-    `${compass(c.wind_direction_10m)} ${r0v(U.spd(c.wind_speed_10m))} ${U.spdU().toUpperCase()}  ·  `+
-    `HUM ${r0v(c.relative_humidity_2m)}%  ·  UV ${r1v(hv(h,"uv_index",i))}`;
+  ch.textContent=`Feels ${r0v(f(c.apparent_temperature))}°  ·  `+
+    `${compass(c.wind_direction_10m)} ${r0v(U.spd(c.wind_speed_10m))} ${U.spdU()}  ·  `+
+    `Hum ${r0v(c.relative_humidity_2m)}%  ·  UV ${r1v(hv(h,"uv_index",i))}`;
   const sn=document.getElementById("suns"),dd=D.daily;
   if(dd&&dd.sunrise&&dd.sunrise[0]&&dd.sunset&&dd.sunset[0]){
     sn.hidden=false;
-    sn.innerHTML=`<u>SUNRISE</u> <b>${clockMin(dd.sunrise[0])}</b> · <u>SUNSET</u> <b>${clockMin(dd.sunset[0])}</b>`;
+    sn.innerHTML=`<span class="pair"><span class="lbl">Sunrise</span> <b>${clockMin(dd.sunrise[0])}</b></span> · <span class="pair"><span class="lbl">Sunset</span> <b>${clockMin(dd.sunset[0])}</b></span>`;
   }else sn.hidden=true;
 }
 
@@ -1886,9 +1983,9 @@ function renderSky(){
     (isDay?`<path d="${path}" stroke="${K.sunc}" stroke-width="2.5" fill="none" stroke-dasharray="${(frac*300).toFixed(0)} 999"/>`:"")+
     `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="7" fill="${isDay?K.sunc:K.dimc}"/>`;
   const mins=Math.round((dn-up)/60000);
-  document.getElementById("sunUp").innerHTML=clockMin(dd.sunrise[0])+"<s>SUNRISE</s>";
-  document.getElementById("sunDown").innerHTML=clockMin(dd.sunset[0])+"<s>SUNSET</s>";
-  document.getElementById("dayLen").innerHTML=Math.floor(mins/60)+"h "+(mins%60)+"m<s>DAYLIGHT</s>";
+  document.getElementById("sunUp").innerHTML=clockMin(dd.sunrise[0])+"<span class='sub'>SUNRISE</span>";
+  document.getElementById("sunDown").innerHTML=clockMin(dd.sunset[0])+"<span class='sub'>SUNSET</span>";
+  document.getElementById("dayLen").innerHTML=Math.floor(mins/60)+"h "+(mins%60)+"m<span class='sub'>DAYLIGHT</span>";
   drawMoon();
 }
 const PHASES=["New moon","Waxing crescent","First quarter","Waxing gibbous","Full moon","Waning gibbous","Last quarter","Waning crescent"];
@@ -1939,7 +2036,7 @@ function renderConsole(){
     renderScope();renderSky();
   }catch(e){}
 }
-document.getElementById("moreBtn").addEventListener("click",()=>document.getElementById("console").scrollIntoView({behavior:"smooth"}));
+document.getElementById("moreBtn").addEventListener("click",()=>document.getElementById("console").scrollIntoView());
 let rzT2;
 window.addEventListener("resize",()=>{clearTimeout(rzT2);rzT2=setTimeout(()=>{if(D){renderScope();if(RADAR_SEEN){sizeRadar();drawRadar()}}},150)});
 drawScale();setPlayIcon();setRFull(false);
@@ -1957,7 +2054,7 @@ load();
 (function pullRefresh(){
   let y0=null,armed=false,was="";
   const top=()=>(window.scrollY||document.documentElement.scrollTop||0)<=2;
-  const busy=()=>!!document.querySelector(".sheet.open");
+  const busy=()=>!!document.querySelector("dialog[open]");
   window.addEventListener("touchstart",e=>{
     if(e.touches.length!==1||!top()||busy()){y0=null;return}
     y0=e.touches[0].clientY;armed=false;was=document.getElementById("stamp").textContent;
@@ -1966,11 +2063,11 @@ load();
     if(y0==null||e.touches.length!==1)return;
     if(!top()){y0=null;if(armed){stamp(was);armed=false}return}
     const dy=e.touches[0].clientY-y0;
-    if(dy>=70&&!armed){armed=true;stamp("RELEASE TO REFRESH")}
+    if(dy>=70&&!armed){armed=true;stamp("Release to refresh")}
     else if(dy<70&&armed){armed=false;stamp(was)}
   },{passive:true});
   const done=()=>{
-    if(armed){armed=false;stamp("CHECKING…");load();checkUpdate()}
+    if(armed){armed=false;stamp("Checking…");load();checkUpdate()}
     y0=null;
   };
   window.addEventListener("touchend",done,{passive:true});
@@ -2020,7 +2117,7 @@ function gpsSync(){
     if(saved&&saved.gps&&dist(saved.lat,saved.lon,lat,lon)<2&&!staleName)return;
     const name=await resolvePlace(lat,lon);
     loc={name,lat,lon,gps:true,rv:RESOLVER_V};box.s("wx.loc",loc);
-    stamp("CHECKING…");load();
+    stamp("Checking…");load();
   },()=>{},{timeout:8000,maximumAge:600000});
 }
 gpsSync();

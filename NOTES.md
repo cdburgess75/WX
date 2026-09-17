@@ -60,13 +60,15 @@ Wears the same Big Sky as the answer screen since v2026.08.20.001: translucent p
 Big Sky aesthetic since v2026.08.20.001: the whole background is one saturated color chosen by the verdict, with white type drawn straight on it — no cards on screen one. Was the sun-shower pastel through v2026.08.16.015, cave-wall stone/ochre through v2026.08.16.005. One screen, no scrolling. Reading level ~5th grade.
 
 **The sky IS the verdict:** one flat color, cross-fading when conditions change —
-- **blue** `#2C82D6` — FINE, the everyday sky
-- **amber** `#E8862B` — heat verdicts and moderate alerts
+- **blue** `#256EB6` — FINE, the everyday sky
+- **amber** `#AD510A` — heat verdicts and moderate alerts
 - **slate** `#414E63` — thunderstorms, wind, bad air
-- **teal** `#1F7A8C` — rain and snow
+- **teal** `#1E7688` — rain and snow
 - **deep navy** `#182236` — after sunset when nothing's wrong (night mode happens by itself; the sun/moon toggle retired with it)
 - **red** `#B23A31` — severe/extreme warnings only, so red always means danger
 - **ice** `#C9D9E6` — dangerous cold; the one sky with dark ink instead of white
+
+Every sky is held dark enough (ice: light enough) that the ink and the 13px labels clear WCAG 4.5:1 — blue, amber and teal went a shade deeper in v2026.09.17.001 for exactly that, and the sun/rain accent tints are set per sky. Change a sky and re-measure.
 
 Flat color on purpose — gradients read as murk on OLED phones. The console panels are translucent white (or ink, on ice) over the same sky, and the canvases (scope, radar basemap, sun arc, moon) carry white-on-color palettes with a dark-on-ice variant. The favicon re-renders to the current verdict's pictograph, so even the tab shows the weather.
 
@@ -210,6 +212,7 @@ on plain HTTP in every current browser.
 - v2026.09.07.004 — **live severe weather can no longer hide behind an advisory** (reported: thunder, lightning, rain and heavy wind passed through while the screen read HEAT ADVISORY). Any active alert used to win outright; now only warnings do, a storm or damaging gust takes the word and the advisory moves to a tappable line. Damaging gusts (45+ mph) become their own verdict instead of sitting below the heat check, where a Louisiana summer buried them forever. And the app now asks the nearest NWS station what is actually being observed, so a real thunderstorm reaches the screen even when the forecast model shows a clear afternoon
 - v2026.09.14.001 — **the app looks out of the window** (reported: raining, app said HOT, no alert, station dry). Adds four rain-now witnesses: current precipitation/rain/showers (never requested until now), the current 15-minute bucket (downloaded all along, only ever read forwards), station observation, and the radar pixel directly over your coordinates from the same RainViewer tiles the console map draws. Console gains Radar overhead and Reported now readings
 - v2026.09.14.002 — the radar probe from .001 never read a pixel: the map loads the same tiles at the same default zoom without CORS, so the browser answered the probe's crossOrigin request from that cached copy and refused the pixels. Tiles are now fetched as blobs with `cache:"reload"`, the coverage threshold drops to 12% so light rain counts, and the console's Radar overhead row reports the reading or the reason there isn't one
+- v2026.09.17.001 — **the everyone-can-use-it pass** (full interface review). Skies deepen so white type clears 4.5:1 everywhere, accents re-tinted per sky; screen readers now hear the temperature, the town and the week's conditions (aria-labels were replacing them); hour bars are buttons walked with the arrow keys, and rain-likely hours carry a drop as well as a color (they vanished on the ice sky); the "also in effect" line, refresh stamp and town list are real buttons; scope and radar take arrow keys; both sheets are native `<dialog>`s; radar autoplay and smooth scroll respect reduced motion; a blocked location is explained inside the sheet; sample data says NO SIGNAL in the headline; `<main>`, an `<h1>`, a status live region; one nine-step type scale with a 12px floor; tip no longer covers the refresh button; hover and press feedback; dead `.dayrow` CSS removed
 
 ## Backlog / ideas
 

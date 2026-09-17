@@ -6,7 +6,7 @@ A single-file, offline-first weather app. No build step, no API keys, no librari
 |-----|------|------------|
 | WX | `index.html` | One answer first — decides what matters and says it plainly; the full console (radar, 48-hour scope, details, sun & moon) sits below the fold |
 
-`console.html` is only a redirect stub for old bookmarks. WX pulls from Open-Meteo (forecast + geocoding) and api.weather.gov (US alerts), with RainViewer / NEXRAD radar over CARTO tiles. Everything is fetched in metric and converted client-side, and the last good payload is cached in localStorage so the app still renders — flagged stale — with the network down.
+`console.html` is only a redirect stub for old bookmarks. WX pulls from Open-Meteo (forecast + geocoding) and api.weather.gov (US alerts), with RainViewer / NEXRAD radar over OpenStreetMap tiles. Everything is fetched in metric and converted client-side, and the last good payload is cached in localStorage so the app still renders — flagged stale — with the network down.
 
 ## Live
 
@@ -22,4 +22,4 @@ See **[NOTES.md](NOTES.md)** for the full design record: data sources, architect
 
 ## Attribution
 
-Weather data by [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Alerts from the US National Weather Service. Radar tiles from RainViewer; basemap © OpenStreetMap contributors, © CARTO.
+Weather data by [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Alerts from the US National Weather Service. Radar tiles from RainViewer; basemap © OpenStreetMap contributors.

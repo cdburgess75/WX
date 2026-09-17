@@ -108,18 +108,16 @@ Most verdicts carry two or three phrasings, rotated by day of month — determin
 
 ## App icon
 
-"Sun shower on the Big Sky" (WX v2026.09.06.001) — the icon is now drawn from
-the app's own palette instead of sitting beside it: the FINE sky blue `#2C82D6`
-as a full-bleed tile, a fat white cloud, the gold sun `#FFD469` peeking over its
-shoulder, three white drops beneath. Big shapes and three colors, so it still
-reads at 40px on a crowded home screen. Replaced the 2026.08.16.013
-sun/storm/rain mark, which was drawn for the old pale-sky palette and went muddy
-at small sizes. Source of truth is `icon.svg`; `apple-touch-icon.png` (180) and
-`icon-512.png` are renders of it (rendered at 1024 and box-downsampled — small
-headless viewports pad with white). The favicon is a data URI in the `<head>`,
-so the page itself stays single-file; the PNGs exist only because iOS ignores
-data URIs for `apple-touch-icon`. In-app, the favicon re-renders per verdict on
-a tile of the current sky color.
+The WX wordmark (v2026.09.17.003): "WX" heavy and tracked, like the verdict
+word on screen one, white on the FINE sky blue `#256EB6`. It is drawn as
+geometric strokes (beveled joins, clipped to a flat cap-height box) rather
+than font text, so it renders identically everywhere and stays crisp at
+29px. Source of truth is `icon.svg`; `apple-touch-icon.png` (180) and
+`icon-512.png` are renders of it (Quick Look at 1024, `sips` down). The
+favicon is a data URI in the `<head>`; in-app it re-renders the same mark
+on a tile of the current sky color (dark ink on ice), so the tab still
+carries the verdict. Replaced the sun-shower clip art (v2026.09.06.001 to
+v2026.09.17.002), which said "weather app" but nothing about this one.
 
 ## Why "No signal" in previews
 
@@ -214,6 +212,7 @@ on plain HTTP in every current browser.
 - v2026.09.14.002 — the radar probe from .001 never read a pixel: the map loads the same tiles at the same default zoom without CORS, so the browser answered the probe's crossOrigin request from that cached copy and refused the pixels. Tiles are now fetched as blobs with `cache:"reload"`, the coverage threshold drops to 12% so light rain counts, and the console's Radar overhead row reports the reading or the reason there isn't one
 - v2026.09.17.001 — **the everyone-can-use-it pass** (full interface review). Skies deepen so white type clears 4.5:1 everywhere, accents re-tinted per sky; screen readers now hear the temperature, the town and the week's conditions (aria-labels were replacing them); hour bars are buttons walked with the arrow keys, and rain-likely hours carry a drop as well as a color (they vanished on the ice sky); the "also in effect" line, refresh stamp and town list are real buttons; scope and radar take arrow keys; both sheets are native `<dialog>`s; radar autoplay and smooth scroll respect reduced motion; a blocked location is explained inside the sheet; sample data says NO SIGNAL in the headline; `<main>`, an `<h1>`, a status live region; one nine-step type scale with a 12px floor; tip no longer covers the refresh button; hover and press feedback; dead `.dayrow` CSS removed
 - v2026.09.17.002 — radar basemap switches from CARTO Voyager to OpenStreetMap standard tiles: CARTO began watermarking its free tiles with API KEY REQUIRED, on the live site too
+- v2026.09.17.003 — new app icon: the WX wordmark, geometric paths, white on the FINE sky; favicon re-tints per sky
 
 ## Backlog / ideas
 

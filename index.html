@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://api.open-meteo.com" crossorigin>
 <link rel="preconnect" href="https://api.weather.gov" crossorigin>
 <link rel="preconnect" href="https://air-quality-api.open-meteo.com" crossorigin>
-<link rel="dns-prefetch" href="https://basemaps.cartocdn.com">
+<link rel="dns-prefetch" href="https://tile.openstreetmap.org">
 <link rel="dns-prefetch" href="https://tilecache.rainviewer.com">
 <title>WX</title>
 <meta name="description" content="One screen. One answer. Weather without the dashboard.">
@@ -225,6 +225,9 @@
                    the headline instead of whispering in the footer. One
                    type scale (nine sizes, 12px floor), a tip that no longer
                    covers the refresh button, hover and press feedback
+  v2026.09.17.002  the radar basemap comes from OpenStreetMap's standard
+                   tiles now: CARTO began stamping API KEY REQUIRED across
+                   its free Voyager tiles, on the live site too
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -670,7 +673,7 @@ body.sky-ice .rbar .play{color:#FFF}
     <button class="upd" id="updBtn" hidden>Update to the new version</button>
     <button type="button" class="stampbtn" id="stampBtn"><span class="vh">Refresh.</span> <span id="stamp">—</span></button><br>
     <p class="vh" role="status" id="live"></p>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.17.001</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.17.002</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">Console ⌄</button>
 </div>
@@ -747,7 +750,7 @@ body.sky-ice .rbar .play{color:#FFF}
 
   <footer class="pagefoot">
     Forecast data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>, CC BY 4.0. Watches and warnings from the US National Weather Service (api.weather.gov).<br>
-    Radar by <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>; NEXRAD reflectivity via <a href="https://mesonet.agron.iastate.edu/" target="_blank" rel="noopener">Iowa Environmental Mesonet</a>. Basemap &copy; OpenStreetMap contributors, &copy; CARTO.<br>
+    Radar by <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>; NEXRAD reflectivity via <a href="https://mesonet.agron.iastate.edu/" target="_blank" rel="noopener">Iowa Environmental Mesonet</a>. Basemap &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.<br>
     Not for use in life-threatening weather. Always confirm with NWS or your local emergency management.
   </footer>
 </div>
@@ -770,7 +773,7 @@ body.sky-ice .rbar .play{color:#FFF}
 
 <script>
 "use strict";
-const VERSION="v2026.09.17.001";
+const VERSION="v2026.09.17.002";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -1560,10 +1563,10 @@ function codeToMark(c,day){
 /* canvas palette follows the sky: white marks on color, dark marks on ice */
 const CPAL_W={night:"rgba(0,0,0,.16)",grid:"rgba(255,255,255,.16)",lbl:"rgba(255,255,255,.62)",dow:"rgba(255,255,255,.85)",div:"rgba(255,255,255,.3)",
  precip:"168,216,255",temp:"#FFD469",tempRGB:"255,212,105",nowline:"rgba(255,255,255,.5)",nowlbl:"#FFFFFF",
- radarbg:"#D7E8EC",carto:"rastertiles/voyager",marker:"#E8432E",axis:"rgba(255,255,255,.3)",arc:"rgba(255,255,255,.42)",sunc:"#FFD469",dimc:"rgba(255,255,255,.55)",moonbg:"rgba(255,255,255,.18)"};
+ radarbg:"#D7E8EC",marker:"#E8432E",axis:"rgba(255,255,255,.3)",arc:"rgba(255,255,255,.42)",sunc:"#FFD469",dimc:"rgba(255,255,255,.55)",moonbg:"rgba(255,255,255,.18)"};
 const CPAL_ICE={night:"#B9CCDA",grid:"#B7C9D6",lbl:"#5B7285",dow:"#3D566B",div:"#A5BACA",
  precip:"53,118,201",temp:"#C87F16",tempRGB:"200,127,22",nowline:"rgba(23,49,63,.45)",nowlbl:"#17313F",
- radarbg:"#DCE9F5",carto:"rastertiles/voyager",marker:"#E8432E",axis:"#A9BFCF",arc:"#93AEC2",sunc:"#C87F16",dimc:"#7A93A6",moonbg:"#E2ECF5"};
+ radarbg:"#DCE9F5",marker:"#E8432E",axis:"#A9BFCF",arc:"#93AEC2",sunc:"#C87F16",dimc:"#7A93A6",moonbg:"#E2ECF5"};
 const cpal=()=>document.body.classList.contains("sky-ice")?CPAL_ICE:CPAL_W;
 const hv=(h,k,i)=>(h&&h[k]&&h[k][i]!=null)?h[k][i]:null;
 
@@ -1657,7 +1660,7 @@ function drawRadar(){
     for(let y=Math.floor(oY/TS);y<=Math.floor((oY+H)/TS);y++){
       if(y<0||y>=n)continue;
       const tx=((x%n)+n)%n,px=Math.round(x*TS-oX),py=Math.round(y*TS-oY);
-      const base=tileImg(`https://basemaps.cartocdn.com/${C.carto}/${z}/${tx}/${y}.png`);
+      const base=tileImg(`https://tile.openstreetmap.org/${z}/${tx}/${y}.png`);
       if(base._ok)g.drawImage(base,px,py,TS,TS);
       if(frame){
         // RainViewer's free tiles stop at zoom 7 — above that the server

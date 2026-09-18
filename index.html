@@ -18,7 +18,7 @@
 <link rel="dns-prefetch" href="https://tilecache.rainviewer.com">
 <title>WX</title>
 <meta name="description" content="One screen. One answer. Weather without the dashboard.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%232C82D6%22/%3E%3Ccircle cx=%2266%22 cy=%2232%22 r=%2214%22 fill=%22%23FFD469%22/%3E%3Cline x1=%2266.0%22 y1=%2212.5%22 x2=%2266.0%22 y2=%226.0%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2279.8%22 y1=%2218.2%22 x2=%2284.4%22 y2=%2213.6%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2285.5%22 y1=%2232.0%22 x2=%2292.0%22 y2=%2232.0%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2279.8%22 y1=%2245.8%22 x2=%2284.4%22 y2=%2250.4%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2266.0%22 y1=%2251.5%22 x2=%2266.0%22 y2=%2258.0%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2252.2%22 y1=%2245.8%22 x2=%2247.6%22 y2=%2250.4%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2246.5%22 y1=%2232.0%22 x2=%2240.0%22 y2=%2232.0%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cline x1=%2252.2%22 y1=%2218.2%22 x2=%2247.6%22 y2=%2213.6%22 stroke=%22%23FFD469%22 stroke-width=%225.5%22 stroke-linecap=%22round%22/%3E%3Cg transform=%22translate%2846,58%29 scale%281.05%29%22%3E%3Crect x=%22-30%22 y=%22-4%22 width=%2260%22 height=%2218%22 rx=%229%22 fill=%22%23FFFFFF%22/%3E%3Ccircle cx=%22-14%22 cy=%22-6%22 r=%2213%22 fill=%22%23FFFFFF%22/%3E%3Ccircle cx=%223%22 cy=%22-13%22 r=%2217%22 fill=%22%23FFFFFF%22/%3E%3Ccircle cx=%2219%22 cy=%22-5%22 r=%2212%22 fill=%22%23FFFFFF%22/%3E%3C/g%3E%3Cpath transform=%22translate%2830,84%29 scale%280.62%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%23FFFFFF%22/%3E%3Cpath transform=%22translate%2846,88%29 scale%280.66%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%23FFFFFF%22/%3E%3Cpath transform=%22translate%2862,84%29 scale%280.62%29%22 d=%22M0 -10 C3 -4 8 1 8 6 A8 8 0 0 1 -8 6 C-8 1 -3 -4 0 -10 Z%22 fill=%22%23FFFFFF%22/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2218%22%20fill%3D%22%23256EB6%22%2F%3E%3Cg%20transform%3D%22translate%2850%2050%29%20scale%28.82%29%20translate%28-50%20-50%29%22%3E%3CclipPath%20id%3D%22cap%22%3E%3Crect%20x%3D%220%22%20y%3D%2230%22%20width%3D%22100%22%20height%3D%2240%22%2F%3E%3C%2FclipPath%3E%3Cg%20clip-path%3D%22url%28%23cap%29%22%20fill%3D%22none%22%20stroke%3D%22%23FFFFFF%22%20stroke-width%3D%229.5%22%20stroke-linejoin%3D%22bevel%22%3E%3Cpath%20d%3D%22M8%2026%20L20%2074%20L29.5%2040%20L39%2074%20L51%2026%22%2F%3E%3Cpath%20d%3D%22M62%2026%20L92%2074%20M92%2026%20L62%2074%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!--
   WX v2026.08.20.001 — Big Sky: the background IS the verdict.
@@ -228,6 +228,10 @@
   v2026.09.17.002  the radar basemap comes from OpenStreetMap's standard
                    tiles now: CARTO began stamping API KEY REQUIRED across
                    its free Voyager tiles, on the live site too
+  v2026.09.17.003  new app icon: the WX wordmark, heavy and tracked like
+                   the verdict word, white on the FINE sky. Drawn as
+                   geometric paths (no font dependency); the favicon shows
+                   the same mark on a tile of the current sky color
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -680,7 +684,7 @@ body.sky-ice .rbar .play{color:#FFF}
     <button class="upd" id="updBtn" hidden>Update to the new version</button>
     <button type="button" class="stampbtn" id="stampBtn"><span class="vh">Refresh.</span> <span id="stamp">—</span></button><br>
     <p class="vh" role="status" id="live"></p>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.17.002</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.17.003</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">Console ⌄</button>
 </div>
@@ -780,7 +784,7 @@ body.sky-ice .rbar .play{color:#FFF}
 
 <script>
 "use strict";
-const VERSION="v2026.09.17.002";
+const VERSION="v2026.09.17.003";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -1211,7 +1215,7 @@ function paint(){
     if(note){sEl.hidden=false;sEl.textContent=note}else sEl.hidden=true;
   }
   document.getElementById("placeName").textContent=loc.name;
-  setFavicon(v.mark);
+  setFavicon();
   // Tomorrow in one small line: hi/lo and the first thing that falls
   const tEl=document.getElementById("tmrw"),dd=D.daily;
   if(v.alert||!dd||!dd.time||!dd.time[1]){tEl.hidden=true}
@@ -1271,13 +1275,16 @@ function setSkin(v){
   if(tc)tc.setAttribute("content",SKYBG[sky]);
 }
 /* ---------- the tab shows the weather too ---------- */
-function setFavicon(mark){
+function setFavicon(){
+  // The WX mark on a tile of the current sky, so the tab color still says
+  // what the verdict is. Ice keeps its dark ink.
   const l=document.querySelector('link[rel="icon"]');if(!l)return;
   const k=(document.body.className.match(/sky-(\w+)/)||[])[1]||"fine";
-  const bg=k==="ice"?"#17313F":(SKYBG[k]||"#256EB6");
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="${bg}"/>${pict(mark)}</svg>`;
+  const bg=SKYBG[k]||"#256EB6",ink=k==="ice"?"#17313F":"#FFFFFF";
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="${bg}"/>${WXMARK.replace("#FFFFFF",ink)}</svg>`;
   l.setAttribute("href","data:image/svg+xml,"+encodeURIComponent(svg));
 }
+const WXMARK='<g transform="translate(50 50) scale(.82) translate(-50 -50)"><clipPath id="cap"><rect x="0" y="30" width="100" height="40"/></clipPath><g clip-path="url(#cap)" fill="none" stroke="#FFFFFF" stroke-width="9.5" stroke-linejoin="bevel"><path d="M8 26 L20 74 L29.5 40 L39 74 L51 26"/><path d="M62 26 L92 74 M92 26 L62 74"/></g></g>';
 
 /* ---------- data ---------- */
 async function load(){

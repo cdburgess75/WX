@@ -213,6 +213,7 @@ on plain HTTP in every current browser.
 - v2026.09.17.001 — **the everyone-can-use-it pass** (full interface review). Skies deepen so white type clears 4.5:1 everywhere, accents re-tinted per sky; screen readers now hear the temperature, the town and the week's conditions (aria-labels were replacing them); hour bars are buttons walked with the arrow keys, and rain-likely hours carry a drop as well as a color (they vanished on the ice sky); the "also in effect" line, refresh stamp and town list are real buttons; scope and radar take arrow keys; both sheets are native `<dialog>`s; radar autoplay and smooth scroll respect reduced motion; a blocked location is explained inside the sheet; sample data says NO SIGNAL in the headline; `<main>`, an `<h1>`, a status live region; one nine-step type scale with a 12px floor; tip no longer covers the refresh button; hover and press feedback; dead `.dayrow` CSS removed
 - v2026.09.17.002 — radar basemap switches from CARTO Voyager to OpenStreetMap standard tiles: CARTO began watermarking its free tiles with API KEY REQUIRED, on the live site too
 - v2026.09.17.003 — new app icon: the WX wordmark, geometric paths, white on the FINE sky; favicon re-tints per sky
+- v2026.09.18.001 — share button moved below the iPhone status bar (safe-area inset) and made a visible ring on the place row; on an uninstalled iPhone, tapping it also explains Safari share → Add to Home Screen
 
 ## Backlog / ideas
 

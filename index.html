@@ -232,6 +232,12 @@
                    the verdict word, white on the FINE sky. Drawn as
                    geometric paths (no font dependency); the favicon shows
                    the same mark on a tile of the current sky color
+  v2026.09.18.001  the share button was drawn under the iPhone status bar
+                   (it ignored the safe-area inset, and iOS keeps taps on
+                   the clock and battery). It now sits on the place row as
+                   a visible ring, and on an iPhone that hasn't installed
+                   WX a tip explains Safari's share → Add to Home Screen,
+                   which the web share sheet can't offer
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -285,10 +291,14 @@ body{
 .place svg{opacity:.65}
 
 /* ---- corner button: share ---- */
-.corner{position:absolute;top:2px;right:0;display:flex;gap:2px;z-index:2}
+/* Sits on the place row, below the iPhone status bar: the app runs edge to
+   edge under a translucent status bar, so anything above the safe-area
+   inset is drawn under the clock and battery — and iOS keeps those taps. */
+.corner{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:10px;display:flex;gap:2px;z-index:2}
 .corner button{
-  background:none;border:0;color:var(--ash);cursor:pointer;width:44px;height:44px;
-  display:flex;align-items:center;justify-content:center;padding:0;border-radius:12px;
+  background:rgba(0,0,0,.14);border:1.5px solid color-mix(in srgb,var(--fg) 55%,transparent);
+  color:var(--bone);cursor:pointer;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;padding:0;border-radius:99px;
 }
 .corner button:active{color:var(--bone)}
 
@@ -684,7 +694,7 @@ body.sky-ice .rbar .play{color:#FFF}
     <button class="upd" id="updBtn" hidden>Update to the new version</button>
     <button type="button" class="stampbtn" id="stampBtn"><span class="vh">Refresh.</span> <span id="stamp">—</span></button><br>
     <p class="vh" role="status" id="live"></p>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.17.003</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.18.001</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">Console ⌄</button>
 </div>
@@ -784,7 +794,7 @@ body.sky-ice .rbar .play{color:#FFF}
 
 <script>
 "use strict";
-const VERSION="v2026.09.17.003";
+const VERSION="v2026.09.18.001";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -1331,6 +1341,9 @@ document.getElementById("shareBtn").addEventListener("click",async()=>{
     if(navigator.share)await navigator.share({title:"WX",text:"One screen. One answer.",url:location.href});
     else if(navigator.clipboard){await navigator.clipboard.writeText(location.href);stamp("Link copied")}
   }catch(e){}
+  // The web share sheet has no "Add to Home Screen" — only Safari's own does.
+  const ios=/iP(hone|ad|od)/.test(navigator.userAgent),installed=matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+  if(ios&&!installed)showTip("To keep WX on your Home Screen: tap Safari’s share button, then Add to Home Screen.",9000);
 });
 
 /* the timestamp refreshes when tapped */
@@ -2092,13 +2105,17 @@ load();
 })();
 
 /* ---------- the two invisible gestures, said once ---------- */
+let tipT=null;
+function showTip(text,ms){
+  const t=document.getElementById("tip");if(!t)return;
+  t.firstElementChild.textContent=text;t.hidden=false;
+  clearTimeout(tipT);tipT=setTimeout(()=>{t.hidden=true},ms);
+}
+document.getElementById("tipX").addEventListener("click",()=>{clearTimeout(tipT);document.getElementById("tip").hidden=true});
 (function firstTip(){
   if(box.g("wx.tip",false))return;
-  const t=document.getElementById("tip");if(!t)return;
-  const hide=()=>{t.hidden=true;box.s("wx.tip",true)};
-  setTimeout(()=>{t.hidden=false},1400);
-  document.getElementById("tipX").addEventListener("click",hide);
-  setTimeout(hide,12000);
+  const first=document.getElementById("tip").firstElementChild.textContent;
+  setTimeout(()=>{showTip(first,12000);box.s("wx.tip",true)},1400);
 })();
 
 /* GPS decides where "here" is — quietly, after the first paint. A location the

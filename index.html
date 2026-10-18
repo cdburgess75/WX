@@ -238,17 +238,19 @@
                    a visible ring, and on an iPhone that hasn't installed
                    WX a tip explains Safari's share → Add to Home Screen,
                    which the web share sheet can't offer
-  v2026.10.18.001  the hours between now and tomorrow, at a glance: the
-                   twelve mute bars become a row of hour columns — the
-                   time, a pictograph of the sky, the rain chance when
-                   there is one, the temperature, and the bar under it so
-                   the day's shape still reads. The row runs to tomorrow's
-                   sunrise: every hour in the evening, every two hours
-                   while the whole day is ahead (a two-hour column carries
-                   its worst sky and highest rain chance, so a 4 PM shower
-                   cannot fall between the 3 and 5 o'clock columns). The
-                   TOMORROW line moves beneath the row, where tomorrow
-                   actually begins, and no longer hides while an alert is up
+  v2026.10.18.001  the whole day at a glance: the twelve mute bars become
+                   the day itself — midnight today to 6 AM tomorrow in
+                   three-hour columns, each with the time, a pictograph of
+                   the sky, the rain chance when there is one, the
+                   temperature, and the bar under it so the day's shape
+                   still reads. The hours already behind you are dimmed,
+                   the column you are in is ringed, and a dot on the axis
+                   beneath marks the exact time, with the dates at the
+                   ends. A column carries the worst sky and highest rain
+                   chance of its three hours, so a 4 PM shower cannot fall
+                   between the 3 and 6 o'clock columns. The TOMORROW line
+                   moves beneath the row, where tomorrow actually begins,
+                   and no longer hides while an alert is up
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -380,11 +382,12 @@ body{
 .suns .lbl{text-decoration:none;color:var(--sunlbl);font-weight:800}
 .suns b{color:var(--suntime);font-weight:700}
 
-/* ---- the hours between now and tomorrow morning ---- */
-/* One column per hour (per two hours when the whole day is still ahead):
-   the time, what the sky is doing, the rain chance when there is one, the
-   temperature, and a bar that follows it so the day's shape reads at a
-   glance. Twelve columns fit a phone; a very narrow one scrolls sideways. */
+/* ---- today, hour by hour, through tomorrow's dawn ---- */
+/* Eleven three-hour columns from midnight to 6 AM tomorrow: the time, what
+   the sky is doing, the rain chance when there is one, the temperature, and
+   a bar that follows it so the day's shape reads at a glance. The hours
+   behind you dim, the column you are in is ringed, and the axis beneath
+   carries a dot at the exact time. A very narrow phone scrolls sideways. */
 .hours{width:100%;flex:none;padding-top:10px}
 .bars{display:flex;align-items:flex-end;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .bars::-webkit-scrollbar{display:none}
@@ -409,6 +412,14 @@ body{
 .bars button.wet .bt i{background:var(--rainink)}
 .bars button.now .bt i{background:var(--fg);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--bg) 75%,#000)}
 .bars button:focus-visible{outline-offset:-2px}   /* the row clips at its edges */
+/* the hours already behind you step back; their numbers stay in the labels */
+.bars button.past .ic,.bars button.past .pp,.bars button.past .tv,.bars button.past .bt i{opacity:.5}
+/* the time axis: a hairline with a tick per column and a dot where you are */
+.axis{position:relative;height:12px;margin-top:4px}
+.axis::before{content:"";position:absolute;left:0;right:0;top:5px;height:2px;border-radius:1px;background:color-mix(in srgb,var(--fg) 40%,transparent)}
+.axis .tick{position:absolute;top:3px;width:2px;height:6px;margin-left:-1px;background:color-mix(in srgb,var(--fg) 40%,transparent)}
+.axis .dot{position:absolute;top:0;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--fg);box-shadow:0 0 0 2px color-mix(in srgb,var(--bg) 75%,#000)}
+.dates{display:flex;justify-content:space-between;margin-top:6px;text-transform:uppercase;font:600 var(--fs-12)/1 var(--sans);letter-spacing:.18em;color:var(--ash)}
 .tmrw{text-transform:uppercase;font:700 var(--fs-13)/1.3 var(--sans);letter-spacing:.14em;color:var(--ash);text-align:center;text-wrap:balance;margin-top:10px;padding:0 4px}
 .tmrw[hidden]{display:none}
 
@@ -705,7 +716,9 @@ body.sky-ice .rbar .play{color:#FFF}
   <p class="suns" id="suns" hidden></p>
 
   <div class="hours">
-    <div class="bars" id="bars" role="group" aria-label="Hour by hour until tomorrow morning. Arrow keys move between hours."></div>
+    <div class="bars" id="bars" role="group" aria-label="Today, hour by hour, through tomorrow's dawn. Arrow keys move between hours."></div>
+    <div class="axis" id="axis" aria-hidden="true"></div>
+    <div class="dates"><span id="dateL"></span><span id="dateR"></span></div>
     <p class="tmrw" id="tmrw" hidden></p>
   </div>
 
@@ -1269,55 +1282,65 @@ function paint(){
     tEl.textContent=`Tomorrow ${R(f(dd.temperature_2m_max[1]))}°/${R(f(dd.temperature_2m_min[1]))}° · ${ev}`;
   }
 
-  renderHours(i);
+  renderHours();
   renderChips();
   renderWeek();
   renderConsole();
 }
 
-/* ---------- the hours between now and tomorrow morning ---------- */
-/* The row runs from this hour to the next sunrise — never fewer than 12
-   hours, never more than 24 — one column per hour, or per two hours when
-   the whole day is still ahead, so the day fits a phone screen in one look.
-   A two-hour column reports the worst sky and the highest rain chance of
-   its two hours, so a 4 PM shower cannot fall between the 3 and 5 o'clock
-   columns; its temperature and pictograph belong to the hour it is named for. */
-function renderHours(i){
-  const h=D.hourly,dd=D.daily,bars=document.getElementById("bars");bars.innerHTML="";
-  const n=h.time.length,t=now();
-  let span=12;
-  if(dd&&dd.sunrise){
-    const up=dd.sunrise.map(s=>s?ms(s):NaN).find(x=>x>t);   // the next sunrise after now
-    if(up){let j=i;while(j<n&&ms(h.time[j])+3600000<=up)j++;span=Math.min(24,Math.max(12,j-i))}
-  }
-  span=Math.max(1,Math.min(span,n-i));
-  const step=span>12?2:1,cols=Math.ceil(span/step);
-  const temps=[];for(let k=0;k<cols;k++)temps.push(f(h.temperature_2m[i+k*step]));
+/* ---------- today, hour by hour, through tomorrow's dawn ---------- */
+/* Midnight today to 6 AM tomorrow in three-hour columns, the way a day is
+   planned: the hours already behind you are dimmed, the column you are in
+   is ringed, and a dot on the axis beneath marks the exact time. A column
+   reports the worst sky and the highest rain chance of its three hours, so
+   a 4 PM shower cannot fall between the 3 and 6 o'clock columns; its
+   temperature and pictograph belong to the hour it is named for. */
+const HSTEP=3,HCOLS=11;   // 12 AM, 3 AM … 12 AM, 3 AM, 6 AM tomorrow
+function renderHours(){
+  const h=D.hourly,bars=document.getElementById("bars");bars.innerHTML="";
+  const n=h.time.length,t=now(),HR=3600000;
+  // the row starts at today's midnight — the first hour carrying today's date
+  const today=new Date(t).toISOString().slice(0,10);
+  let base=h.time.findIndex(x=>x.slice(0,10)===today);if(base<0)base=0;
+  const cols=Math.max(1,Math.min(HCOLS,Math.ceil((n-base)/HSTEP)));
+  const temps=[];for(let k=0;k<cols;k++)temps.push(f(h.temperature_2m[base+k*HSTEP]));
   const lo=Math.min(...temps),hi=Math.max(...temps),sp=Math.max(hi-lo,F?12:7);
-  // what matters most in a two-hour column: storm, then snow, then rain, then fog
+  // what matters most in a three-hour column: storm, then snow, then rain, then fog
   const loud=c=>STORM.has(c)?4:SNOW.has(c)?3:WET.has(c)?2:(c===45||c===48)?1:0;
+  let here=null;
   for(let k=0;k<cols;k++){
-    const j=i+k*step,end=Math.min(j+step,i+span);
+    const j=base+k*HSTEP,end=Math.min(j+HSTEP,n);
     let code=hv(h,"weather_code",j),pop=0;
     for(let q=j;q<end;q++){
       const c=hv(h,"weather_code",q);if(c!=null&&(code==null||loud(c)>loud(code)))code=c;
       pop=Math.max(pop,h.precipitation_probability[q]||0);
     }
     const tp=temps[k],day=hv(h,"is_day",j)!==0,wet=pop>=45;
+    const past=ms(h.time[end-1])+HR<=t;          // every hour of the column is behind us
+    const now_=!past&&ms(h.time[j])<=t;           // the column we are standing in
     const b=document.createElement("button");b.type="button";
-    b.className=(wet?"wet":"")+(k===0?" now":"");
-    b.tabIndex=k===0?0:-1;   // one tab stop; the arrow keys walk the hours
+    b.className=(wet?"wet":"")+(past?" past":"")+(now_?" now":"");
+    b.tabIndex=-1;                                // one tab stop (set below); the arrow keys walk the hours
     const hh=+h.time[j].slice(11,13);
-    b.innerHTML=`<span class="ht">${k===0?"<b>NOW</b><span></span>":`<b>${hh%12||12}</b><span>${hh>=12?"PM":"AM"}</span>`}</span>`+
+    b.innerHTML=`<span class="ht"><b>${hh%12||12}</b><span>${hh>=12?"PM":"AM"}</span></span>`+
       `<span class="ic"><svg viewBox="0 0 100 100" aria-hidden="true">${pict(codeToMark(code,day))}</svg></span>`+
       `<span class="pp">${pop>=30?pop+"%":""}</span>`+
       `<span class="tv">${r0v(tp)}°</span>`+
       `<span class="bt"><i style="height:${isNaN(tp)?22:(22+((tp-lo)/sp)*74).toFixed(0)}%"></i></span>`;
-    b.dataset.info=(k===0?"Now":clock(h.time[j]))+" — "+r0v(tp)+"°, "+wmoText(code).toLowerCase()+
+    b.dataset.info=(now_?"Now, ":past?"Earlier, ":"")+clock(h.time[j])+" — "+r0v(tp)+"°, "+wmoText(code).toLowerCase()+
       ", "+(pop>(h.precipitation_probability[j]||0)?"up to ":"")+pop+"% chance of rain";
     b.setAttribute("aria-label",b.dataset.info);
+    if(now_)here=b;
     bars.appendChild(b);
   }
+  (here||bars.firstChild).tabIndex=0;
+  // the axis: a tick under each column, and the dot at the exact time
+  const ax=document.getElementById("axis");
+  const x=(t-ms(h.time[base]))/(HSTEP*HR)+.5;   // where now falls, in column widths
+  ax.innerHTML=Array.from({length:cols},(_,k)=>`<i class="tick" style="left:${((k+.5)/cols*100).toFixed(2)}%"></i>`).join("")+
+    (x>=0&&x<=cols?`<i class="dot" style="left:${(x/cols*100).toFixed(2)}%"></i>`:"");
+  document.getElementById("dateL").textContent=shortDate(h.time[base]);
+  document.getElementById("dateR").textContent=cols>1?shortDate(h.time[base+(cols-1)*HSTEP]):"";
 }
 
 /* ---------- the sky IS the verdict ---------- */

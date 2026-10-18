@@ -248,7 +248,7 @@
                    its worst sky and highest rain chance, so a 4 PM shower
                    cannot fall between the 3 and 5 o'clock columns). The
                    TOMORROW line moves beneath the row, where tomorrow
-                   actually begins
+                   actually begins, and no longer hides while an alert is up
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -1250,9 +1250,11 @@ function paint(){
   }
   document.getElementById("placeName").textContent=loc.name;
   setFavicon();
-  // Tomorrow in one small line: hi/lo and the first thing that falls
+  // Tomorrow in one small line: hi/lo and the first thing that falls.
+  // It used to hide behind an alert, when it shared the answer block with
+  // the advisory box; under the hour row it has room, so it stays.
   const tEl=document.getElementById("tmrw"),dd=D.daily;
-  if(v.alert||!dd||!dd.time||!dd.time[1]){tEl.hidden=true}
+  if(!dd||!dd.time||!dd.time[1]){tEl.hidden=true}
   else{
     const day2=dd.time[1];let ev="no rain";
     for(let j=0;j<h.time.length;j++){

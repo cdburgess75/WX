@@ -10,9 +10,10 @@ A single-file, offline-first weather app in the SKYWAVE style. (Was two apps —
 
 One page since v2026.08.16.014; screen one went dense in v2026.08.16.015; Big Sky repaint in v2026.08.20.001.
 The first screen now carries a compact hero row (pictograph · temperature ·
-verdict word side by side), the sentence, the TOMORROW line, four snapshot
-chips (feels · wind · humidity · UV), the 12 hourly bars, and the 7-day
-outlook folded to three rows — ALL 7 DAYS unfolds it in place, and tapping a
+verdict word side by side), the sentence, four snapshot chips (feels · wind ·
+humidity · UV), the day row (midnight to 6 AM tomorrow in three-hour columns,
+the hours behind you dimmed, a dot on the axis at the time) with the TOMORROW
+line under it, and the 7-day outlook folded to three rows — ALL 7 DAYS unfolds it in place, and tapping a
 row opens that day's details. Scrolling (or the CONSOLE ⌄ tab) reveals the
 details grid, radar (RV/NX), the 48-hour scope, and sun & moon. `console.html`
 survives only as a redirect stub for old bookmarks, forwarding to `/#console`.
@@ -72,9 +73,9 @@ Every sky is held dark enough (ice: light enough) that the ink and the 13px labe
 
 Flat color on purpose — gradients read as murk on OLED phones. The console panels are translucent white (or ink, on ice) over the same sky, and the canvases (scope, radar basemap, sun arc, moon) carry white-on-color palettes with a dark-on-ice variant. The favicon re-renders to the current verdict's pictograph, so even the tab shows the weather.
 
-**Screen:** place → big thin temperature → ONE WORD verdict under it → one plain sentence → TOMORROW hi/lo + first-rain line → one line of vitals (feels · wind · humidity · UV) with sunrise · sunset under it → 12 hourly bars (taller = warmer, water-blue = rain likely) → 7-day outlook as white hairline rows, folded to three → status stamp. Long alert names drop to a smaller size so they never swallow the screen. The hero pictograph retired with the repaint — the color and the word carry it now (the pictographs live on in the week rows and the favicon).
+**Screen:** place → big thin temperature → ONE WORD verdict under it → one plain sentence → one line of vitals (feels · wind · humidity · UV) with sunrise · sunset under it → the day row: midnight today to 6 AM tomorrow in three-hour columns (time · sky pictograph · rain chance when ≥30% · temperature · a bar that follows the temperature, water-blue when rain is likely), the hours behind you dimmed, the column you are in ringed, a time axis beneath with a dot at the exact time and the dates at its ends → TOMORROW hi/lo + first-rain line → 7-day outlook as white hairline rows, folded to three → status stamp. Long alert names drop to a smaller size so they never swallow the screen. The hero pictograph retired with the repaint — the color and the word carry it now (the pictographs live on in the week rows and the favicon).
 
-**The taps:** temperature = °F/°C · place name = change location · the UPDATED stamp (or a pull down from the top) = refresh · the boxed advisory when an alert is up (the whole panel, not just the words) = full NWS text in plain language · any hour bar = that hour's numbers for a few seconds · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A white pill appears when a newer version is deployed; tapping it reloads.
+**The taps:** temperature = °F/°C · place name = change location · the UPDATED stamp (or a pull down from the top) = refresh · the boxed advisory when an alert is up (the whole panel, not just the words) = full NWS text in plain language · any hour column = that hour's numbers and sky for a few seconds · share (top right) = system share sheet · the version number in the footer = this changelog on GitHub. A white pill appears when a newer version is deployed; tapping it reloads.
 
 **Alert ranking:** `alertRank()` scores every active alert 0–5 from its NWS `severity` *and* its event name, whichever is louder (tornado/flash-flood/hurricane/storm-surge/tsunami warnings = 5, any Warning = 3, Watch/Advisory/Statement = 2). Anything scoring 2+ is kept, deduped by event|severity, and sorted worst-first, so `ALERTS[0]` — the one the answer screen shows — is always the most dangerous. Rank ≥ 3 is "grave": red sky, warn pictograph.
 
@@ -214,6 +215,7 @@ on plain HTTP in every current browser.
 - v2026.09.17.002 — radar basemap switches from CARTO Voyager to OpenStreetMap standard tiles: CARTO began watermarking its free tiles with API KEY REQUIRED, on the live site too
 - v2026.09.17.003 — new app icon: the WX wordmark, geometric paths, white on the FINE sky; favicon re-tints per sky
 - v2026.09.18.001 — share button moved below the iPhone status bar (safe-area inset) and made a visible ring on the place row; on an uninstalled iPhone, tapping it also explains Safari share → Add to Home Screen
+- v2026.10.18.001 — **the whole day at a glance.** The twelve mute bars become the day itself: midnight today to 6 AM tomorrow in three-hour columns, each with the time, a pictograph of the sky, the rain chance when there is one, the temperature, and the bar under it so the day's shape still reads. The hours already behind you are dimmed, the column you are in is ringed, and a dot on the axis beneath marks the exact time, with the dates at the ends (the Weather Underground day strip, in WX's clothes). A column carries the worst sky and highest rain chance of its three hours so nothing falls between columns. The TOMORROW line moves beneath the row, where tomorrow begins, and no longer hides while an alert is up (it only did so because it shared the answer block with the advisory box); the NOW / +6 / +12 HRS ticks retire (every column carries its own time)
 
 ## Backlog / ideas
 

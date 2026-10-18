@@ -238,6 +238,19 @@
                    a visible ring, and on an iPhone that hasn't installed
                    WX a tip explains Safari's share → Add to Home Screen,
                    which the web share sheet can't offer
+  v2026.10.18.001  the whole day at a glance: the twelve mute bars become
+                   the day itself — midnight today to 6 AM tomorrow in
+                   three-hour columns, each with the time, a pictograph of
+                   the sky, the rain chance when there is one, the
+                   temperature, and the bar under it so the day's shape
+                   still reads. The hours already behind you are dimmed,
+                   the column you are in is ringed, and a dot on the axis
+                   beneath marks the exact time, with the dates at the
+                   ends. A column carries the worst sky and highest rain
+                   chance of its three hours, so a 4 PM shower cannot fall
+                   between the 3 and 6 o'clock columns. The TOMORROW line
+                   moves beneath the row, where tomorrow actually begins,
+                   and no longer hides while an alert is up
 -->
 <style>
 /* Big Sky: one color, picked by the verdict. Everything else is white
@@ -344,7 +357,6 @@ body{
   font:500 clamp(var(--fs-15),2.2vh,var(--fs-19))/1.4 var(--sans);color:var(--bone);opacity:.92;
   text-align:center;max-width:32ch;text-wrap:balance;margin-top:clamp(2px,.6vh,6px);
 }
-.tmrw{text-transform:uppercase;font:700 var(--fs-13)/1.3 var(--sans);letter-spacing:.18em;color:var(--ash);text-align:center}
 .soon{text-transform:uppercase;font:700 var(--fs-13)/1.3 var(--sans);letter-spacing:.18em;color:var(--rainink);text-align:center}
 .soon.tapline[hidden]{display:none}
 .soon.tapline{
@@ -370,22 +382,46 @@ body{
 .suns .lbl{text-decoration:none;color:var(--sunlbl);font-weight:800}
 .suns b{color:var(--suntime);font-weight:700}
 
-/* ---- next 12 hours ---- */
-.hours{width:100%;flex:none;padding-top:12px}
-.bars{display:flex;align-items:flex-end;gap:clamp(3px,1.4vw,7px);height:clamp(34px,6vh,52px)}
+/* ---- today, hour by hour, through tomorrow's dawn ---- */
+/* Eleven three-hour columns from midnight to 6 AM tomorrow: the time, what
+   the sky is doing, the rain chance when there is one, the temperature, and
+   a bar that follows it so the day's shape reads at a glance. The hours
+   behind you dim, the column you are in is ringed, and the axis beneath
+   carries a dot at the exact time. A very narrow phone scrolls sideways. */
+.hours{width:100%;flex:none;padding-top:10px}
+.bars{display:flex;align-items:flex-end;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.bars::-webkit-scrollbar{display:none}
 .bars button{
-  flex:1;position:relative;border:0;padding:0;cursor:pointer;border-radius:3px;min-height:5px;
-  background:color-mix(in srgb,var(--fg) 65%,transparent);
+  flex:1 0 0;min-width:28px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  border:0;padding:0;cursor:pointer;border-radius:4px;background:none;color:inherit;font:inherit;
 }
-.bars button::after{content:"";position:absolute;left:0;right:0;bottom:0;height:clamp(34px,6vh,52px)}
-/* rain-likely hours say so twice: the water color and a drop over the bar */
-.bars button.wet{background:var(--rainink)}
-.bars button.wet::before{
-  content:"";position:absolute;left:50%;top:-9px;width:5px;height:5px;margin-left:-2.5px;
-  border-radius:50%;background:var(--rainink);
+/* the hour on one line and AM/PM under it: "11AM" is wider than a column */
+.bars .ht{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:26px;font:600 var(--fs-12)/1 var(--sans);letter-spacing:0;color:var(--ash);white-space:nowrap}
+.bars .ht b{font-weight:800;color:var(--bone)}
+.bars .ic{width:clamp(22px,6.2vw,24px);height:clamp(22px,6.2vw,24px)}
+.bars .ic svg{width:100%;height:100%;filter:drop-shadow(0 0 1px rgba(0,0,0,.3))}
+/* rain-likely hours say so three times: the pictograph, the water color, and the number */
+.bars .pp{font:700 var(--fs-12)/1 var(--sans);letter-spacing:0;color:var(--ash);min-height:12px}
+.bars button.wet .pp{color:var(--rainink)}
+.bars .tv{font:700 var(--fs-13)/1 var(--sans);letter-spacing:0;color:var(--bone);font-variant-numeric:tabular-nums;margin-top:1px}
+.bars .bt{position:relative;width:100%;height:clamp(16px,3vh,24px);margin-top:3px}
+.bars .bt i{
+  position:absolute;left:50%;bottom:0;width:min(calc(100% - 4px),34px);transform:translateX(-50%);
+  min-height:4px;border-radius:3px;background:color-mix(in srgb,var(--fg) 65%,transparent);
 }
-.bars button.now{background:var(--fg);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--bg) 75%,#000)}
-.ticks{text-transform:uppercase;display:flex;justify-content:space-between;margin-top:9px;font:600 var(--fs-13)/1 var(--sans);letter-spacing:.18em;color:var(--ash)}
+.bars button.wet .bt i{background:var(--rainink)}
+.bars button.now .bt i{background:var(--fg);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--bg) 75%,#000)}
+.bars button:focus-visible{outline-offset:-2px}   /* the row clips at its edges */
+/* the hours already behind you step back; their numbers stay in the labels */
+.bars button.past .ic,.bars button.past .pp,.bars button.past .tv,.bars button.past .bt i{opacity:.5}
+/* the time axis: a hairline with a tick per column and a dot where you are */
+.axis{position:relative;height:12px;margin-top:4px}
+.axis::before{content:"";position:absolute;left:0;right:0;top:5px;height:2px;border-radius:1px;background:color-mix(in srgb,var(--fg) 40%,transparent)}
+.axis .tick{position:absolute;top:3px;width:2px;height:6px;margin-left:-1px;background:color-mix(in srgb,var(--fg) 40%,transparent)}
+.axis .dot{position:absolute;top:0;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--fg);box-shadow:0 0 0 2px color-mix(in srgb,var(--bg) 75%,#000)}
+.dates{display:flex;justify-content:space-between;margin-top:6px;text-transform:uppercase;font:600 var(--fs-12)/1 var(--sans);letter-spacing:.18em;color:var(--ash)}
+.tmrw{text-transform:uppercase;font:700 var(--fs-13)/1.3 var(--sans);letter-spacing:.14em;color:var(--ash);text-align:center;text-wrap:balance;margin-top:10px;padding:0 4px}
+.tmrw[hidden]{display:none}
 
 /* ---- the week: white lines on the sky ---- */
 .week{
@@ -674,15 +710,16 @@ body.sky-ice .rbar .play{color:#FFF}
     </div>
     <p class="soon" id="soon" hidden></p>
     <button type="button" class="soon tapline" id="alsoBtn" hidden></button>
-    <p class="tmrw" id="tmrw" hidden></p>
   </div>
 
   <div class="chips" id="chips" hidden></div>
   <p class="suns" id="suns" hidden></p>
 
   <div class="hours">
-    <div class="bars" id="bars" role="group" aria-label="Next 12 hours. Arrow keys move between hours."></div>
-    <div class="ticks"><span>Now</span><span id="tickMid">+6</span><span>+12 hrs</span></div>
+    <div class="bars" id="bars" role="group" aria-label="Today, hour by hour, through tomorrow's dawn. Arrow keys move between hours."></div>
+    <div class="axis" id="axis" aria-hidden="true"></div>
+    <div class="dates"><span id="dateL"></span><span id="dateR"></span></div>
+    <p class="tmrw" id="tmrw" hidden></p>
   </div>
 
   <div class="week" id="week">
@@ -694,7 +731,7 @@ body.sky-ice .rbar .play{color:#FFF}
     <button class="upd" id="updBtn" hidden>Update to the new version</button>
     <button type="button" class="stampbtn" id="stampBtn"><span class="vh">Refresh.</span> <span id="stamp">—</span></button><br>
     <p class="vh" role="status" id="live"></p>
-    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.09.18.001</a> · Open-Meteo · NWS alerts
+    <a href="https://github.com/cdburgess75/WX/blob/main/NOTES.md#changelog" target="_blank" rel="noopener">WX v2026.10.18.001</a> · Open-Meteo · NWS alerts
   </div>
   <button class="more" id="moreBtn">Console ⌄</button>
 </div>
@@ -794,7 +831,7 @@ body.sky-ice .rbar .play{color:#FFF}
 
 <script>
 "use strict";
-const VERSION="v2026.09.18.001";
+const VERSION="v2026.10.18.001";
 /* ---------- tiny store ---------- */
 const box=(()=>{let ok=true,m={};try{localStorage.setItem("_","1");localStorage.removeItem("_")}catch(e){ok=false}
  return{g(k,d){try{const v=ok?localStorage.getItem(k):m[k];return v?JSON.parse(v):d}catch(e){return d}},
@@ -1226,9 +1263,11 @@ function paint(){
   }
   document.getElementById("placeName").textContent=loc.name;
   setFavicon();
-  // Tomorrow in one small line: hi/lo and the first thing that falls
+  // Tomorrow in one small line: hi/lo and the first thing that falls.
+  // It used to hide behind an alert, when it shared the answer block with
+  // the advisory box; under the hour row it has room, so it stays.
   const tEl=document.getElementById("tmrw"),dd=D.daily;
-  if(v.alert||!dd||!dd.time||!dd.time[1]){tEl.hidden=true}
+  if(!dd||!dd.time||!dd.time[1]){tEl.hidden=true}
   else{
     const day2=dd.time[1];let ev="no rain";
     for(let j=0;j<h.time.length;j++){
@@ -1243,24 +1282,65 @@ function paint(){
     tEl.textContent=`Tomorrow ${R(f(dd.temperature_2m_max[1]))}°/${R(f(dd.temperature_2m_min[1]))}° · ${ev}`;
   }
 
-  const bars=document.getElementById("bars");bars.innerHTML="";
-  const temps=[];for(let j=i;j<Math.min(i+12,h.time.length);j++)temps.push(f(h.temperature_2m[j]));
-  const lo=Math.min(...temps),hi=Math.max(...temps),sp=Math.max(hi-lo,F?12:7);
-  temps.forEach((tp,k)=>{
-    const j=i+k,pop=h.precipitation_probability[j]||0;
-    const b=document.createElement("button");b.type="button";
-    b.style.height=(22+((tp-lo)/sp)*74).toFixed(0)+"%";
-    if(pop>=45)b.className="wet";
-    if(k===0)b.className+=" now";
-    b.tabIndex=k===0?0:-1;   // one tab stop; the arrow keys walk the hours
-    b.dataset.info=clock(h.time[j])+" — "+R(tp)+"°, "+pop+"% chance of rain";
-    b.setAttribute("aria-label",(k===0?"Now, ":"")+b.dataset.info);
-    bars.appendChild(b);
-  });
-  document.getElementById("tickMid").textContent=temps.length>6?clock(h.time[i+6]):"+6";
+  renderHours();
   renderChips();
   renderWeek();
   renderConsole();
+}
+
+/* ---------- today, hour by hour, through tomorrow's dawn ---------- */
+/* Midnight today to 6 AM tomorrow in three-hour columns, the way a day is
+   planned: the hours already behind you are dimmed, the column you are in
+   is ringed, and a dot on the axis beneath marks the exact time. A column
+   reports the worst sky and the highest rain chance of its three hours, so
+   a 4 PM shower cannot fall between the 3 and 6 o'clock columns; its
+   temperature and pictograph belong to the hour it is named for. */
+const HSTEP=3,HCOLS=11;   // 12 AM, 3 AM … 12 AM, 3 AM, 6 AM tomorrow
+function renderHours(){
+  const h=D.hourly,bars=document.getElementById("bars");bars.innerHTML="";
+  const n=h.time.length,t=now(),HR=3600000;
+  // the row starts at today's midnight — the first hour carrying today's date
+  const today=new Date(t).toISOString().slice(0,10);
+  let base=h.time.findIndex(x=>x.slice(0,10)===today);if(base<0)base=0;
+  const cols=Math.max(1,Math.min(HCOLS,Math.ceil((n-base)/HSTEP)));
+  const temps=[];for(let k=0;k<cols;k++)temps.push(f(h.temperature_2m[base+k*HSTEP]));
+  const lo=Math.min(...temps),hi=Math.max(...temps),sp=Math.max(hi-lo,F?12:7);
+  // what matters most in a three-hour column: storm, then snow, then rain, then fog
+  const loud=c=>STORM.has(c)?4:SNOW.has(c)?3:WET.has(c)?2:(c===45||c===48)?1:0;
+  let here=null;
+  for(let k=0;k<cols;k++){
+    const j=base+k*HSTEP,end=Math.min(j+HSTEP,n);
+    let code=hv(h,"weather_code",j),pop=0;
+    for(let q=j;q<end;q++){
+      const c=hv(h,"weather_code",q);if(c!=null&&(code==null||loud(c)>loud(code)))code=c;
+      pop=Math.max(pop,h.precipitation_probability[q]||0);
+    }
+    const tp=temps[k],day=hv(h,"is_day",j)!==0,wet=pop>=45;
+    const past=ms(h.time[end-1])+HR<=t;          // every hour of the column is behind us
+    const now_=!past&&ms(h.time[j])<=t;           // the column we are standing in
+    const b=document.createElement("button");b.type="button";
+    b.className=(wet?"wet":"")+(past?" past":"")+(now_?" now":"");
+    b.tabIndex=-1;                                // one tab stop (set below); the arrow keys walk the hours
+    const hh=+h.time[j].slice(11,13);
+    b.innerHTML=`<span class="ht"><b>${hh%12||12}</b><span>${hh>=12?"PM":"AM"}</span></span>`+
+      `<span class="ic"><svg viewBox="0 0 100 100" aria-hidden="true">${pict(codeToMark(code,day))}</svg></span>`+
+      `<span class="pp">${pop>=30?pop+"%":""}</span>`+
+      `<span class="tv">${r0v(tp)}°</span>`+
+      `<span class="bt"><i style="height:${isNaN(tp)?22:(22+((tp-lo)/sp)*74).toFixed(0)}%"></i></span>`;
+    b.dataset.info=(now_?"Now, ":past?"Earlier, ":"")+clock(h.time[j])+" — "+r0v(tp)+"°, "+wmoText(code).toLowerCase()+
+      ", "+(pop>(h.precipitation_probability[j]||0)?"up to ":"")+pop+"% chance of rain";
+    b.setAttribute("aria-label",b.dataset.info);
+    if(now_)here=b;
+    bars.appendChild(b);
+  }
+  (here||bars.firstChild).tabIndex=0;
+  // the axis: a tick under each column, and the dot at the exact time
+  const ax=document.getElementById("axis");
+  const x=(t-ms(h.time[base]))/(HSTEP*HR)+.5;   // where now falls, in column widths
+  ax.innerHTML=Array.from({length:cols},(_,k)=>`<i class="tick" style="left:${((k+.5)/cols*100).toFixed(2)}%"></i>`).join("")+
+    (x>=0&&x<=cols?`<i class="dot" style="left:${(x/cols*100).toFixed(2)}%"></i>`:"");
+  document.getElementById("dateL").textContent=shortDate(h.time[base]);
+  document.getElementById("dateR").textContent=cols>1?shortDate(h.time[base+(cols-1)*HSTEP]):"";
 }
 
 /* ---------- the sky IS the verdict ---------- */
@@ -1421,7 +1501,7 @@ barsEl.addEventListener("keydown",e=>{
   e.preventDefault();all[at].tabIndex=-1;all[to].tabIndex=0;all[to].focus();
 });
 barsEl.addEventListener("click",e=>{
-  const b=e.target&&e.target.dataset&&e.target.dataset.info?e.target:null;if(!b)return;
+  const b=e.target&&e.target.closest?e.target.closest("button[data-info]"):null;if(!b)return;
   const sayEl=document.getElementById("say");
   if(!sayT)sayOrig=sayEl.textContent;
   else clearTimeout(sayT);
